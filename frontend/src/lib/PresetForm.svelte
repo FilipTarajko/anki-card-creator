@@ -8,8 +8,7 @@
 		name: string;
 		type: 'text' | 'selectOne' | 'selectMany';
 		options: string[];
-		default_one: string;
-		default_many: string[];
+		default: string[];
 		option_input?: string;
 	};
 
@@ -22,8 +21,7 @@
 				name: '',
 				type: 'text',
 				options: [''],
-				default_one: '',
-				default_many: []
+				default: ['']
 			}
 		];
 	}
@@ -34,24 +32,21 @@
 			name: 'field1',
 			type: 'text',
 			options: [''],
-			default_one: '',
-			default_many: []
+			default: ['']
 		},
 		{
 			id: 1,
 			name: 'field2',
 			type: 'selectOne',
 			options: ['cat', 'dog', 'bird'],
-			default_one: 'cat',
-			default_many: []
+			default: ['cat']
 		},
 		{
 			id: 2,
 			name: 'field3',
 			type: 'selectMany',
 			options: ['cat', 'dog', 'bird'],
-			default_many: ['cat', 'dog'],
-			default_one: ''
+			default: ['cat', 'dog']
 		}
 	];
 </script>
@@ -90,7 +85,7 @@
 		</RadioGroup>
 		{#if field.type === 'text'}
 			<div style="grid-column: 5">
-				default: <input type="text" bind:value={field.default_one} />
+				default: <input type="text" bind:value={field.default[0]} />
 			</div>
 		{:else if field.type === 'selectOne'}
 			<div style="grid-column: 5">
@@ -98,13 +93,13 @@
 					options: {field.options.join(', ')}
 				</div>
 				<div style="margin-bottom: 8px;">
-					default: {field.default_one}
+					default: {field.default[0]}
 				</div>
 				<ListBox>
 					<div style="display: grid; grid-template-columns: 1fr 8ch; gap: 2px;">
-						{#each field.options.filter((e) => e != '') as option, i_option}
-							<ListBoxItem bind:group={field.default_one} name="option" value={option}
-								>{option}</ListBoxItem
+						{#each field.options as option, i_option}
+							<ListBoxItem bind:group={field.default[0]} name="option" value={option}
+								>{option || '(empty)'}</ListBoxItem
 							>
 							<button
 								type="button"
@@ -125,10 +120,8 @@
 							class="btn-icon variant-filled-success"
 							style="font-size: 1.6rem;"
 							on:click={() => {
-								if (field.option_input) {
-									field.options.push(field.option_input);
-									field.option_input = '';
-								}
+								field.options.push(field.option_input || '');
+								field.option_input = '';
 							}}
 						>
 							+
@@ -142,13 +135,13 @@
 					options: {field.options.join(', ')}
 				</div>
 				<div style="margin-bottom: 8px;">
-					default: {field.default_many.join(', ')}
+					default: {field.default.join(', ')}
 				</div>
 				<ListBox multiple>
 					<div style="display: grid; grid-template-columns: 1fr 8ch; gap: 2px;">
-						{#each field.options.filter((e) => e != '') as option, i_option}
-							<ListBoxItem bind:group={field.default_many} name="option" value={option}
-								>{option}</ListBoxItem
+						{#each field.options as option, i_option}
+							<ListBoxItem bind:group={field.default} name="option" value={option}
+								>{option || '(empty)'}</ListBoxItem
 							>
 							<button
 								type="button"
@@ -169,10 +162,8 @@
 							class="btn-icon variant-filled-success"
 							style="font-size: 1.6rem;"
 							on:click={() => {
-								if (field.option_input) {
-									field.options.push(field.option_input);
-									field.option_input = '';
-								}
+								field.options.push(field.option_input || '');
+								field.option_input = '';
 							}}
 						>
 							+
