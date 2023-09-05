@@ -39,8 +39,13 @@
 				>
 					Anki docs
 				</a>
-				<a class="btn btn-sm variant-ghost-surface" href="github" target="_blank" rel="noreferrer">
-					This project's github (todo)
+				<a
+					class="btn btn-sm variant-ghost-surface"
+					href="https://github.com/FilipTarajko/anki-card-generator"
+					target="_blank"
+					rel="noreferrer"
+				>
+					This project's github
 				</a>
 			</svelte:fragment>
 		</AppBar>
