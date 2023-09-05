@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 
+	let last_id = 2;
+
 	type Field = {
+		id: number;
 		name: string;
 		type: 'text' | 'selectOne' | 'selectMany';
 		options: string[];
@@ -10,23 +13,41 @@
 		option_input?: string;
 	};
 
+	function create_field() {
+		last_id++;
+		fields = [
+			...fields,
+			{
+				id: last_id,
+				name: '',
+				type: 'text',
+				options: [''],
+				default_one: '',
+				default_many: []
+			}
+		];
+	}
+
 	let fields: Field[] = [
 		{
-			name: '',
+			id: 0,
+			name: 'field1',
 			type: 'text',
 			options: [''],
 			default_one: '',
 			default_many: []
 		},
 		{
-			name: '',
+			id: 1,
+			name: 'field2',
 			type: 'selectOne',
 			options: ['cat', 'dog', 'bird'],
 			default_one: 'cat',
 			default_many: []
 		},
 		{
-			name: '',
+			id: 2,
+			name: 'field3',
 			type: 'selectMany',
 			options: ['cat', 'dog', 'bird'],
 			default_many: ['cat', 'dog'],
@@ -36,10 +57,31 @@
 </script>
 
 <div style="display: grid; grid-template-columns: 7ch 7ch 7ch 15ch 5fr; gap: 8px;">
-	{#each fields as field}
-		<button class="btn btn-sm variant-ghost-surface">delete</button>
-		<button class="btn btn-sm variant-ghost-surface">up</button>
-		<button class="btn btn-sm variant-ghost-surface">down</button>
+	{#each fields as field, i_field}
+		<button
+			class="btn btn-sm variant-ghost-surface"
+			on:click={() => {
+				fields = fields.filter((e) => e.id != field.id);
+			}}>delete</button
+		>
+		<button
+			class="btn btn-sm variant-ghost-surface"
+			disabled={i_field == 0}
+			on:click={() => {
+				let temp = fields[i_field - 1];
+				fields[i_field - 1] = field;
+				fields[i_field] = temp;
+			}}>up</button
+		>
+		<button
+			class="btn btn-sm variant-ghost-surface"
+			disabled={i_field == fields.length - 1}
+			on:click={() => {
+				let temp = fields[i_field + 1];
+				fields[i_field + 1] = field;
+				fields[i_field] = temp;
+			}}>down</button
+		>
 		<input type="text" bind:value={field.name} />
 		<RadioGroup>
 			<RadioItem bind:group={field.type} name="type" value="text">text</RadioItem>
@@ -60,7 +102,7 @@
 				</div>
 				<ListBox>
 					<div style="display: grid; grid-template-columns: 1fr 8ch; gap: 2px;">
-						{#each field.options as option}
+						{#each field.options.filter((e) => e != '') as option, i_option}
 							<ListBoxItem bind:group={field.default_one} name="option" value={option}
 								>{option}</ListBoxItem
 							>
@@ -68,6 +110,10 @@
 								type="button"
 								class="btn-icon variant-filled-warning"
 								style="font-weight: bold;"
+								on:click={() => {
+									field.options.splice(i_option, 1);
+									field.options = field.options;
+								}}
 							>
 								<!-- <i class="fa-solid fa-skull" /> -->
 								X
@@ -100,7 +146,7 @@
 				</div>
 				<ListBox multiple>
 					<div style="display: grid; grid-template-columns: 1fr 8ch; gap: 2px;">
-						{#each field.options as option}
+						{#each field.options.filter((e) => e != '') as option, i_option}
 							<ListBoxItem bind:group={field.default_many} name="option" value={option}
 								>{option}</ListBoxItem
 							>
@@ -108,6 +154,10 @@
 								type="button"
 								class="btn-icon variant-filled-warning"
 								style="font-weight: bold;"
+								on:click={() => {
+									field.options.splice(i_option, 1);
+									field.options = field.options;
+								}}
 							>
 								<!-- <i class="fa-solid fa-skull" /> -->
 								X
@@ -132,7 +182,13 @@
 			</div>
 		{/if}
 	{/each}
-	<button style="grid-column: 1 / 4;" class="btn btn-sm variant-ghost-surface">new</button>
+	<button
+		style="grid-column: 1 / 4;"
+		class="btn btn-sm variant-ghost-surface"
+		on:click={() => {
+			create_field();
+		}}>new</button
+	>
 </div>
 
 <style scoped>
