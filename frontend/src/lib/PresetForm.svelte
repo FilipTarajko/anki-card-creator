@@ -7,16 +7,6 @@
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
 
-	type Field = {
-		id: number;
-		name: string;
-		type: 'text' | 'selectOne' | 'selectMany';
-		options: string[];
-		default: string[];
-		option_input?: string;
-		visible_by_default: boolean;
-	};
-
 	function create_field() {
 		last_id++;
 		fields = [
@@ -68,7 +58,7 @@
 	{#each fields as field, i_field}
 		<div
 			class="card p-4"
-			style="display: grid; grid-template-columns: 15ch 5fr 7ch 4.5ch; gap: 8px; margin-top: 20px;"
+			style="display: grid; grid-template-columns: 15ch 5fr 4.5ch 4.5ch 7ch 4.5ch; gap: 8px; margin-top: 12px;"
 		>
 			<input type="text" style="grid-column: 1; margin-right: 4px;" bind:value={field.name} />
 			<RadioGroup>
@@ -76,6 +66,30 @@
 				<RadioItem bind:group={field.type} name="type" value="selectOne">select one</RadioItem>
 				<RadioItem bind:group={field.type} name="type" value="selectMany">select many</RadioItem>
 			</RadioGroup>
+			<button
+				on:click={() => {
+					field.currently_forced_visible = !field.currently_forced_visible;
+				}}
+				class="btn btn-sm {field.currently_forced_visible ? 'variant-filled' : 'variant-ghost'}"
+			>
+				{#if field.currently_forced_visible}
+					<i class="fa-solid fa-chevron-up" />
+				{:else}
+					<i class="fa-solid fa-chevron-down" />
+				{/if}
+			</button>
+			<button
+				on:click={() => {
+					field.visible_by_default = !field.visible_by_default;
+				}}
+				class="btn btn-sm {field.visible_by_default ? 'variant-filled' : 'variant-ghost'}"
+			>
+				{#if field.visible_by_default}
+					<i class="fa-solid fa-eye" />
+				{:else}
+					<i class="fa-solid fa-eye-slash" />
+				{/if}
+			</button>
 			<div style="display: flex; direction: row;">
 				<button
 					style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-bottom: 4px;"
@@ -85,7 +99,7 @@
 						let temp = fields[i_field - 1];
 						fields[i_field - 1] = field;
 						fields[i_field] = temp;
-					}}>↑</button
+					}}><i class="fa-solid fa-arrow-up" /></button
 				>
 				<button
 					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 4px;"
@@ -97,7 +111,7 @@
 						let temp = fields[i_field + 1];
 						fields[i_field + 1] = field;
 						fields[i_field] = temp;
-					}}>↓</button
+					}}><i class="fa-solid fa-arrow-down" /></button
 				>
 			</div>
 			<button
@@ -106,99 +120,101 @@
 					fields = fields.filter((e) => e.id != field.id);
 				}}>X</button
 			>
-			{#if field.type === 'text'}
-				<div style="grid-column: 2">
-					default: <input type="text" bind:value={field.default[0]} />
-				</div>
-			{:else if field.type === 'selectOne'}
-				<div style="grid-column: 2">
-					<div>
-						options: {field.options.join(', ')}
+			{#if field.currently_forced_visible}
+				{#if field.type === 'text'}
+					<div style="grid-column: 2">
+						default: <input style="width: 240px;" type="text" bind:value={field.default[0]} />
 					</div>
-					<div style="margin-bottom: 8px;">
-						default: {field.default[0]}
-					</div>
-					<ListBox>
-						<div style="display: grid; grid-template-columns: 1fr 8ch; gap: 2px;">
-							{#each field.options as option, i_option}
-								<ListBoxItem bind:group={field.default[0]} name="option" value={option}
-									>{option || '(empty)'}</ListBoxItem
-								>
+				{:else if field.type === 'selectOne'}
+					<div style="grid-column: 2">
+						<div>
+							options: {field.options.join(', ')}
+						</div>
+						<div style="margin-bottom: 8px;">
+							default: {field.default[0]}
+						</div>
+						<ListBox>
+							<div style="display: grid; grid-template-columns: 1fr 4.5ch; gap: 2px;">
+								{#each field.options as option, i_option}
+									<ListBoxItem bind:group={field.default[0]} name="option" value={option}
+										>{option || '(empty)'}</ListBoxItem
+									>
+									<button
+										type="button"
+										class="btn-icon variant-filled-warning"
+										style="font-weight: bold;"
+										on:click={() => {
+											field.options.splice(i_option, 1);
+											field.options = field.options;
+										}}
+									>
+										X
+									</button>
+								{/each}
+								<input type="text" bind:value={field.option_input} />
 								<button
 									type="button"
-									class="btn-icon variant-filled-warning"
-									style="font-weight: bold;"
+									class="btn-icon variant-filled-success"
+									style="font-size: 1.6rem;"
 									on:click={() => {
-										field.options.splice(i_option, 1);
-										field.options = field.options;
+										field.options.push(field.option_input || '');
+										field.option_input = '';
 									}}
 								>
-									X
+									+
 								</button>
-							{/each}
-							<input type="text" bind:value={field.option_input} />
-							<button
-								type="button"
-								class="btn-icon variant-filled-success"
-								style="font-size: 1.6rem;"
-								on:click={() => {
-									field.options.push(field.option_input || '');
-									field.option_input = '';
-								}}
-							>
-								+
-							</button>
+							</div>
+						</ListBox>
+					</div>
+				{:else if field.type === 'selectMany'}
+					<div style="grid-column: 2">
+						<div>
+							options: {field.options.join(', ')}
 						</div>
-					</ListBox>
-				</div>
-			{:else if field.type === 'selectMany'}
-				<div style="grid-column: 2">
-					<div>
-						options: {field.options.join(', ')}
-					</div>
-					<div style="margin-bottom: 8px;">
-						default: {field.default.join(', ')}
-					</div>
-					<ListBox multiple>
-						<div style="display: grid; grid-template-columns: 1fr 8ch; gap: 2px;">
-							{#each field.options as option, i_option}
-								<ListBoxItem bind:group={field.default} name="option" value={option}
-									>{option || '(empty)'}</ListBoxItem
-								>
+						<div style="margin-bottom: 8px;">
+							default: {field.default.join(', ')}
+						</div>
+						<ListBox multiple>
+							<div style="display: grid; grid-template-columns: 1fr 4.5ch; gap: 2px;">
+								{#each field.options as option, i_option}
+									<ListBoxItem bind:group={field.default} name="option" value={option}
+										>{option || '(empty)'}</ListBoxItem
+									>
+									<button
+										type="button"
+										class="btn-icon variant-filled-warning"
+										style="font-weight: bold;"
+										on:click={() => {
+											field.options.splice(i_option, 1);
+											field.options = field.options;
+										}}
+									>
+										X
+									</button>
+								{/each}
+								<input type="text" bind:value={field.option_input} />
 								<button
 									type="button"
-									class="btn-icon variant-filled-warning"
-									style="font-weight: bold;"
+									class="btn-icon variant-filled-success"
+									style="font-size: 1.6rem;"
 									on:click={() => {
-										field.options.splice(i_option, 1);
-										field.options = field.options;
+										field.options.push(field.option_input || '');
+										field.option_input = '';
 									}}
 								>
-									X
+									+
 								</button>
-							{/each}
-							<input type="text" bind:value={field.option_input} />
-							<button
-								type="button"
-								class="btn-icon variant-filled-success"
-								style="font-size: 1.6rem;"
-								on:click={() => {
-									field.options.push(field.option_input || '');
-									field.option_input = '';
-								}}
-							>
-								+
-							</button>
-						</div>
-					</ListBox>
-				</div>
+							</div>
+						</ListBox>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/each}
 
 	<div
 		class="card p-4"
-		style="display: grid; grid-template-columns: 15ch 5fr 7ch 4.5ch; gap: 8px; margin-top: 20px;"
+		style="display: grid; grid-template-columns: 15ch 5fr 4.5ch 4.5ch 7ch 4.5ch; gap: 8px; margin-top: 12px;"
 	>
 		<input type="text" style="grid-column: 1; margin-right: 4px;" bind:value={new_field_name} />
 		<RadioGroup>
@@ -207,7 +223,7 @@
 			<RadioItem bind:group={new_field_type} name="type" value="selectMany">select many</RadioItem>
 		</RadioGroup>
 		<button
-			style="grid-column: 3/6;"
+			style="grid-column: 3/7;"
 			class="btn btn-sm variant-filled-success"
 			on:click={() => {
 				create_field();
