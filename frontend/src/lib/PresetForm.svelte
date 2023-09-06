@@ -4,6 +4,9 @@
 	let last_id = 2;
 	let preset_name = '';
 
+	let new_field_name = '';
+	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
+
 	type Field = {
 		id: number;
 		name: string;
@@ -20,13 +23,15 @@
 			...fields,
 			{
 				id: last_id,
-				name: '',
-				type: 'text',
+				name: new_field_name,
+				type: new_field_type ?? 'text',
 				options: [''],
 				default: [''],
 				visible_by_default: true
 			}
 		];
+		new_field_name = '';
+		new_field_type = null;
 	}
 
 	let fields: Field[] = [
@@ -60,10 +65,11 @@
 <div>
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
-	<div
-		style="display: grid; grid-template-columns: 15ch 5fr 7ch 4.5ch; gap: 8px; margin-top: 20px;"
-	>
-		{#each fields as field, i_field}
+	{#each fields as field, i_field}
+		<div
+			class="card p-4"
+			style="display: grid; grid-template-columns: 15ch 5fr 7ch 4.5ch; gap: 8px; margin-top: 20px;"
+		>
 			<input type="text" style="grid-column: 1; margin-right: 4px;" bind:value={field.name} />
 			<RadioGroup>
 				<RadioItem bind:group={field.type} name="type" value="text">text</RadioItem>
@@ -187,19 +193,32 @@
 					</ListBox>
 				</div>
 			{/if}
-		{/each}
+		</div>
+	{/each}
+
+	<div
+		class="card p-4"
+		style="display: grid; grid-template-columns: 15ch 5fr 7ch 4.5ch; gap: 8px; margin-top: 20px;"
+	>
+		<input type="text" style="grid-column: 1; margin-right: 4px;" bind:value={new_field_name} />
+		<RadioGroup>
+			<RadioItem bind:group={new_field_type} name="type" value="text">text</RadioItem>
+			<RadioItem bind:group={new_field_type} name="type" value="selectOne">select one</RadioItem>
+			<RadioItem bind:group={new_field_type} name="type" value="selectMany">select many</RadioItem>
+		</RadioGroup>
 		<button
-			style="grid-column: 1;"
+			style="grid-column: 3/6;"
 			class="btn btn-sm variant-filled-success"
 			on:click={() => {
 				create_field();
-			}}>add another field</button
+			}}>add field</button
 		>
 	</div>
 	<button
+		style="margin-top: 12px;"
 		class="btn btn-large variant-filled-success"
 		on:click={() => {
-			create_field();
+			alert('TODO');
 		}}>save preset</button
 	>
 </div>
