@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { data } from '../store';
 
 	let last_id = 2;
 	let preset_name = '';
@@ -234,7 +235,25 @@
 		style="margin-top: 12px;"
 		class="btn btn-large variant-filled-success"
 		on:click={() => {
-			alert('TODO');
+			if (!preset_name) {
+				// TODO: handle it better
+				alert("Please enter preset's name");
+			} else if (
+				// @ts-ignore
+				$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
+			) {
+				// TODO: handle it better
+				alert('Preset with this name already exists!');
+			} else {
+				$data.presets = [
+					...$data.presets,
+					{
+						name: preset_name,
+						fields: fields
+					}
+				];
+				localStorage.setItem('presets', JSON.stringify($data.presets));
+			}
 		}}>save preset</button
 	>
 </div>
