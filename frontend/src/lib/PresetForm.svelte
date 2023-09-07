@@ -18,7 +18,8 @@
 				type: new_field_type ?? 'text',
 				options: [''],
 				default: [''],
-				visible_by_default: true
+				visible_by_default: true,
+				current_inputs: ['']
 			}
 		];
 		new_field_name = '';
@@ -32,7 +33,8 @@
 			type: 'text',
 			options: [''],
 			default: [''],
-			visible_by_default: true
+			visible_by_default: true,
+			current_inputs: ['']
 		},
 		{
 			id: 1,
@@ -40,7 +42,8 @@
 			type: 'selectOne',
 			options: ['cat', 'dog', 'bird'],
 			default: ['cat'],
-			visible_by_default: true
+			visible_by_default: true,
+			current_inputs: ['']
 		},
 		{
 			id: 2,
@@ -48,7 +51,8 @@
 			type: 'selectMany',
 			options: ['cat', 'dog', 'bird'],
 			default: ['cat', 'dog'],
-			visible_by_default: true
+			visible_by_default: true,
+			current_inputs: ['']
 		}
 	];
 </script>
@@ -69,11 +73,11 @@
 			</RadioGroup>
 			<button
 				on:click={() => {
-					field.currently_forced_visible = !field.currently_forced_visible;
+					field.currently_visible = !field.currently_visible;
 				}}
-				class="btn btn-sm {field.currently_forced_visible ? 'variant-filled' : 'variant-ghost'}"
+				class="btn btn-sm {field.currently_visible ? 'variant-filled' : 'variant-ghost'}"
 			>
-				{#if field.currently_forced_visible}
+				{#if field.currently_visible}
 					<i class="fa-solid fa-chevron-up" />
 				{:else}
 					<i class="fa-solid fa-chevron-down" />
@@ -116,12 +120,13 @@
 				>
 			</div>
 			<button
+				style="font-weight: bold;"
 				class="btn btn-sm variant-filled-primary"
 				on:click={() => {
 					fields = fields.filter((e) => e.id != field.id);
 				}}>X</button
 			>
-			{#if field.currently_forced_visible}
+			{#if field.currently_visible}
 				{#if field.type === 'text'}
 					<div style="grid-column: 2">
 						default: <input style="width: 240px;" type="text" bind:value={field.default[0]} />
@@ -152,14 +157,14 @@
 										X
 									</button>
 								{/each}
-								<input type="text" bind:value={field.option_input} />
+								<input type="text" bind:value={field.current_inputs[0]} />
 								<button
 									type="button"
 									class="btn-icon variant-filled-success"
 									style="font-size: 1.6rem;"
 									on:click={() => {
-										field.options.push(field.option_input || '');
-										field.option_input = '';
+										field.options.push(field.current_inputs[0] || '');
+										field.current_inputs = [''];
 									}}
 								>
 									+
@@ -193,14 +198,14 @@
 										X
 									</button>
 								{/each}
-								<input type="text" bind:value={field.option_input} />
+								<input type="text" bind:value={field.current_inputs[0]} />
 								<button
 									type="button"
 									class="btn-icon variant-filled-success"
 									style="font-size: 1.6rem;"
 									on:click={() => {
-										field.options.push(field.option_input || '');
-										field.option_input = '';
+										field.options.push(field.current_inputs[0] || '');
+										field.current_inputs = [''];
 									}}
 								>
 									+
@@ -245,6 +250,11 @@
 				// TODO: handle it better
 				alert('Preset with this name already exists!');
 			} else {
+				fields.forEach((field) => {
+					field.current_inputs = field.default;
+					field.currently_visible = field.visible_by_default;
+				});
+
 				$data.presets = [
 					...$data.presets,
 					{
@@ -258,7 +268,7 @@
 	>
 </div>
 
-<style scoped>
+<style lang="postcss">
 	input {
 		color: black;
 	}
