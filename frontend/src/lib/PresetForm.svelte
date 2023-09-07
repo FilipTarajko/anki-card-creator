@@ -16,10 +16,10 @@
 				id: last_id,
 				name: new_field_name,
 				type: new_field_type ?? 'text',
-				options: [''],
-				default: [''],
+				options: [],
+				default: [],
 				visible_by_default: true,
-				current_inputs: ['']
+				current_inputs: []
 			}
 		];
 		new_field_name = '';
@@ -31,10 +31,10 @@
 			id: 0,
 			name: 'field1',
 			type: 'text',
-			options: [''],
-			default: [''],
+			options: [],
+			default: [],
 			visible_by_default: true,
-			current_inputs: ['']
+			current_inputs: []
 		},
 		{
 			id: 1,
@@ -43,7 +43,7 @@
 			options: ['cat', 'dog', 'bird'],
 			default: ['cat'],
 			visible_by_default: true,
-			current_inputs: ['']
+			current_inputs: []
 		},
 		{
 			id: 2,
@@ -52,7 +52,7 @@
 			options: ['cat', 'dog', 'bird'],
 			default: ['cat', 'dog'],
 			visible_by_default: true,
-			current_inputs: ['']
+			current_inputs: []
 		}
 	];
 </script>
@@ -251,8 +251,8 @@
 				alert('Preset with this name already exists!');
 			} else {
 				fields.forEach((field) => {
-					field.current_inputs = field.default;
-					field.currently_visible = field.visible_by_default;
+					field.current_inputs = JSON.parse(JSON.stringify(field.default));
+					field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
 				});
 
 				$data.presets = [
