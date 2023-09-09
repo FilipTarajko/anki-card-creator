@@ -53,10 +53,14 @@
 						{/if}
 					</button>
 				</div>
-				{#each selected_preset.fields as field}
-					{#if field.currently_visible || currently_all_forced_visible}
-						<div class="card p-4" style="margin-top: 16px;">
-							{field.name}
+				<div style="display: grid; grid-template-columns: 100px 1fr 7ch;">
+					{#each selected_preset.fields as field}
+						{#if field.currently_visible || currently_all_forced_visible}
+							<!-- <div class="card p-4" style="margin-top: 8px; width: 400px;"> -->
+							<!-- center a div -->
+							<div style="display: flex; justify-content: center; align-items: center;">
+								{field.name}
+							</div>
 							{#if field.type === 'text'}
 								<input type="text" bind:value={field.current_inputs[0]} />
 							{:else if field.type === 'selectOne'}
@@ -69,7 +73,7 @@
 								</RadioGroup>
 							{:else if field.type === 'selectMany'}
 								<ListBox multiple>
-									<div class="card">
+									<div class="card" style="display: flex; flex-direction: row;">
 										{#each field.options as option}
 											<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
 												>{option}</ListBoxItem
@@ -107,9 +111,10 @@
 								{/if}
 							</div>
 						</button> -->
-						</div>
-					{/if}
-				{/each}
+							<!-- </div> -->
+						{/if}
+					{/each}
+				</div>
 			{/if}
 		{/if}
 		<h2 class="h2">Create a card preset</h2>
