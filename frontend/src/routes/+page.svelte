@@ -152,9 +152,9 @@
 							>
 								<abbr title={`reset to '${field.default}'`}>
 									{#if field.currently_frozen}
-										<i class="fa-solid fa-snowflake" />
+										<i class="fa-solid fa-lock" />
 									{:else}
-										<i class="fa-solid fa-droplet" />
+										<i class="fa-solid fa-lock-open" />
 									{/if}
 								</abbr>
 							</button>
