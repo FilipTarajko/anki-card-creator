@@ -7,6 +7,7 @@ type Field = {
 	current_inputs: string[];
 	visible_by_default: boolean;
 	currently_visible?: boolean;
+	currently_frozen?: boolean;
 };
 
 type Preset = {

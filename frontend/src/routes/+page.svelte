@@ -32,8 +32,8 @@
 <div class="container h-full mx-auto items-center">
 	<div class="space-y-10 text-center flex flex-col items-center">
 		<h2 class="h2 mt-12">Data to download</h2>
+		<pre class="card p-4 variant-ghost">{$data.prefix_for_exports}</pre>
 		{#if $data.string_for_export}
-			<pre class="card p-4 variant-ghost">{$data.prefix_for_exports}</pre>
 			<div class="card p-4 variant-ghost">
 				<pre>{$data.string_for_export}</pre>
 			</div>
@@ -105,11 +105,9 @@
 						{/if}
 					</button>
 				</div>
-				<div style="display: grid; grid-template-columns: 140px 1fr 7ch;">
+				<div style="display: grid; grid-template-columns: 140px 1fr 5ch 5ch;">
 					{#each selected_preset.fields as field}
 						{#if field.currently_visible || currently_all_forced_visible}
-							<!-- <div class="card p-4" style="margin-top: 8px; width: 400px;"> -->
-							<!-- center a div -->
 							<div style="display: flex; justify-content: center; align-items: center;">
 								{field.name}
 							</div>
@@ -145,6 +143,21 @@
 									><i class="fa-solid fa-rotate-left" /></abbr
 								>
 							</button>
+							<button
+								style="width: 4.5ch;"
+								class="btn btn-large {field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
+								on:click={() => {
+									field.currently_frozen = !field.currently_frozen;
+								}}
+							>
+								<abbr title={`reset to '${field.default}'`}>
+									{#if field.currently_frozen}
+										<i class="fa-solid fa-snowflake" />
+									{:else}
+										<i class="fa-solid fa-droplet" />
+									{/if}
+								</abbr>
+							</button>
 
 							<!-- <button
 							style="width: 4.5ch;"
@@ -175,6 +188,15 @@
 							current_output +
 							`
 `;
+						if (selected_preset?.fields?.length) {
+							for (let i = 0; i < selected_preset?.fields?.length || 0; i++) {
+								if (!selected_preset?.fields[i].currently_frozen) {
+									selected_preset.fields[i].current_inputs = JSON.parse(
+										JSON.stringify(selected_preset?.fields[i].default)
+									);
+								}
+							}
+						}
 						localStorage.setItem('string_for_export', $data.string_for_export);
 					}}>add card</button
 				>
