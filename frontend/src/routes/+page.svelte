@@ -6,6 +6,7 @@
 	let currently_all_forced_visible: boolean = false;
 	let selected_preset: Preset | null = null;
 	let current_output: string = '';
+
 	$: {
 		if (selected_preset) {
 			let output = '';
@@ -20,6 +21,9 @@
 
 <div class="container h-full mx-auto items-center">
 	<div class="space-y-10 text-center flex flex-col items-center">
+		<div style="card p-4">
+			<pre>{$data.string_for_import}</pre>
+		</div>
 		<h2 class="h2 mt-12">Create a card</h2>
 		{#if $data.presets.length}
 			<RadioGroup>
@@ -126,7 +130,19 @@
 						{/if}
 					{/each}
 				</div>
-				<div>current result: {current_output}</div>
+				<button
+					style="margin-top: 12px;"
+					class="btn btn-large variant-filled-success"
+					on:click={() => {
+						$data.string_for_import +=
+							current_output +
+							`
+`;
+					}}>save preset</button
+				>
+				<div>
+					current result: <pre>{current_output}</pre>
+				</div>
 			{/if}
 		{/if}
 		<h2 class="h2">Create a card preset</h2>
