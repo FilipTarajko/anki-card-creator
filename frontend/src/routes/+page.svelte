@@ -5,6 +5,17 @@
 
 	let currently_all_forced_visible: boolean = false;
 	let selected_preset: Preset | null = null;
+	let current_output: string = '';
+	$: {
+		if (selected_preset) {
+			let output = '';
+			selected_preset.fields.forEach((field) => {
+				output += field.current_inputs.join(' ');
+				output += ';';
+			});
+			current_output = output.slice(0, -1);
+		}
+	}
 </script>
 
 <div class="container h-full mx-auto items-center">
@@ -53,7 +64,7 @@
 						{/if}
 					</button>
 				</div>
-				<div style="display: grid; grid-template-columns: 100px 1fr 7ch;">
+				<div style="display: grid; grid-template-columns: 140px 1fr 7ch;">
 					{#each selected_preset.fields as field}
 						{#if field.currently_visible || currently_all_forced_visible}
 							<!-- <div class="card p-4" style="margin-top: 8px; width: 400px;"> -->
@@ -115,6 +126,7 @@
 						{/if}
 					{/each}
 				</div>
+				<div>current result: {current_output}</div>
 			{/if}
 		{/if}
 		<h2 class="h2">Create a card preset</h2>
