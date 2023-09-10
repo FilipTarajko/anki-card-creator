@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.postcss';
-	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
+	import { AppShell, AppBar, LightSwitch } from '@skeletonlabs/skeleton';
 
 	// Highlight JS
 	import hljs from 'highlight.js';
@@ -23,6 +23,7 @@
 				<strong class="text-xl uppercase">Anki Card Creator</strong>
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
+				<LightSwitch />
 				<a
 					class="btn btn-sm variant-ghost-surface"
 					href="https://apps.ankiweb.net"
