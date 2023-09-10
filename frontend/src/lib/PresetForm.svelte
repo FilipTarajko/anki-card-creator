@@ -29,7 +29,7 @@
 	let fields: Field[] = [
 		{
 			id: 0,
-			name: 'field1',
+			name: 'deck',
 			type: 'text',
 			options: [],
 			default: [],
@@ -38,19 +38,19 @@
 		},
 		{
 			id: 1,
-			name: 'field2',
+			name: 'notetype',
 			type: 'selectOne',
-			options: ['cat', 'dog', 'bird'],
-			default: ['cat'],
+			options: ['2X22', '3X22'],
+			default: ['2X22'],
 			visible_by_default: true,
 			current_inputs: []
 		},
 		{
 			id: 2,
-			name: 'field3',
+			name: 'tags',
 			type: 'selectMany',
-			options: ['cat', 'dog', 'bird'],
-			default: ['cat', 'dog'],
+			options: ['AnkiCC', 'test', 'test::AnkiCC', 'test::foo::baz::baz'],
+			default: ['AnkiCC', 'test'],
 			visible_by_default: true,
 			current_inputs: []
 		}

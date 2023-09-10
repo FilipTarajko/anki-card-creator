@@ -32,9 +32,10 @@
 <div class="container h-full mx-auto items-center">
 	<div class="space-y-10 text-center flex flex-col items-center">
 		<h2 class="h2 mt-12">Data to download</h2>
-		{#if $data.string_for_import}
+		{#if $data.string_for_export}
+			<pre class="card p-4 variant-ghost">{$data.prefix_for_exports}</pre>
 			<div class="card p-4 variant-ghost">
-				<pre>{$data.string_for_import}</pre>
+				<pre>{$data.string_for_export}</pre>
 			</div>
 		{:else}
 			<div class="card p-4 variant-ghost-warning">
@@ -45,7 +46,7 @@
 			<button
 				class="btn-icon variant-filled-success"
 				on:click={() => {
-					download('AnkiCC.txt', $data.string_for_import.slice(0, -1));
+					download('AnkiCC.txt', $data.prefix_for_exports + $data.string_for_export.slice(0, -1));
 				}}
 			>
 				<i class="fa-solid fa-download" />
@@ -53,8 +54,8 @@
 			<button
 				class="btn-icon variant-filled-primary"
 				on:click={() => {
-					$data.string_for_import = '';
-					localStorage.setItem('string_for_import', $data.string_for_import);
+					$data.string_for_export = '';
+					localStorage.setItem('string_for_export', $data.string_for_export);
 				}}
 			>
 				<i class="fa-solid fa-remove" />
@@ -118,7 +119,7 @@
 								<RadioGroup>
 									{#each field.options as option}
 										<RadioItem bind:group={field.current_inputs[0]} name="type" value={option}
-											>{option}</RadioItem
+											>{option || '(empty)'}</RadioItem
 										>
 									{/each}
 								</RadioGroup>
@@ -127,7 +128,7 @@
 									<div class="card" style="display: flex; flex-direction: row;">
 										{#each field.options as option}
 											<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
-												>{option}</ListBoxItem
+												>{option || '(empty)'}</ListBoxItem
 											>
 										{/each}
 									</div>
@@ -170,11 +171,11 @@
 					style="margin-top: 12px;"
 					class="btn btn-large variant-filled-success"
 					on:click={() => {
-						$data.string_for_import +=
+						$data.string_for_export +=
 							current_output +
 							`
 `;
-						localStorage.setItem('string_for_import', $data.string_for_import);
+						localStorage.setItem('string_for_export', $data.string_for_export);
 					}}>add card</button
 				>
 				<div>
