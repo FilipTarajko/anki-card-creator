@@ -17,12 +17,48 @@
 			current_output = output.slice(0, -1);
 		}
 	}
+
+	function download(filename: string, text: string) {
+		const element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+		element.setAttribute('download', filename);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+	}
 </script>
 
 <div class="container h-full mx-auto items-center">
 	<div class="space-y-10 text-center flex flex-col items-center">
-		<div style="card p-4">
-			<pre>{$data.string_for_import}</pre>
+		<h2 class="h2 mt-12">Data to download</h2>
+		{#if $data.string_for_import}
+			<div class="card p-4 variant-ghost">
+				<pre>{$data.string_for_import}</pre>
+			</div>
+		{:else}
+			<div class="card p-4 variant-ghost-warning">
+				<pre>nothing to download</pre>
+			</div>
+		{/if}
+		<div class="mt-0">
+			<button
+				class="btn-icon variant-filled-success"
+				on:click={() => {
+					download('AnkiCC.txt', $data.string_for_import.slice(0, -1));
+				}}
+			>
+				<i class="fa-solid fa-download" />
+			</button>
+			<button
+				class="btn-icon variant-filled-primary"
+				on:click={() => {
+					$data.string_for_import = '';
+					localStorage.setItem('string_for_import', $data.string_for_import);
+				}}
+			>
+				<i class="fa-solid fa-remove" />
+			</button>
 		</div>
 		<h2 class="h2 mt-12">Create a card</h2>
 		{#if $data.presets.length}
@@ -48,7 +84,7 @@
 							localStorage.setItem('presets', JSON.stringify($data.presets));
 						}}
 					>
-						X
+						<i class="fa-solid fa-remove" />
 					</button>
 				</div>
 				<div class="card p-4 variant-ghost-secondary">
@@ -138,7 +174,8 @@
 							current_output +
 							`
 `;
-					}}>save preset</button
+						localStorage.setItem('string_for_import', $data.string_for_import);
+					}}>add card</button
 				>
 				<div>
 					current result: <pre>{current_output}</pre>

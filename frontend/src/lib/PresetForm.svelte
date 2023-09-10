@@ -124,7 +124,9 @@
 				class="btn btn-sm variant-filled-primary"
 				on:click={() => {
 					fields = fields.filter((e) => e.id != field.id);
-				}}>X</button
+				}}
+			>
+				<i class="fa-solid fa-remove" /></button
 			>
 			{#if field.currently_visible}
 				{#if field.type === 'text'}
@@ -154,7 +156,7 @@
 											field.options = field.options;
 										}}
 									>
-										X
+										<i class="fa-solid fa-remove" />
 									</button>
 								{/each}
 								<input type="text" bind:value={field.current_inputs[0]} />
@@ -195,7 +197,7 @@
 											field.options = field.options;
 										}}
 									>
-										X
+										<i class="fa-solid fa-remove" />
 									</button>
 								{/each}
 								<input type="text" bind:value={field.current_inputs[0]} />
