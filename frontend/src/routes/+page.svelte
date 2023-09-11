@@ -44,7 +44,10 @@
 		{/if}
 		<div class="mt-0">
 			<button
-				class="btn-icon variant-filled-success"
+				disabled={!$data.string_for_export}
+				class={`btn-icon ${
+					$data.string_for_export ? 'variant-filled-success' : 'variant-soft-success'
+				}`}
 				on:click={() => {
 					download('AnkiCC.txt', $data.prefix_for_exports + $data.string_for_export.slice(0, -1));
 				}}
