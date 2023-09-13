@@ -75,10 +75,8 @@
 				value={'0'}
 				title="tile-1"
 			>
-				<svelte:fragment slot="lead"
-					><i class="fa-solid fa-circle-question fa-xl" /></svelte:fragment
-				>
-				<span>guide</span>
+				<svelte:fragment slot="lead"><i class="fa-solid fa-circle-info fa-xl" /></svelte:fragment>
+				<span>about</span>
 			</AppRailTile>
 			<AppRailTile
 				bind:group={$data.current_page}
