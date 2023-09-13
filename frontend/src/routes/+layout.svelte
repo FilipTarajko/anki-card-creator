@@ -117,6 +117,18 @@
 				<svelte:fragment slot="lead"><i class="fa-solid fa-file-export fa-xl" /></svelte:fragment>
 				<span>export</span>
 			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
+					localStorage.setItem('current_page', '4');
+				}}
+				name="tile-5"
+				value={'4'}
+				title="tile-5"
+			>
+				<svelte:fragment slot="lead"><i class="fa-solid fa-laptop-code fa-xl" /></svelte:fragment>
+				<span>developed</span>
+			</AppRailTile>
 			<!-- --- -->
 			<!-- <svelte:fragment slot="trail">
 				<AppRailAnchor href="/" target="_blank" title="Account">(icon)</AppRailAnchor>

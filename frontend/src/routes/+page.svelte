@@ -3,6 +3,7 @@
 	import DownloadComponent from '$lib/DownloadComponent.svelte';
 	import NoteComponent from '$lib/NoteComponent.svelte';
 	import GuideComponent from '$lib/GuideComponent.svelte';
+	import DevelopersPlayground from '$lib/DevelopersPlayground.svelte';
 
 	import { data } from '../store';
 </script>
@@ -17,6 +18,8 @@
 			<NoteComponent />
 		{:else if $data.current_page == '3'}
 			<DownloadComponent />
+		{:else if $data.current_page == '4'}
+			<DevelopersPlayground />
 		{/if}
 	</div>
 </div>
