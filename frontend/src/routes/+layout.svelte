@@ -20,7 +20,7 @@
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
-	let currentTile = 0;
+	import { data } from '../store';
 </script>
 
 <!-- App Shell -->
@@ -66,24 +66,56 @@
 				<AppRailAnchor href="/">(icon)</AppRailAnchor>
 			</svelte:fragment> -->
 			<!-- --- -->
-			<AppRailTile bind:group={currentTile} name="tile-2" value={1} title="tile-2">
-				<svelte:fragment slot="lead"><i class="fa-solid fa-square-plus fa-xl" /></svelte:fragment>
-				<span>add cards</span>
-			</AppRailTile>
-			<AppRailTile bind:group={currentTile} name="tile-1" value={0} title="tile-1">
-				<svelte:fragment slot="lead"><i class="fa-solid fa-clipboard-list fa-xl" /></svelte:fragment
-				>
-				<span>presets</span>
-			</AppRailTile>
-			<AppRailTile bind:group={currentTile} name="tile-3" value={2} title="tile-3">
-				<svelte:fragment slot="lead"><i class="fa-solid fa-file-export fa-xl" /></svelte:fragment>
-				<span>export</span>
-			</AppRailTile>
-			<AppRailTile bind:group={currentTile} name="tile-4" value={3} title="tile-4">
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
+					localStorage.setItem('current_page', '0');
+				}}
+				name="tile-1"
+				value={'0'}
+				title="tile-1"
+			>
 				<svelte:fragment slot="lead"
 					><i class="fa-solid fa-circle-question fa-xl" /></svelte:fragment
 				>
 				<span>guide</span>
+			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
+					localStorage.setItem('current_page', '1');
+				}}
+				name="tile-2"
+				value={'1'}
+				title="tile-2"
+			>
+				<svelte:fragment slot="lead"><i class="fa-solid fa-clipboard-list fa-xl" /></svelte:fragment
+				>
+				<span>presets</span>
+			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
+					localStorage.setItem('current_page', '2');
+				}}
+				name="tile-3"
+				value={'2'}
+				title="tile-3"
+			>
+				<svelte:fragment slot="lead"><i class="fa-solid fa-square-plus fa-xl" /></svelte:fragment>
+				<span>add cards</span>
+			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
+					localStorage.setItem('current_page', '3');
+				}}
+				name="tile-4"
+				value={'3'}
+				title="tile-4"
+			>
+				<svelte:fragment slot="lead"><i class="fa-solid fa-file-export fa-xl" /></svelte:fragment>
+				<span>export</span>
 			</AppRailTile>
 			<!-- --- -->
 			<!-- <svelte:fragment slot="trail">

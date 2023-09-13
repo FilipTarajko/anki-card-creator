@@ -57,6 +57,7 @@
 	];
 </script>
 
+<h2 class="h2 mt-12">Create a card preset</h2>
 <div>
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
