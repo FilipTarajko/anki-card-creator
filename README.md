@@ -1,5 +1,10 @@
 # Tool for creating complex Anki notes quickly
-Allows for faster note creation by allowing to automatically filling in fields, allowing for limiting value selection in fields, hiding fields etc. 
+Allows for faster note creation by allowing to:
+  - create note presets
+  - automatically fill fields with predefined default values
+  - select fields' values from predefined values
+  - hide fields which don't need to be visible
+  - quickly import data to Anki
 
 ## Used technologies:
 - Axum
