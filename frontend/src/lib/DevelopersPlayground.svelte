@@ -4,6 +4,13 @@
 	let mongo_status = 'loading...';
 	let user_count = 'loading...';
 
+	let registration_form_data = {
+		email: '',
+		username: '',
+		password: ''
+	};
+	let password_repeat: '';
+
 	function check_connection_to_backend() {
 		backend_status = 'loading...';
 		user_count = 'loading...';
@@ -64,6 +71,21 @@
 		}
 	}
 
+	function try_to_register() {
+		if (registration_form_data.password !== password_repeat) {
+			alert('passwords do not match');
+			return;
+		}
+		axios
+			.post('http://localhost:3001/register_user', registration_form_data)
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -91,3 +113,12 @@
 		check_connection_to_backend_and_mongo();
 	}}>reload data</button
 >
+<form>
+	<div class="card p-6" style="display: flex; flex-direction: column; color: black;">
+		<input type="text" placeholder="email" bind:value={registration_form_data.email} />
+		<input type="text" placeholder="username" bind:value={registration_form_data.username} />
+		<input type="password" placeholder="password" bind:value={registration_form_data.password} />
+		<input type="password" placeholder="repeat password" bind:value={password_repeat} />
+		<button class="btn btn-sm variant-filled mt-2" on:click={try_to_register}> register </button>
+	</div>
+</form>
