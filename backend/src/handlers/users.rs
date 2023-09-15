@@ -5,10 +5,11 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 const ARGON_CONFIG: argon2::Config<'_> = argon2::Config {
-    variant: argon2::Variant::Argon2i,
+    variant: argon2::Variant::Argon2id,
     version: argon2::Version::Version13,
     mem_cost: 65536,
-    time_cost: 10,
+    // TODO: how safe is this?
+    time_cost: 1,
     lanes: 4,
     secret: &[],
     ad: &[],
@@ -46,6 +47,7 @@ pub struct Claims {
     iat: u64,
     exp: u64,
     id: String,
+    email: String,
 }
 
 pub async fn register_user(
@@ -172,6 +174,7 @@ pub async fn generate_jwt(user: User) -> Result<String, StatusCode> {
         iat: chrono::Utc::now().timestamp() as u64,
         exp: (chrono::Utc::now() + chrono::Duration::days(180)).timestamp() as u64,
         id: user.id.unwrap().to_hex(),
+        email: user.email.clone(),
     };
 
     let jwt = jsonwebtoken::encode(
