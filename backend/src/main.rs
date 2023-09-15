@@ -11,7 +11,7 @@ use tower_http::cors::CorsLayer;
 mod handlers;
 use handlers::{
     checks::{add_test_user, check_backend, check_mongo},
-    users::register_user,
+    users::{login, register_user},
 };
 
 #[tokio::main]
@@ -32,6 +32,7 @@ async fn main() {
         .route("/check_mongo", get(check_mongo))
         .route("/check_backend", get(check_backend))
         .route("/register_user", post(register_user))
+        .route("/login", post(login))
         .layer(cors_layer)
         .with_state(database_client);
 

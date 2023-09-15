@@ -11,6 +11,11 @@
 	};
 	let password_repeat: '';
 
+	let login_form_data = {
+		username_or_email: '',
+		password: ''
+	};
+
 	function check_connection_to_backend() {
 		backend_status = 'loading...';
 		user_count = 'loading...';
@@ -86,6 +91,17 @@
 			});
 	}
 
+	function try_to_login() {
+		axios
+			.post('http://localhost:3001/login', login_form_data)
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -115,10 +131,22 @@
 >
 <form>
 	<div class="card p-6" style="display: flex; flex-direction: column; color: black;">
-		<input type="text" placeholder="email" bind:value={registration_form_data.email} />
+		<input type="email" placeholder="email" bind:value={registration_form_data.email} />
 		<input type="text" placeholder="username" bind:value={registration_form_data.username} />
 		<input type="password" placeholder="password" bind:value={registration_form_data.password} />
 		<input type="password" placeholder="repeat password" bind:value={password_repeat} />
 		<button class="btn btn-sm variant-filled mt-2" on:click={try_to_register}> register </button>
+	</div>
+</form>
+
+<form>
+	<div class="card p-6" style="display: flex; flex-direction: column; color: black;">
+		<input
+			type="text"
+			placeholder="username_or_email"
+			bind:value={login_form_data.username_or_email}
+		/>
+		<input type="password" placeholder="password" bind:value={login_form_data.password} />
+		<button class="btn btn-sm variant-filled mt-2" on:click={try_to_login}> login </button>
 	</div>
 </form>

@@ -33,6 +33,21 @@ pub struct RegistrationFormData {
     pub password: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LoginFormData {
+    pub username_or_email: String,
+    pub password: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    sub: String,
+    iss: String,
+    iat: u64,
+    exp: u64,
+    id: String,
+}
+
 pub async fn register_user(
     State(client): State<Client>,
     registration_form_data: Json<RegistrationFormData>,
@@ -94,4 +109,77 @@ pub async fn register_user(
         Ok(_) => Ok("Registered".to_string()),
         Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
+}
+
+pub async fn login(
+    State(client): State<Client>,
+    login_form_data: Json<LoginFormData>,
+) -> Result<String, StatusCode> {
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection(std::env::var("COLLECTION_NAME").unwrap().as_str());
+
+    let user_to_check = match user_collection
+        .find_one(
+            doc! {
+                "$or": [
+                    { "username": &login_form_data.username_or_email },
+                    { "email": &login_form_data.username_or_email }
+                ]
+            },
+            None,
+        )
+        .await
+    {
+        Ok(Some(user)) => user,
+        Ok(None) => return Err(StatusCode::BAD_REQUEST),
+        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+    };
+
+    let password_matches = argon2::verify_encoded(
+        user_to_check.password.as_ref(),
+        login_form_data.password.as_ref(),
+    );
+
+    let failed_login_attempts = if password_matches.is_ok() {
+        0
+    } else {
+        user_to_check.failed_login_attempts + 1
+    };
+
+    user_collection
+        .update_one(
+            doc! { "_id": user_to_check.id.unwrap() },
+            doc! { "$set": { "failed_login_attempts": failed_login_attempts } },
+            None,
+        )
+        .await
+        .unwrap();
+
+    match password_matches {
+        Ok(true) => Ok(generate_jwt(user_to_check).await.unwrap()),
+        Ok(false) => Err(StatusCode::BAD_REQUEST),
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+    }
+}
+
+pub async fn generate_jwt(user: User) -> Result<String, StatusCode> {
+    let jwt_secret = std::env::var("JWT_SECRET").unwrap();
+
+    let claims = Claims {
+        sub: user.username.clone(),
+        iss: "AnkiCC".to_string(),
+        iat: chrono::Utc::now().timestamp() as u64,
+        exp: (chrono::Utc::now() + chrono::Duration::days(180)).timestamp() as u64,
+        id: user.id.unwrap().to_hex(),
+    };
+
+    let jwt = jsonwebtoken::encode(
+        &jsonwebtoken::Header::default(),
+        &claims,
+        &jsonwebtoken::EncodingKey::from_secret(jwt_secret.as_ref()),
+    )
+    .unwrap();
+
+    Ok(jwt)
 }
