@@ -133,6 +133,40 @@
 			});
 	}
 
+	function upload_notes() {
+		axios
+			.post('http://localhost:3001/upload_notes', JSON.stringify($data.string_for_export), {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
+	function download_notes() {
+		axios
+			.get('http://localhost:3001/download_notes', {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`
+				}
+			})
+			.then((response) => {
+				console.log(response);
+				$data.string_for_export = response.data;
+				localStorage.setItem('string_for_export', $data.string_for_export);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+		alert('TODO');
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -183,6 +217,11 @@
 	<form>
 		<button class="btn variant-filled" on:click={check_token}>check token</button>
 	</form>
+	<div class="card p-4 variant-ghost">
+		<pre>{$data.string_for_export}</pre>
+		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
+		<button class="btn variant-filled-warning" on:click={download_notes}>download notes</button>
+	</div>
 {:else}
 	<form>
 		<div class="card p-6" style="display: flex; flex-direction: column; color: black;">

@@ -46,7 +46,7 @@ pub async fn register_user(
 ) -> Result<String, StatusCode> {
     let user_collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
-        .collection(std::env::var("COLLECTION_NAME").unwrap().as_str());
+        .collection("Users");
 
     let mut user_to_insert = User {
         id: None,
@@ -109,7 +109,7 @@ pub async fn login(
 ) -> Result<String, StatusCode> {
     let user_collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
-        .collection(std::env::var("COLLECTION_NAME").unwrap().as_str());
+        .collection("Users");
 
     let user_to_check = match user_collection
         .find_one(

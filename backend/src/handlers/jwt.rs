@@ -75,11 +75,29 @@ pub async fn check_given_token(
         .unwrap();
     let collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
-        .collection(std::env::var("COLLECTION_NAME").unwrap().as_str());
+        .collection("Users");
     let user = collection
         .find_one(doc! { "username": claims.sub, "email": claims.email }, None)
         .await
         .unwrap()
         .unwrap();
     Ok(format!("Token confirmed! User: {}", user.username))
+}
+
+pub async fn get_user_by_jwt(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+) -> Result<User, StatusCode> {
+    let claims = validate_jwt_from_bearer(TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    let user = collection
+        .find_one(doc! { "username": claims.sub, "email": claims.email }, None)
+        .await
+        .unwrap()
+        .unwrap();
+    Ok(user)
 }
