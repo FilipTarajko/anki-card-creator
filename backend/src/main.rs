@@ -10,7 +10,7 @@ use tower_http::cors::CorsLayer;
 
 mod handlers;
 use handlers::{
-    checks::{add_test_user, check_backend, check_mongo},
+    connection_checks::{add_test_user, check_backend, check_mongo},
     jwt::check_given_token,
     users::{login, register_user},
 };
