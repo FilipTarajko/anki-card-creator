@@ -118,6 +118,21 @@
 			});
 	}
 
+	function check_token() {
+		axios
+			.get('http://localhost:3001/check_token', {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`
+				}
+			})
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -150,6 +165,7 @@
 	<div class="card p-6">
 		Logged in as {$data.username} ({$data.email}), id: {$data.id}
 	</div>
+	<div style="width: 90%; line-break:anywhere;">{$data.jwt}</div>
 	<button
 		on:click={() => {
 			$data.jwt = '';
@@ -161,8 +177,12 @@
 			localStorage.removeItem('email');
 			localStorage.removeItem('id');
 		}}
-		class="btn variant-filled">log out</button
+		class="btn variant-filled-primary">log out</button
 	>
+
+	<form>
+		<button class="btn variant-filled" on:click={check_token}>check token</button>
+	</form>
 {:else}
 	<form>
 		<div class="card p-6" style="display: flex; flex-direction: column; color: black;">

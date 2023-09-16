@@ -11,6 +11,7 @@ use tower_http::cors::CorsLayer;
 mod handlers;
 use handlers::{
     checks::{add_test_user, check_backend, check_mongo},
+    jwt::check_given_token,
     users::{login, register_user},
 };
 
@@ -25,9 +26,13 @@ async fn main() {
     let cors_layer: CorsLayer = CorsLayer::new()
         .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
         .allow_methods([Method::GET, Method::POST])
-        .allow_headers(vec![axum::http::header::CONTENT_TYPE]);
+        .allow_headers(vec![
+            axum::http::header::CONTENT_TYPE,
+            axum::http::header::AUTHORIZATION,
+        ]);
 
     let app = Router::new()
+        .route("/check_token", get(check_given_token))
         .route("/add_test_user", post(add_test_user))
         .route("/check_mongo", get(check_mongo))
         .route("/check_backend", get(check_backend))

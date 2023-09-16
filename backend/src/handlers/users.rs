@@ -40,16 +40,6 @@ pub struct LoginFormData {
     pub password: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
-    sub: String,
-    iss: String,
-    iat: u64,
-    exp: u64,
-    id: String,
-    email: String,
-}
-
 pub async fn register_user(
     State(client): State<Client>,
     registration_form_data: Json<RegistrationFormData>,
@@ -159,30 +149,8 @@ pub async fn login(
         .unwrap();
 
     match password_matches {
-        Ok(true) => Ok(generate_jwt(user_to_check).await.unwrap()),
+        Ok(true) => Ok(super::jwt::generate_jwt(user_to_check).await.unwrap()),
         Ok(false) => Err(StatusCode::BAD_REQUEST),
         Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
-}
-
-pub async fn generate_jwt(user: User) -> Result<String, StatusCode> {
-    let jwt_secret = std::env::var("JWT_SECRET").unwrap();
-
-    let claims = Claims {
-        sub: user.username.clone(),
-        iss: "AnkiCC".to_string(),
-        iat: chrono::Utc::now().timestamp() as u64,
-        exp: (chrono::Utc::now() + chrono::Duration::days(180)).timestamp() as u64,
-        id: user.id.unwrap().to_hex(),
-        email: user.email.clone(),
-    };
-
-    let jwt = jsonwebtoken::encode(
-        &jsonwebtoken::Header::default(),
-        &claims,
-        &jsonwebtoken::EncodingKey::from_secret(jwt_secret.as_ref()),
-    )
-    .unwrap();
-
-    Ok(jwt)
 }
