@@ -2,31 +2,11 @@
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
 
-	let last_id = 2;
-	let preset_name = '';
-
+	let preset_name = 'new preset';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
-
-	function create_field() {
-		last_id++;
-		fields = [
-			...fields,
-			{
-				id: last_id,
-				name: new_field_name,
-				type: new_field_type ?? 'text',
-				options: [],
-				default: [],
-				visible_by_default: true,
-				current_inputs: []
-			}
-		];
-		new_field_name = '';
-		new_field_type = null;
-	}
-
-	let fields: Field[] = [
+	let based_on_preset: Preset | null = null;
+	let default_fields = [
 		{
 			id: 0,
 			name: 'deck',
@@ -55,10 +35,122 @@
 			current_inputs: []
 		}
 	];
+	let fields: Field[] = JSON.parse(JSON.stringify(default_fields));
+
+	function create_field() {
+		fields = [
+			...fields,
+			{
+				id: fields.length,
+				name: new_field_name,
+				type: new_field_type ?? 'text',
+				options: [],
+				default: [],
+				visible_by_default: true,
+				current_inputs: []
+			}
+		];
+		new_field_name = '';
+		new_field_type = null;
+	}
+
+	function save_preset_as_new() {
+		if (!preset_name) {
+			// TODO: handle it better
+			alert("Please enter preset's name");
+		} else if (
+			// @ts-ignore
+			$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
+		) {
+			// TODO: handle it better
+			alert('Preset with this name already exists!');
+		} else {
+			fields.forEach((field) => {
+				field.current_inputs = JSON.parse(JSON.stringify(field.default));
+				field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
+			});
+
+			$data.presets = [
+				...$data.presets,
+				{
+					name: preset_name,
+					fields: JSON.parse(JSON.stringify(fields)),
+					last_edited: new Date().getTime(),
+					status: 'unsynced'
+				}
+			];
+			localStorage.setItem('presets', JSON.stringify($data.presets));
+		}
+	}
+
+	function update_preset() {
+		if (!based_on_preset) {
+			console.error('based_on_preset is null');
+		} else if (!preset_name) {
+			// TODO: handle it better
+			alert("Please enter preset's name");
+		} else if (
+			// @ts-ignore
+			$data.presets.find(
+				(e: Preset) =>
+					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== based_on_preset
+			)
+		) {
+			// TODO: handle it better
+			alert('Preset with this name already exists!');
+		} else {
+			fields.forEach((field) => {
+				field.current_inputs = JSON.parse(JSON.stringify(field.default));
+				field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
+			});
+
+			based_on_preset.fields = fields;
+			based_on_preset.name = preset_name;
+			based_on_preset.last_edited = new Date().getTime();
+			if ((based_on_preset.status = 'synced')) {
+				based_on_preset.status = 'to_update';
+			}
+			$data.presets = $data.presets;
+			localStorage.setItem('presets', JSON.stringify($data.presets));
+		}
+	}
 </script>
 
 <h2 class="h2 mt-12">Create a card preset</h2>
+<div class="card p-2">
+	<button
+		class={`btn ${!based_on_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
+		on:click={() => {
+			preset_name = 'new preset';
+			fields = JSON.parse(JSON.stringify(default_fields));
+			based_on_preset = null;
+		}}
+	>
+		<b><i>new preset</i></b>
+	</button>
+	{#each $data.presets as preset}
+		<button
+			class={`btn ${
+				based_on_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+			} m-0.5`}
+			on:click={() => {
+				preset_name = preset.name;
+				fields = JSON.parse(JSON.stringify(preset.fields));
+				based_on_preset = preset;
+			}}
+		>
+			{preset.name}
+		</button>
+	{/each}
+</div>
 <div>
+	<div class="mb-4">
+		{#if based_on_preset}
+			based on: {based_on_preset.name}
+		{:else}
+			creating preset from scratch
+		{/if}
+	</div>
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
 	{#each fields as field, i_field}
@@ -239,38 +331,24 @@
 			}}>add field</button
 		>
 	</div>
-	<button
-		style="margin-top: 12px;"
-		class="btn btn-large variant-filled-success"
-		on:click={() => {
-			if (!preset_name) {
-				// TODO: handle it better
-				alert("Please enter preset's name");
-			} else if (
-				// @ts-ignore
-				$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
-			) {
-				// TODO: handle it better
-				alert('Preset with this name already exists!');
-			} else {
-				fields.forEach((field) => {
-					field.current_inputs = JSON.parse(JSON.stringify(field.default));
-					field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
-				});
-
-				$data.presets = [
-					...$data.presets,
-					{
-						name: preset_name,
-						fields: JSON.parse(JSON.stringify(fields)),
-						last_edited: new Date().getTime(),
-						status: 'unsynced'
-					}
-				];
-				localStorage.setItem('presets', JSON.stringify($data.presets));
-			}
-		}}>save preset</button
-	>
+	{#if based_on_preset}
+		<button
+			style="margin-top: 12px;"
+			class="btn btn-large variant-filled-success"
+			on:click={save_preset_as_new}>save as new</button
+		>
+		<button
+			style="margin-top: 12px;"
+			class="btn btn-large variant-filled-success"
+			on:click={update_preset}>update {based_on_preset.name}</button
+		>
+	{:else}
+		<button
+			style="margin-top: 12px;"
+			class="btn btn-large variant-filled-success"
+			on:click={save_preset_as_new}>save preset</button
+		>
+	{/if}
 </div>
 
 <style lang="postcss">
