@@ -22,7 +22,6 @@ pub async fn upload_notes(
     let user_collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
         .collection("Users");
-    // update user's notes
     user_collection
         .update_one(
             doc! {"_id": user.id.unwrap()},
@@ -51,4 +50,26 @@ pub async fn download_notes(
         .unwrap()
         .unwrap();
     Json(user.notes)
+}
+
+pub async fn delete_notes(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+) -> String {
+    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    user_collection
+        .update_one(
+            doc! {"_id": user.id.unwrap()},
+            doc! {"$set": {"notes": ""}},
+            None,
+        )
+        .await
+        .unwrap();
+
+    "Notes deleted!".to_string()
 }

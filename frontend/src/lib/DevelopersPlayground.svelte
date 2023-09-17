@@ -166,6 +166,22 @@
 			});
 	}
 
+	function delete_notes() {
+		axios
+			.get('http://localhost:3001/delete_notes', {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`
+				}
+			})
+			.then((response) => {
+				$data.string_for_export = '';
+				localStorage.setItem('string_for_export', '');
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -220,6 +236,7 @@
 		<pre>{$data.string_for_export}</pre>
 		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
 		<button class="btn variant-filled-warning" on:click={download_notes}>download notes</button>
+		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button>
 	</div>
 {:else}
 	<form>
