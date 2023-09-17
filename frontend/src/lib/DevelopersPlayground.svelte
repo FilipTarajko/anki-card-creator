@@ -191,6 +191,22 @@
 			});
 	}
 
+	function upload_presets() {
+		axios
+			.post('http://localhost:3001/upload_presets', JSON.stringify($data.presets), {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -248,6 +264,16 @@
 		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
 		<button class="btn variant-filled-warning" on:click={sync_notes}>sync notes</button>
 		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button>
+	</div>
+	<div class="card p-4 variant-ghost" style="line-break: anywhere; width: 80%;">
+		{#each $data.presets as preset}
+			<div>
+				{JSON.stringify(preset)}
+			</div>
+		{/each}
+		<button class="btn variant-filled-warning" on:click={upload_presets}>upload notes</button>
+		<!-- <button class="btn variant-filled-warning" on:click={sync_notes}>sync notes</button>
+		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button> -->
 	</div>
 {:else}
 	<form>

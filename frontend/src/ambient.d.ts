@@ -11,7 +11,8 @@ type Field = {
 };
 
 type Preset = {
-	id: number;
+	id?: number;
+	last_edited: number;
 	name: string;
 	fields: Field[];
 };

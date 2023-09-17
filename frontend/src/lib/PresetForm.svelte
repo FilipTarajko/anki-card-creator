@@ -262,7 +262,8 @@
 					...$data.presets,
 					{
 						name: preset_name,
-						fields: JSON.parse(JSON.stringify(fields))
+						fields: JSON.parse(JSON.stringify(fields)),
+						last_edited: new Date().getTime()
 					}
 				];
 				localStorage.setItem('presets', JSON.stringify($data.presets));

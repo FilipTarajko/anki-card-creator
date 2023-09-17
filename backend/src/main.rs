@@ -41,6 +41,7 @@ async fn main() {
         .route("/upload_notes", post(handlers::sync::upload_notes))
         .route("/sync_notes", post(handlers::sync::sync_notes))
         .route("/delete_notes", post(handlers::sync::delete_notes))
+        .route("/upload_presets", post(handlers::sync::upload_presets))
         .layer(cors_layer)
         .with_state(database_client);
 
