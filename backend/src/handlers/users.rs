@@ -4,6 +4,8 @@ use mongodb::{bson::doc, Client, Collection};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
+use super::sync::Preset;
+
 const ARGON_CONFIG: argon2::Config<'_> = argon2::Config {
     variant: argon2::Variant::Argon2id,
     version: argon2::Version::Version13,
@@ -26,6 +28,7 @@ pub struct User {
     pub password: String,
     pub failed_login_attempts: i32,
     pub notes: String,
+    pub presets: Vec<Preset>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -57,6 +60,7 @@ pub async fn register_user(
         password: registration_form_data.password.clone(),
         failed_login_attempts: 0,
         notes: "".to_string(),
+        presets: vec![],
     };
 
     println!("{:?}", user_to_insert);

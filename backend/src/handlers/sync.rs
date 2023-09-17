@@ -159,3 +159,14 @@ pub async fn upload_presets(
 
     "Presets uploaded!".to_string()
 }
+
+pub async fn load_presets(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+) -> Json<Vec<Preset>> {
+    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+
+    Json(user.presets)
+}
