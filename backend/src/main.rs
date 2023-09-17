@@ -39,6 +39,7 @@ async fn main() {
         .route("/register_user", post(register_user))
         .route("/login", post(login))
         .route("/upload_notes", post(handlers::sync::upload_notes))
+        .route("/download_notes", get(handlers::sync::download_notes))
         .layer(cors_layer)
         .with_state(database_client);
 

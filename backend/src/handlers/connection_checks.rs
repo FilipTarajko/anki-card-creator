@@ -22,6 +22,7 @@ pub async fn add_test_user(State(client): State<Client>) -> Html<&'static str> {
         email: "test@test.test".to_string(),
         password: "test".to_string(),
         failed_login_attempts: 0,
+        notes: "".to_string(),
     };
 
     let collection: Collection<User> = client

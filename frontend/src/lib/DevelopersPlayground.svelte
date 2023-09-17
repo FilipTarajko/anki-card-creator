@@ -157,14 +157,13 @@
 				}
 			})
 			.then((response) => {
-				console.log(response);
+				alert(response.data);
 				$data.string_for_export = response.data;
 				localStorage.setItem('string_for_export', $data.string_for_export);
 			})
 			.catch((error) => {
 				console.error(error);
 			});
-		alert('TODO');
 	}
 
 	check_connection_to_backend();

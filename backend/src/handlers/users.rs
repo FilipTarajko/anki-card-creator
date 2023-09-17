@@ -25,6 +25,7 @@ pub struct User {
     pub email: String,
     pub password: String,
     pub failed_login_attempts: i32,
+    pub notes: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -55,6 +56,7 @@ pub async fn register_user(
         email: registration_form_data.email.clone(),
         password: registration_form_data.password.clone(),
         failed_login_attempts: 0,
+        notes: "".to_string(),
     };
 
     println!("{:?}", user_to_insert);

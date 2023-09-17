@@ -34,3 +34,21 @@ pub async fn upload_notes(
 
     "Notes updated!".to_string()
 }
+
+pub async fn download_notes(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+) -> Json<String> {
+    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    let user = user_collection
+        .find_one(doc! {"_id": user.id.unwrap()}, None)
+        .await
+        .unwrap()
+        .unwrap();
+    Json(user.notes)
+}
