@@ -15,4 +15,5 @@ type Preset = {
 	last_edited: number;
 	name: string;
 	fields: Field[];
+	status: 'synced' | 'unsynced' | 'to_update';
 };

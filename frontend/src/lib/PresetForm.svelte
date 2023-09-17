@@ -263,7 +263,8 @@
 					{
 						name: preset_name,
 						fields: JSON.parse(JSON.stringify(fields)),
-						last_edited: new Date().getTime()
+						last_edited: new Date().getTime(),
+						status: 'unsynced'
 					}
 				];
 				localStorage.setItem('presets', JSON.stringify($data.presets));

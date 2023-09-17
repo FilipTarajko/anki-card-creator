@@ -48,6 +48,7 @@ pub struct Preset {
     pub name: String,
     pub fields: Vec<Field>,
     pub last_edited: i64,
+    pub status: String,
 }
 
 impl From<Preset> for Bson {
@@ -61,6 +62,7 @@ impl From<Preset> for Bson {
             "name": preset.name,
             "fields": preset.fields,
             "last_edited": preset.last_edited,
+            "status": "synced".to_string(),
         })
     }
 }

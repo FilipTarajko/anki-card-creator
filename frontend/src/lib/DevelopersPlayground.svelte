@@ -201,6 +201,13 @@
 			})
 			.then((response) => {
 				console.log(response);
+				if (response.status === 200) {
+					$data.presets.forEach((preset: Preset) => {
+						preset.status = 'synced';
+					});
+					$data.presets = $data.presets;
+					localStorage.setItem('presets', JSON.stringify($data.presets));
+				}
 			})
 			.catch((error) => {
 				console.error(error);
@@ -288,6 +295,7 @@
 			<div>
 				{preset.name}
 				{preset.last_edited}
+				{preset.status}
 			</div>
 		{/each}
 		<button class="btn variant-filled-warning" on:click={upload_presets}>upload presets</button>
