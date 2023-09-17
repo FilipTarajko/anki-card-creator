@@ -43,6 +43,7 @@ async fn main() {
         .route("/delete_notes", post(handlers::sync::delete_notes))
         .route("/upload_presets", post(handlers::sync::upload_presets))
         .route("/load_presets", post(handlers::sync::load_presets))
+        .route("/sync_presets", post(handlers::sync::sync_presets))
         .layer(cors_layer)
         .with_state(database_client);
 

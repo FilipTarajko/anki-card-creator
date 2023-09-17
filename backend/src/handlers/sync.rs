@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::handlers::jwt::get_user_by_jwt;
 use crate::handlers::users::User;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Field {
     pub id: i32,
     pub name: String,
@@ -41,7 +41,7 @@ impl From<Field> for Bson {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Preset {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<mongodb::bson::oid::ObjectId>,
@@ -171,4 +171,35 @@ pub async fn load_presets(
         .unwrap();
 
     Json(user.presets)
+}
+
+pub async fn sync_presets(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+    Json(presets_to_add): Json<Vec<Preset>>,
+) -> Json<Vec<Preset>> {
+    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    let mut presets_to_save = user.presets;
+    println!("before appending: {:?}", presets_to_save.len());
+    println!("appending: {:?}", presets_to_add.len());
+    presets_to_save.append(&mut presets_to_add.clone());
+    println!("after appending: {:?}", presets_to_save.len());
+    for preset in &mut presets_to_save {
+        preset.status = "synced".to_string();
+    }
+    user_collection
+        .update_one(
+            doc! {"_id": user.id.unwrap()},
+            doc! {"$set": {"presets": &presets_to_save}},
+            None,
+        )
+        .await
+        .unwrap();
+
+    Json(presets_to_save)
 }
