@@ -15,9 +15,12 @@
 
 <h2 class="h2 mt-12">Data to download</h2>
 <pre class="card p-4 variant-ghost">{$data.prefix_for_exports}</pre>
-{#if $data.string_for_export}
+{#if $data.notes_synced || $data.notes_unsynced}
 	<div class="card p-4 variant-ghost">
-		<pre>{$data.string_for_export}</pre>
+		<pre>{$data.notes_synced}</pre>
+	</div>
+	<div class="card p-4 variant-ghost">
+		<pre>{$data.notes_unsynced}</pre>
 	</div>
 {:else}
 	<div class="card p-4 variant-ghost-warning">
@@ -26,12 +29,18 @@
 {/if}
 <div class="mt-0">
 	<button
-		disabled={!$data.string_for_export}
+		disabled={!$data.notes_synced && !$data.notes_unsynced}
 		class={`btn-icon ${
-			$data.string_for_export ? 'variant-filled-success' : 'variant-soft-success'
+			$data.notes_synced || $data.notes_unsynced ? 'variant-filled-success' : 'variant-soft-success'
 		}`}
 		on:click={() => {
-			download('AnkiCC.txt', $data.prefix_for_exports + $data.string_for_export.slice(0, -1));
+			let to_download = $data.prefix_for_exports;
+			if ($data.notes_unsynced) {
+				to_download += $data.notes_synced + $data.notes_unsynced.slice(0, -1);
+			} else {
+				to_download += $data.notes_synced.slice(0, -1);
+			}
+			download('AnkiCC.txt', to_download);
 		}}
 	>
 		<i class="fa-solid fa-download" />
@@ -39,8 +48,10 @@
 	<button
 		class="btn-icon variant-filled-primary"
 		on:click={() => {
-			$data.string_for_export = '';
-			localStorage.setItem('string_for_export', $data.string_for_export);
+			$data.notes_synced = '';
+			localStorage.setItem('notes_synced', $data.notes_synced);
+			$data.notes_unsynced = '';
+			localStorage.setItem('notes_unsynced', $data.notes_unsynced);
 		}}
 	>
 		<i class="fa-solid fa-remove" />

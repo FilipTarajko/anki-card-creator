@@ -137,7 +137,7 @@
 			style="margin-top: 12px;"
 			class="btn btn-large variant-filled-success"
 			on:click={() => {
-				$data.string_for_export +=
+				$data.notes_unsynced +=
 					current_output +
 					`
 `;
@@ -150,7 +150,7 @@
 						}
 					}
 				}
-				localStorage.setItem('string_for_export', $data.string_for_export);
+				localStorage.setItem('notes_unsynced', $data.notes_unsynced);
 			}}>add card</button
 		>
 		<div>

@@ -135,13 +135,17 @@
 
 	function upload_notes() {
 		axios
-			.post('http://localhost:3001/upload_notes', JSON.stringify($data.string_for_export), {
+			.post('http://localhost:3001/upload_notes', JSON.stringify($data.notes_unsynced), {
 				headers: {
 					Authorization: `Bearer ${$data.jwt}`,
 					'Content-Type': 'application/json'
 				}
 			})
 			.then((response) => {
+				$data.notes_synced = $data.notes_synced + $data.notes_unsynced;
+				localStorage.setItem('notes_synced', $data.notes_synced);
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', '');
 				console.log(response);
 			})
 			.catch((error) => {
@@ -149,17 +153,19 @@
 			});
 	}
 
-	function download_notes() {
+	function sync_notes() {
 		axios
-			.get('http://localhost:3001/download_notes', {
+			.post('http://localhost:3001/sync_notes', JSON.stringify($data.notes_unsynced), {
 				headers: {
-					Authorization: `Bearer ${$data.jwt}`
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
 				}
 			})
 			.then((response) => {
-				alert(response.data);
-				$data.string_for_export = response.data;
-				localStorage.setItem('string_for_export', $data.string_for_export);
+				$data.notes_synced = response.data;
+				localStorage.setItem('notes_synced', $data.notes_synced);
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', '');
 			})
 			.catch((error) => {
 				console.error(error);
@@ -168,14 +174,17 @@
 
 	function delete_notes() {
 		axios
-			.get('http://localhost:3001/delete_notes', {
+			.post('http://localhost:3001/delete_notes', '', {
 				headers: {
-					Authorization: `Bearer ${$data.jwt}`
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
 				}
 			})
 			.then((response) => {
-				$data.string_for_export = '';
-				localStorage.setItem('string_for_export', '');
+				$data.notes_synced = '';
+				localStorage.setItem('notes_synced', '');
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', '');
 			})
 			.catch((error) => {
 				console.error(error);
@@ -233,9 +242,11 @@
 		<button class="btn variant-filled" on:click={check_token}>check token</button>
 	</form>
 	<div class="card p-4 variant-ghost">
-		<pre>{$data.string_for_export}</pre>
+		<pre>{$data.notes_synced}</pre>
+		-
+		<pre>{$data.notes_unsynced}</pre>
 		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
-		<button class="btn variant-filled-warning" on:click={download_notes}>download notes</button>
+		<button class="btn variant-filled-warning" on:click={sync_notes}>sync notes</button>
 		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button>
 	</div>
 {:else}

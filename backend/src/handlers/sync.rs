@@ -14,7 +14,7 @@ use crate::handlers::users::User;
 pub async fn upload_notes(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
-    Json(notes): Json<String>,
+    Json(notes_to_add): Json<String>,
 ) -> String {
     let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
         .await
@@ -25,7 +25,7 @@ pub async fn upload_notes(
     user_collection
         .update_one(
             doc! {"_id": user.id.unwrap()},
-            doc! {"$set": {"notes": notes}},
+            doc! {"$set": {"notes": user.notes+&notes_to_add}},
             None,
         )
         .await
@@ -34,22 +34,31 @@ pub async fn upload_notes(
     "Notes updated!".to_string()
 }
 
-pub async fn download_notes(
+pub async fn sync_notes(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+    Json(notes_to_add): Json<String>,
 ) -> Json<String> {
-    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+    let authenticated_user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
         .await
         .unwrap();
     let user_collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
         .collection("Users");
-    let user = user_collection
-        .find_one(doc! {"_id": user.id.unwrap()}, None)
+    user_collection
+        .update_one(
+            doc! {"_id": authenticated_user.id.unwrap()},
+            doc! {"$set": {"notes": authenticated_user.notes+&notes_to_add}},
+            None,
+        )
+        .await
+        .unwrap();
+    let loaded_user = user_collection
+        .find_one(doc! {"_id": authenticated_user.id.unwrap()}, None)
         .await
         .unwrap()
         .unwrap();
-    Json(user.notes)
+    Json(loaded_user.notes)
 }
 
 pub async fn delete_notes(

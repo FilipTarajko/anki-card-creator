@@ -84,6 +84,7 @@ pub async fn check_given_token(
     Ok(format!("Token confirmed! User: {}", user.username))
 }
 
+// TODO: probably overused
 pub async fn get_user_by_jwt(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
