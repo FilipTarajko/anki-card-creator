@@ -257,7 +257,7 @@
 						);
 					}
 					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
-						show_toast('Presets synced!', 'variant-filled-success');
+						show_toast('Presets synced!', 'variant-filled-success', 1000, true, true);
 					}
 					$data.presets = response.data[1];
 					localStorage.setItem('presets', JSON.stringify($data.presets));
@@ -296,13 +296,15 @@
 		message: string,
 		background = 'variant-filled-primary',
 		timeout = 10000,
-		autohide = true
+		autohide = true,
+		hideDismiss = false
 	) {
 		const t: ToastSettings = {
 			message,
 			timeout,
 			background,
-			autohide
+			autohide,
+			hideDismiss
 		};
 		toastStore.trigger(t);
 	}
