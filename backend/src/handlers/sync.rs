@@ -184,7 +184,11 @@ pub struct PresetSyncReport {
 pub async fn sync_presets(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
-    Json((presets_to_add, presets_to_edit)): Json<(Vec<Preset>, Vec<Preset>)>,
+    Json((presets_to_add, presets_to_edit, presets_to_remove)): Json<(
+        Vec<Preset>,
+        Vec<Preset>,
+        Vec<mongodb::bson::oid::ObjectId>,
+    )>,
 ) -> Json<(PresetSyncReport, Vec<Preset>)> {
     let number_of_new_presets = presets_to_add.len() as i32;
     let mut ignored_presets = vec![];
@@ -197,6 +201,9 @@ pub async fn sync_presets(
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
         .collection("Users");
     let mut presets_to_save = user.presets;
+    for preset_to_remove in &presets_to_remove {
+        presets_to_save.retain(|preset| preset.id != Some(*preset_to_remove));
+    }
     'needle: for needle_preset in &presets_to_edit {
         for hay_preset in &mut presets_to_save {
             if hay_preset.id == needle_preset.id {

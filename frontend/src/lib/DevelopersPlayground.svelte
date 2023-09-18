@@ -221,7 +221,8 @@
 				'http://localhost:3001/sync_presets',
 				JSON.stringify([
 					$data.presets.filter((e: Preset) => e.status == 'unsynced'),
-					$data.presets.filter((e: Preset) => e.status == 'to_update')
+					$data.presets.filter((e: Preset) => e.status == 'to_update'),
+					$data.ids_of_presets_to_remove || []
 				]),
 				{
 					headers: {
@@ -260,6 +261,8 @@
 					}
 					$data.presets = response.data[1];
 					localStorage.setItem('presets', JSON.stringify($data.presets));
+					$data.ids_of_presets_to_remove = [];
+					localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
 				}
 			})
 			.catch((error) => {

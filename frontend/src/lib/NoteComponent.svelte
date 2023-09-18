@@ -34,6 +34,13 @@
 				class="btn-icon variant-filled-primary"
 				style="font-weight: bold;"
 				on:click={() => {
+					if (selected_preset?.status !== 'unsynced' && selected_preset?._id) {
+						$data.ids_of_presets_to_remove.push(selected_preset?._id);
+						localStorage.setItem(
+							'ids_of_presets_to_remove',
+							JSON.stringify($data.ids_of_presets_to_remove)
+						);
+					}
 					// @ts-ignore
 					$data.presets = $data.presets.filter((p) => p !== selected_preset);
 					selected_preset = null;
