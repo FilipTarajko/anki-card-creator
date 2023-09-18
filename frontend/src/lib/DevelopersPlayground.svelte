@@ -218,7 +218,10 @@
 		axios
 			.post(
 				'http://localhost:3001/sync_presets',
-				JSON.stringify($data.presets.filter((e: Preset) => e.status == 'unsynced')),
+				JSON.stringify([
+					$data.presets.filter((e: Preset) => e.status == 'unsynced'),
+					$data.presets.filter((e: Preset) => e.status == 'to_update')
+				]),
 				{
 					headers: {
 						Authorization: `Bearer ${$data.jwt}`,
@@ -229,7 +232,8 @@
 			.then((response) => {
 				console.log(response);
 				if (response.status === 200) {
-					$data.presets = response.data;
+					console.log(response.data[0]);
+					$data.presets = response.data[1];
 					localStorage.setItem('presets', JSON.stringify($data.presets));
 				}
 			})

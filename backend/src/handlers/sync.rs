@@ -173,11 +173,23 @@ pub async fn load_presets(
     Json(user.presets)
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct PresetSyncReport {
+    number_of_accepted_changes: i32,
+    number_of_new_presets: i32,
+    ignored_presets: Vec<String>,
+    unfound_presets: Vec<String>,
+}
+
 pub async fn sync_presets(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
-    Json(presets_to_add): Json<Vec<Preset>>,
-) -> Json<Vec<Preset>> {
+    Json((presets_to_add, presets_to_edit)): Json<(Vec<Preset>, Vec<Preset>)>,
+) -> Json<(PresetSyncReport, Vec<Preset>)> {
+    let number_of_new_presets = presets_to_add.len() as i32;
+    let mut ignored_presets = vec![];
+    let mut unfound_presets = vec![];
+
     let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
         .await
         .unwrap();
@@ -185,10 +197,23 @@ pub async fn sync_presets(
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
         .collection("Users");
     let mut presets_to_save = user.presets;
-    println!("before appending: {:?}", presets_to_save.len());
-    println!("appending: {:?}", presets_to_add.len());
+    'needle: for needle_preset in &presets_to_edit {
+        for hay_preset in &mut presets_to_save {
+            if hay_preset.id == needle_preset.id {
+                if hay_preset.last_edited < needle_preset.last_edited {
+                    hay_preset.name = needle_preset.name.clone();
+                    hay_preset.fields = needle_preset.fields.clone();
+                    hay_preset.last_edited = needle_preset.last_edited;
+                    hay_preset.status = "synced".to_string();
+                } else {
+                    ignored_presets.push(hay_preset.name.clone());
+                }
+                continue 'needle;
+            }
+        }
+        unfound_presets.push(needle_preset.name.clone());
+    }
     presets_to_save.append(&mut presets_to_add.clone());
-    println!("after appending: {:?}", presets_to_save.len());
     for preset in &mut presets_to_save {
         preset.status = "synced".to_string();
     }
@@ -201,5 +226,13 @@ pub async fn sync_presets(
         .await
         .unwrap();
 
-    Json(presets_to_save)
+    let sync_report = PresetSyncReport {
+        number_of_accepted_changes: presets_to_edit.len() as i32
+            - ignored_presets.len() as i32
+            - unfound_presets.len() as i32,
+        number_of_new_presets,
+        ignored_presets,
+        unfound_presets,
+    };
+    Json((sync_report, presets_to_save))
 }
