@@ -234,6 +234,30 @@
 				console.log(response);
 				if (response.status === 200) {
 					console.log(response.data[0]);
+					let sync_report = response.data[0];
+					if (sync_report.ignored_presets.length > 0) {
+						show_toast(
+							`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
+								'<br/>'
+							)}`,
+							'variant-filled-warning',
+							0,
+							false
+						);
+					}
+					if (sync_report.unfound_presets.length > 0) {
+						show_toast(
+							`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
+								'<br/>'
+							)}`,
+							'variant-filled-warning',
+							0,
+							false
+						);
+					}
+					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
+						show_toast('Presets synced!', 'variant-filled-success');
+					}
 					$data.presets = response.data[1];
 					localStorage.setItem('presets', JSON.stringify($data.presets));
 				}
@@ -265,10 +289,17 @@
 
 	const toastStore = getToastStore();
 
-	function show_toast() {
+	function show_toast(
+		message: string,
+		background = 'variant-filled-primary',
+		timeout = 10000,
+		autohide = true
+	) {
 		const t: ToastSettings = {
-			message: 'This is a simple toast!',
-			timeout: 10000
+			message,
+			timeout,
+			background,
+			autohide
 		};
 		toastStore.trigger(t);
 	}
@@ -370,6 +401,6 @@
 <button
 	class="btn variant-filled"
 	on:click={() => {
-		show_toast();
+		show_toast('test');
 	}}>toast</button
 >
