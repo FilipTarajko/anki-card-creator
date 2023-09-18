@@ -79,11 +79,11 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
-					localStorage.setItem('current_page', '0');
+					localStorage.setItem('current_page', 'about');
 				}}
-				name="tile-1"
-				value={'0'}
-				title="tile-1"
+				name="about"
+				value={'about'}
+				title="about"
 			>
 				<svelte:fragment slot="lead"><i class="fa-solid fa-circle-info fa-xl" /></svelte:fragment>
 				<span>about</span>
@@ -91,11 +91,11 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
-					localStorage.setItem('current_page', '1');
+					localStorage.setItem('current_page', 'presets');
 				}}
-				name="tile-2"
-				value={'1'}
-				title="tile-2"
+				name="presets"
+				value={'presets'}
+				title="presets"
 			>
 				<svelte:fragment slot="lead"><i class="fa-solid fa-clipboard-list fa-xl" /></svelte:fragment
 				>
@@ -104,11 +104,11 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
-					localStorage.setItem('current_page', '2');
+					localStorage.setItem('current_page', 'add cards');
 				}}
-				name="tile-3"
-				value={'2'}
-				title="tile-3"
+				name="add cards"
+				value={'add cards'}
+				title="add cards"
 			>
 				<svelte:fragment slot="lead"><i class="fa-solid fa-square-plus fa-xl" /></svelte:fragment>
 				<span>add cards</span>
@@ -116,11 +116,11 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
-					localStorage.setItem('current_page', '3');
+					localStorage.setItem('current_page', 'export');
 				}}
-				name="tile-4"
-				value={'3'}
-				title="tile-4"
+				name="export"
+				value={'export'}
+				title="export"
 			>
 				<svelte:fragment slot="lead"><i class="fa-solid fa-file-export fa-xl" /></svelte:fragment>
 				<span>export</span>
@@ -128,11 +128,11 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
-					localStorage.setItem('current_page', '4');
+					localStorage.setItem('current_page', 'developed');
 				}}
-				name="tile-5"
-				value={'4'}
-				title="tile-5"
+				name="developed"
+				value={'developed'}
+				title="developed"
 			>
 				<svelte:fragment slot="lead"><i class="fa-solid fa-laptop-code fa-xl" /></svelte:fragment>
 				<span>developed</span>
