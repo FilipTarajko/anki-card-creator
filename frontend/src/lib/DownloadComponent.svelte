@@ -28,6 +28,19 @@
 	</div>
 {/if}
 <div>
+	data to download: {$data.notes_synced.split('\n').length +
+		$data.notes_unsynced.split('\n').length -
+		2} notes (
+	<span style="color: green;">
+		{$data.notes_synced.split('\n').length - 1}
+	</span>
+	+
+	<span style="color: yellow">
+		{$data.notes_unsynced.split('\n').length - 1}
+	</span>
+	)
+</div>
+<div>
 	<button
 		disabled={!$data.notes_synced && !$data.notes_unsynced}
 		class={`btn-icon ${
@@ -58,6 +71,9 @@
 	</button>
 </div>
 <div>
+	Press <kbd class="kbd">Ctrl + Shift + i</kbd> in Anki to open import window.
+	<br />
+	<br />
 	<SlideToggle name="slide" active="bg-success-500" bind:checked={$data.display_csv_headers}
 		>display <abbr title="data added to file for Anki to undestand the file during import"
 			>file headers</abbr

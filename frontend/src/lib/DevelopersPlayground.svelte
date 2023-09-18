@@ -293,14 +293,26 @@
 		<button class="btn variant-filled" on:click={check_token}>check token</button>
 	</form>
 	<div class="card p-4 variant-ghost">
-		<pre>{$data.notes_synced}</pre>
-		-
-		<pre>{$data.notes_unsynced}</pre>
+		<pre style="color: green;">{$data.notes_synced.slice(0, -1)}</pre>
+		<pre style="color: yellow;">{$data.notes_unsynced.slice(0, -1)}</pre>
+	</div>
+	<div>
 		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
 		<button class="btn variant-filled-warning" on:click={sync_notes}>sync notes</button>
+		<button
+			class="btn-icon variant-filled-primary"
+			on:click={() => {
+				$data.notes_synced = '';
+				localStorage.setItem('notes_synced', $data.notes_synced);
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', $data.notes_unsynced);
+			}}
+		>
+			<i class="fa-solid fa-remove" />
+		</button>
 		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button>
 	</div>
-	<div class="card p-4 variant-ghost" style="line-break: anywhere; width: 80%;">
+	<div class="card p-4 variant-ghost">
 		{#each $data.presets as preset}
 			<div>
 				{preset.name}
@@ -308,6 +320,6 @@
 				{preset.status}
 			</div>
 		{/each}
-		<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
 	</div>
+	<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
 {/if}
