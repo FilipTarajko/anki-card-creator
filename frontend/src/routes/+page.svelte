@@ -10,16 +10,40 @@
 
 <div class="container h-full mx-auto items-center">
 	<div class="space-y-10 text-center flex flex-col items-center">
-		{#if $data.current_page == '0'}
+		<div
+			class={`space-y-10 text-center flex flex-col items-center ${
+				$data.current_page == '0' ? 'block' : 'hidden'
+			}`}
+		>
 			<GuideComponent />
-		{:else if $data.current_page == '1'}
+		</div>
+		<div
+			class={`space-y-10 text-center flex flex-col items-center ${
+				$data.current_page == '1' ? 'block' : 'hidden'
+			}`}
+		>
 			<PresetForm />
-		{:else if $data.current_page == '2'}
+		</div>
+		<div
+			class={`space-y-10 text-center flex flex-col items-center ${
+				$data.current_page == '2' ? 'block' : 'hidden'
+			}`}
+		>
 			<NoteComponent />
-		{:else if $data.current_page == '3'}
+		</div>
+		<div
+			class={`space-y-10 text-center flex flex-col items-center ${
+				$data.current_page == '3' ? 'block' : 'hidden'
+			}`}
+		>
 			<DownloadComponent />
-		{:else if $data.current_page == '4'}
+		</div>
+		<div
+			class={`space-y-10 text-center flex flex-col items-center ${
+				$data.current_page == '4' ? 'block' : 'hidden'
+			}`}
+		>
 			<DevelopersPlayground />
-		{/if}
+		</div>
 	</div>
 </div>
