@@ -24,7 +24,10 @@ async fn main() {
         .unwrap();
 
     let cors_layer: CorsLayer = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
+        .allow_origin([
+            "http://localhost:5173".parse::<HeaderValue>().unwrap(),
+            "http://localhost:4173".parse::<HeaderValue>().unwrap(),
+        ])
         .allow_methods([Method::GET, Method::POST])
         .allow_headers(vec![
             axum::http::header::CONTENT_TYPE,

@@ -9,6 +9,7 @@
 		AppRailAnchor,
 		Toast
 	} from '@skeletonlabs/skeleton';
+	import '@fortawesome/fontawesome-free/css/all.min.css';
 
 	// Highlight JS
 	import hljs from 'highlight.js';
