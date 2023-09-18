@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { ListBox, ListBoxItem, RadioGroup, RadioItem, SlideToggle } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
 
 	function download(filename: string, text: string) {
@@ -14,20 +14,20 @@
 </script>
 
 <h2 class="h2 mt-12">Data to download</h2>
-<pre class="card p-4 variant-ghost">{$data.prefix_for_exports}</pre>
 {#if $data.notes_synced || $data.notes_unsynced}
-	<div class="card p-4 variant-ghost">
-		<pre>{$data.notes_synced}</pre>
-	</div>
-	<div class="card p-4 variant-ghost">
-		<pre>{$data.notes_unsynced}</pre>
+	<div class="card text-left p-4 variant-ghost">
+		{#if $data.display_csv_headers}
+			<pre style="color: gray;">{$data.prefix_for_exports.slice(0, -1)}</pre>
+		{/if}
+		<pre style="color: green;">{$data.notes_synced.slice(0, -1)}</pre>
+		<pre style="color: yellow;">{$data.notes_unsynced.slice(0, -1)}</pre>
 	</div>
 {:else}
 	<div class="card p-4 variant-ghost-warning">
 		<pre>nothing to download</pre>
 	</div>
 {/if}
-<div class="mt-0">
+<div>
 	<button
 		disabled={!$data.notes_synced && !$data.notes_unsynced}
 		class={`btn-icon ${
@@ -56,4 +56,15 @@
 	>
 		<i class="fa-solid fa-remove" />
 	</button>
+</div>
+<div>
+	<SlideToggle name="slide" active="bg-success-500" bind:checked={$data.display_csv_headers}
+		>display <abbr title="data added to file for Anki to undestand the file during import"
+			>file headers</abbr
+		></SlideToggle
+	>
+	<br />
+	<span style="color: green;">green text</span> - synced notes
+	<br />
+	<span style="color: yellow;">yellow text</span> - unsynced notes
 </div>

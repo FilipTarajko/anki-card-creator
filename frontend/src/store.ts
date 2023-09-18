@@ -12,5 +12,7 @@ export const data = writable({
 	jwt: (browser && window.localStorage.getItem('jwt')) || '',
 	username: (browser && window.localStorage.getItem('username')) || '',
 	email: (browser && window.localStorage.getItem('email')) || '',
-	id: (browser && window.localStorage.getItem('id')) || ''
+	id: (browser && window.localStorage.getItem('id')) || '',
+	display_csv_headers:
+		(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false
 });
