@@ -14,6 +14,7 @@
 	let password_repeat = 'testtest';
 
 	import { data } from '../store';
+	import type { ToastSettings } from '@skeletonlabs/skeleton';
 
 	let login_form_data = {
 		username_or_email: 'test',
@@ -260,6 +261,18 @@
 			});
 	}
 
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
+
+	function show_toast() {
+		const t: ToastSettings = {
+			message: 'This is a simple toast!',
+			timeout: 10000
+		};
+		toastStore.trigger(t);
+	}
+
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
 </script>
@@ -353,3 +366,10 @@
 		</div>
 	</form>
 {/if}
+
+<button
+	class="btn variant-filled"
+	on:click={() => {
+		show_toast();
+	}}>toast</button
+>

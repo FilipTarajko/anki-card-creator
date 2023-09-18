@@ -6,7 +6,8 @@
 		LightSwitch,
 		AppRail,
 		AppRailTile,
-		AppRailAnchor
+		AppRailAnchor,
+		Toast
 	} from '@skeletonlabs/skeleton';
 
 	// Highlight JS
@@ -21,8 +22,16 @@
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	import { data } from '../store';
+
+	// For toasts, modals etc.
+	import { initializeStores } from '@skeletonlabs/skeleton';
+	initializeStores();
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
 </script>
 
+<Toast />
 <!-- App Shell -->
 <AppShell>
 	<svelte:fragment slot="header">
