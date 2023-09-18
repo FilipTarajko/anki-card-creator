@@ -192,28 +192,28 @@
 			});
 	}
 
-	function upload_presets() {
-		axios
-			.post('http://localhost:3001/upload_presets', JSON.stringify($data.presets), {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				console.log(response);
-				if (response.status === 200) {
-					$data.presets.forEach((preset: Preset) => {
-						preset.status = 'synced';
-					});
-					$data.presets = $data.presets;
-					localStorage.setItem('presets', JSON.stringify($data.presets));
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	}
+	// function upload_presets() {
+	// 	axios
+	// 		.post('http://localhost:3001/upload_presets', JSON.stringify($data.presets), {
+	// 			headers: {
+	// 				Authorization: `Bearer ${$data.jwt}`,
+	// 				'Content-Type': 'application/json'
+	// 			}
+	// 		})
+	// 		.then((response) => {
+	// 			console.log(response);
+	// 			if (response.status === 200) {
+	// 				$data.presets.forEach((preset: Preset) => {
+	// 					preset.status = 'synced';
+	// 				});
+	// 				$data.presets = $data.presets;
+	// 				localStorage.setItem('presets', JSON.stringify($data.presets));
+	// 			}
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error(error);
+	// 		});
+	// }
 
 	function sync_presets() {
 		axios
@@ -243,23 +243,23 @@
 			});
 	}
 
-	function load_presets() {
-		axios
-			.post('http://localhost:3001/load_presets', '', {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.presets = response.data;
-				localStorage.setItem('presets', JSON.stringify($data.presets));
-				console.log(response.data);
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	}
+	// function load_presets() {
+	// 	axios
+	// 		.post('http://localhost:3001/load_presets', '', {
+	// 			headers: {
+	// 				Authorization: `Bearer ${$data.jwt}`,
+	// 				'Content-Type': 'application/json'
+	// 			}
+	// 		})
+	// 		.then((response) => {
+	// 			$data.presets = response.data;
+	// 			localStorage.setItem('presets', JSON.stringify($data.presets));
+	// 			console.log(response.data);
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error(error);
+	// 		});
+	// }
 
 	import { getToastStore } from '@skeletonlabs/skeleton';
 
@@ -339,8 +339,8 @@
 				{preset.status}
 			</div>
 		{/each}
-		<button class="btn variant-filled-warning" on:click={upload_presets}>upload presets</button>
-		<button class="btn variant-filled-warning" on:click={load_presets}>load presets</button>
+		<!-- <button class="btn variant-filled-warning" on:click={upload_presets}>upload presets</button>
+		<button class="btn variant-filled-warning" on:click={load_presets}>load presets</button> -->
 		<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
 	</div>
 {:else}

@@ -139,39 +139,39 @@ pub async fn delete_notes(
     "Notes deleted!".to_string()
 }
 
-pub async fn upload_presets(
-    State(client): State<Client>,
-    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
-    Json(presets): Json<Vec<Preset>>,
-) -> String {
-    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
-        .await
-        .unwrap();
-    let user_collection: Collection<User> = client
-        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
-        .collection("Users");
-    user_collection
-        .update_one(
-            doc! {"_id": user.id.unwrap()},
-            doc! {"$set": {"presets": presets}},
-            None,
-        )
-        .await
-        .unwrap();
+// pub async fn upload_presets(
+//     State(client): State<Client>,
+//     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+//     Json(presets): Json<Vec<Preset>>,
+// ) -> String {
+//     let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+//         .await
+//         .unwrap();
+//     let user_collection: Collection<User> = client
+//         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+//         .collection("Users");
+//     user_collection
+//         .update_one(
+//             doc! {"_id": user.id.unwrap()},
+//             doc! {"$set": {"presets": presets}},
+//             None,
+//         )
+//         .await
+//         .unwrap();
 
-    "Presets uploaded!".to_string()
-}
+//     "Presets uploaded!".to_string()
+// }
 
-pub async fn load_presets(
-    State(client): State<Client>,
-    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
-) -> Json<Vec<Preset>> {
-    let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
-        .await
-        .unwrap();
+// pub async fn load_presets(
+//     State(client): State<Client>,
+//     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+// ) -> Json<Vec<Preset>> {
+//     let user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+//         .await
+//         .unwrap();
 
-    Json(user.presets)
-}
+//     Json(user.presets)
+// }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PresetSyncReport {
