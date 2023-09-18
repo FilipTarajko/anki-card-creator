@@ -128,6 +128,34 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
+					localStorage.setItem('current_page', 'account');
+				}}
+				name="account"
+				value={'account'}
+				title="account"
+			>
+				<svelte:fragment slot="lead">
+					<i class="fa-solid fa-user fa-xl" /></svelte:fragment
+				>
+				<span>account</span>
+			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
+					localStorage.setItem('current_page', 'settings');
+				}}
+				name="settings"
+				value={'settings'}
+				title="settings"
+			>
+				<svelte:fragment slot="lead">
+					<i class="fa-solid fa-gear fa-xl" /></svelte:fragment
+				>
+				<span>settings</span>
+			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
 					localStorage.setItem('current_page', 'developed');
 				}}
 				name="developed"
