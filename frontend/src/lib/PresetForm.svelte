@@ -334,13 +334,13 @@
 	{#if based_on_preset}
 		<button
 			style="margin-top: 12px;"
-			class="btn btn-large variant-filled-success"
-			on:click={save_preset_as_new}>save as new</button
+			class="btn btn-large variant-filled-warning"
+			on:click={update_preset}>update {based_on_preset.name}</button
 		>
 		<button
 			style="margin-top: 12px;"
 			class="btn btn-large variant-filled-success"
-			on:click={update_preset}>update {based_on_preset.name}</button
+			on:click={save_preset_as_new}>save as new</button
 		>
 	{:else}
 		<button
