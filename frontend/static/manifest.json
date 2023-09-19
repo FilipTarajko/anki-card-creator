@@ -1,0 +1,19 @@
+{
+	"id": "ankicc",
+	"name": "Anki Card Creator",
+	"short_name": "AnkiCC",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"orientation": "any",
+	"theme_color": "#adf",
+	"background_color": "#fff",
+	"dir": "ltr",
+	"icons": [
+		{
+			"src": "./icon144.png",
+			"sizes": "144x144",
+			"type": "image/png"
+		}
+	]
+}
