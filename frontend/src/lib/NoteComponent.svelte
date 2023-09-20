@@ -164,6 +164,18 @@
 			current result: <pre>{current_output}</pre>
 		</div>
 	{/if}
+{:else}
+	<div class="card mt-12 variant-ghost-warning p-4">
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		You have no presets yet! Create them in the
+		<span
+			on:click={() => {
+				$data.current_page = 'presets';
+				localStorage.setItem('current_page', 'presets');
+			}}>"<u>presets</u>"</span
+		> tab.
+	</div>
 {/if}
 
 <style lang="postcss">
