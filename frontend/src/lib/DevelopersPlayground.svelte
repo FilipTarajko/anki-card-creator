@@ -12,7 +12,7 @@
 		backend_status = 'loading...';
 		user_count = 'loading...';
 		axios
-			.get('http://localhost:3001/check_backend')
+			.get($data.backend_url + '/check_backend')
 			.then((response) => {
 				if (response.status === 200) {
 					backend_status = '200';
@@ -28,7 +28,7 @@
 	function check_connection_to_backend_and_mongo() {
 		mongo_status = 'loading...';
 		axios
-			.get('http://localhost:3001/check_mongo')
+			.get($data.backend_url + '/check_mongo')
 			.then((response) => {
 				if (response.status === 200) {
 					mongo_status = '200';
@@ -44,7 +44,7 @@
 
 	function add_test_user() {
 		axios
-			.post('http://localhost:3001/add_test_user')
+			.post($data.backend_url + '/add_test_user')
 			.then((response) => {
 				if (response.status === 200) {
 					mongo_status = '200';
@@ -70,7 +70,7 @@
 
 	function check_token() {
 		axios
-			.get('http://localhost:3001/check_token', {
+			.get($data.backend_url + '/check_token', {
 				headers: {
 					Authorization: `Bearer ${$data.jwt}`
 				}
@@ -85,7 +85,7 @@
 
 	function upload_notes() {
 		axios
-			.post('http://localhost:3001/upload_notes', JSON.stringify($data.notes_unsynced), {
+			.post($data.backend_url + '/upload_notes', JSON.stringify($data.notes_unsynced), {
 				headers: {
 					Authorization: `Bearer ${$data.jwt}`,
 					'Content-Type': 'application/json'
@@ -105,7 +105,7 @@
 
 	function sync_notes() {
 		axios
-			.post('http://localhost:3001/sync_notes', JSON.stringify($data.notes_unsynced), {
+			.post($data.backend_url + '/sync_notes', JSON.stringify($data.notes_unsynced), {
 				headers: {
 					Authorization: `Bearer ${$data.jwt}`,
 					'Content-Type': 'application/json'
@@ -124,7 +124,7 @@
 
 	function delete_notes() {
 		axios
-			.post('http://localhost:3001/delete_notes', '', {
+			.post($data.backend_url + '/delete_notes', '', {
 				headers: {
 					Authorization: `Bearer ${$data.jwt}`,
 					'Content-Type': 'application/json'
@@ -143,7 +143,7 @@
 
 	// function upload_presets() {
 	// 	axios
-	// 		.post('http://localhost:3001/upload_presets', JSON.stringify($data.presets), {
+	// 		.post($data.backend_url+'/upload_presets', JSON.stringify($data.presets), {
 	// 			headers: {
 	// 				Authorization: `Bearer ${$data.jwt}`,
 	// 				'Content-Type': 'application/json'
@@ -167,7 +167,7 @@
 	function sync_presets() {
 		axios
 			.post(
-				'http://localhost:3001/sync_presets',
+				$data.backend_url + '/sync_presets',
 				JSON.stringify([
 					$data.presets.filter((e: Preset) => e.status == 'unsynced'),
 					$data.presets.filter((e: Preset) => e.status == 'to_update'),
@@ -221,7 +221,7 @@
 
 	// function load_presets() {
 	// 	axios
-	// 		.post('http://localhost:3001/load_presets', '', {
+	// 		.post($data.backend_url+'/load_presets', '', {
 	// 			headers: {
 	// 				Authorization: `Bearer ${$data.jwt}`,
 	// 				'Content-Type': 'application/json'

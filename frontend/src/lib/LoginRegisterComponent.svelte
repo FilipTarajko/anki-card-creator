@@ -21,7 +21,7 @@
 			return;
 		}
 		axios
-			.post('http://localhost:3001/register_user', registration_form_data)
+			.post($data.backend_url + '/register_user', registration_form_data)
 			.then((response) => {
 				console.log(response);
 			})
@@ -32,7 +32,7 @@
 
 	function try_to_login() {
 		axios
-			.post('http://localhost:3001/login', login_form_data)
+			.post($data.backend_url + '/login', login_form_data)
 			.then((response) => {
 				console.log(response);
 				$data.jwt = response.data;

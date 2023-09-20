@@ -1,7 +1,9 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 export const data = writable({
+	backend_url: PUBLIC_BACKEND_URL,
 	notes_synced: (browser && window.localStorage.getItem('notes_synced')) || '',
 	notes_unsynced: (browser && window.localStorage.getItem('notes_unsynced')) || '',
 	presets: (browser && JSON.parse(window.localStorage.getItem('presets') ?? '[]')) || [],
