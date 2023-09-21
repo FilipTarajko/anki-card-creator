@@ -20,11 +20,31 @@
 
 <h2 class="h2 mt-12">Create a card</h2>
 {#if $data.presets.length}
-	<RadioGroup>
+	<!-- TODO -->
+	<!-- <RadioGroup class="card">
 		{#each $data.presets as preset}
-			<RadioItem bind:group={selected_preset} name="type" value={preset}>{preset.name}</RadioItem>
+			<RadioItem
+				class={`${selected_preset?.name !== preset.name ? 'variant-ghost' : ''}`}
+				bind:group={selected_preset}
+				name="type"
+				value={preset}>{preset.name}</RadioItem
+			>
 		{/each}
-	</RadioGroup>
+	</RadioGroup> -->
+	<div class="card p-2">
+		{#each $data.presets as preset}
+			<button
+				class={`btn ${
+					selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+				} m-0.5`}
+				on:click={() => {
+					selected_preset = preset;
+				}}
+			>
+				{preset.name}
+			</button>
+		{/each}
+	</div>
 
 	{#if selected_preset}
 		<div class="card p-4 variant-ghost-warning">
