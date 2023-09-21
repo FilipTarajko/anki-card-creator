@@ -8,7 +8,20 @@ Allows for faster note creation by allowing to:
 - hide fields which don't need to be visible
 - quickly import data to Anki
 
-## Used technologies:
+## Live site
+
+https://ankicc.vercel.app/
+
+Frontend: Vercel (from GitHub)
+Backend: Fly.io (from docker image)
+MongoDB: MongoDB Atlas
+
+## Updating backend
+
+cargo build --release
+fly deploy
+
+## Used technologies
 
 - Axum
   - Rust
