@@ -69,6 +69,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "ankicc_backend"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "dotenv",
+ "jsonwebtoken",
+ "mongodb",
+ "rand",
+ "regex",
+ "rust-argon2",
+ "serde",
+ "tokio",
+ "tower-http",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -161,23 +178,6 @@ dependencies = [
  "rustversion",
  "tower-layer",
  "tower-service",
-]
-
-[[package]]
-name = "axum_tests"
-version = "0.1.0"
-dependencies = [
- "axum",
- "chrono",
- "dotenv",
- "jsonwebtoken",
- "mongodb",
- "rand",
- "regex",
- "rust-argon2",
- "serde",
- "tokio",
- "tower-http",
 ]
 
 [[package]]
