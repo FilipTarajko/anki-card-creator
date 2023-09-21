@@ -5,7 +5,6 @@ use axum::{
 };
 use dotenv::dotenv;
 
-use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 
 mod handlers;
@@ -52,7 +51,7 @@ async fn main() {
         .layer(cors_layer)
         .with_state(database_client);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
+    let addr = "[::]:8080".parse().unwrap();
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
