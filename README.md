@@ -12,8 +12,8 @@ Allows for faster note creation by allowing to:
 
 https://ankicc.vercel.app/
 
-Frontend: Vercel (from GitHub)
-Backend: Fly.io (from docker image)
+Frontend: Vercel (from GitHub)  
+Backend: Fly.io (from docker image)  
 MongoDB: MongoDB Atlas
 
 ## Updating backend
