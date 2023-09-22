@@ -8,6 +8,7 @@
 	import SettingsComponent from '$lib/SettingsComponent.svelte';
 
 	import { data } from '../store';
+	import WiktionaryComponent from '$lib/WiktionaryComponent.svelte';
 </script>
 
 <div class="container h-full mx-auto items-center">
@@ -52,6 +53,13 @@
 		}`}
 	>
 		<SettingsComponent />
+	</div>
+	<div
+		class={`space-y-2 text-center flex flex-col items-center ${
+			$data.current_page == 'wiktionary' ? 'block' : 'hidden'
+		}`}
+	>
+		<WiktionaryComponent />
 	</div>
 	<div
 		class={`space-y-2 text-center flex flex-col items-center ${

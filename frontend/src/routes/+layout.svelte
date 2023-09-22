@@ -156,6 +156,18 @@
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
+					localStorage.setItem('current_page', 'wiktionary');
+				}}
+				name="wiktionary"
+				value={'wiktionary'}
+				title="wiktionary"
+			>
+				<svelte:fragment slot="lead"><i class="fa-solid fa-spell-check fa-xl" /></svelte:fragment>
+				<span>wiktionary</span>
+			</AppRailTile>
+			<AppRailTile
+				bind:group={$data.current_page}
+				on:click={() => {
 					localStorage.setItem('current_page', 'developed');
 				}}
 				name="developed"
