@@ -34,6 +34,11 @@
 	<div class="card p-2">
 		{#each $data.presets as preset}
 			<button
+				style={`color: hsl(${preset.hue} ${
+					selected_preset?.name == preset.name
+						? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
+						: '70% 50%);'
+				}`}
 				class={`btn ${
 					selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 				} m-0.5`}

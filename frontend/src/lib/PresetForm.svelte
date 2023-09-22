@@ -3,6 +3,7 @@
 	import { data } from '../store';
 
 	let preset_name = 'new preset';
+	let selected_hue: string = '';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
 	let based_on_preset: Preset | null = null;
@@ -76,7 +77,8 @@
 					name: preset_name,
 					fields: JSON.parse(JSON.stringify(fields)),
 					last_edited: new Date().getTime(),
-					status: 'unsynced'
+					status: 'unsynced',
+					hue: selected_hue
 				}
 			];
 			localStorage.setItem('presets', JSON.stringify($data.presets));
@@ -107,7 +109,9 @@
 			based_on_preset.fields = fields;
 			based_on_preset.name = preset_name;
 			based_on_preset.last_edited = new Date().getTime();
-			if ((based_on_preset.status = 'synced')) {
+			based_on_preset.hue = selected_hue;
+
+			if (based_on_preset.status == 'synced') {
 				based_on_preset.status = 'to_update';
 			}
 			$data.presets = $data.presets;
@@ -130,6 +134,11 @@
 	</button>
 	{#each $data.presets as preset}
 		<button
+			style={`color: hsl(${preset.hue} ${
+				based_on_preset?.name == preset.name
+					? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
+					: '70% 50%);'
+			}`}
 			class={`btn ${
 				based_on_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 			} m-0.5`}
@@ -137,6 +146,7 @@
 				preset_name = preset.name;
 				fields = JSON.parse(JSON.stringify(preset.fields));
 				based_on_preset = preset;
+				selected_hue = preset.hue;
 			}}
 		>
 			{preset.name}
@@ -153,6 +163,31 @@
 	</div>
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
+
+	<div
+		style={`display: grid; grid-template-columns: 7ch repeat(16, 1fr); color: hsl(${selected_hue} 50% 50%)`}
+		class="mt-2"
+	>
+		color:
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div
+			on:click={() => {
+				selected_hue = '';
+			}}
+			style={`background-color: white; width: 100%; height: 25px;`}
+		/>
+		{#each Array.from(new Array(15), (_, i) => i * 24) as hue}
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<div
+				on:click={() => {
+					selected_hue = hue.toString();
+				}}
+				style={`background-color: hsl(${hue} 50% 50%); width: 100%; height: 25px;`}
+			/>
+		{/each}
+	</div>
 	{#each fields as field, i_field}
 		<div
 			class="card p-4"

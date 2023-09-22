@@ -16,4 +16,5 @@ type Preset = {
 	name: string;
 	fields: Field[];
 	status: 'synced' | 'unsynced' | 'to_update';
+	hue: string;
 };
