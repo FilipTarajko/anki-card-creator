@@ -7,6 +7,20 @@
 		<meta name="viewport" content="width=device-width" />
 		<style>
 			/* TODO: improve 'responsivity' */
+			.btn:not(.btn-sm) {
+				padding-top: 1ch !important;
+				padding-bottom: 1ch !important;
+			}
+
+			.btn-icon {
+				width: 5ch !important;
+			}
+
+			* {
+				--theme-rounded-base: 2.5ch !important;
+				--theme-rounded-container: 2.5ch !important;
+			}
+
 			@media (max-width: 1024px) {
 				* {
 					font-size: 12px;
@@ -25,6 +39,16 @@
 			@media (max-width: 512px) {
 				* {
 					font-size: 6px;
+				}
+			}
+			@media (max-width: 320px) {
+				* {
+					font-size: 5px;
+				}
+			}
+			@media (max-width: 256px) {
+				* {
+					font-size: 4px;
 				}
 			}
 		</style>

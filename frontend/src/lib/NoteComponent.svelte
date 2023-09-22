@@ -92,7 +92,7 @@
 				{/if}
 			</button>
 		</div>
-		<div style="display: grid; grid-template-columns: 140px 1fr 5ch 5ch;">
+		<div style="display: grid; grid-template-columns: 15ch 1fr 5ch 5ch;">
 			{#each selected_preset.fields as field}
 				{#if field.currently_visible || currently_all_forced_visible}
 					<div style="display: flex; justify-content: center; align-items: center;">
@@ -166,7 +166,7 @@
 			{/each}
 		</div>
 		<button
-			style="margin-top: 12px;"
+			style="margin-top: 1.5ch;"
 			class="btn btn-large variant-filled-success"
 			on:click={() => {
 				$data.notes_unsynced +=
