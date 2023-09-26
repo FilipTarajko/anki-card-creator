@@ -27,8 +27,6 @@
 		axios
 			.post($data.backend_url + '/register_user', registration_form_data)
 			.then((response) => {
-				console.log(response);
-				console.log(response.data);
 				if (response.data === 'Registered') {
 					const t: ToastSettings = {
 						message: 'Registered successfully! You can now log in.',
@@ -41,11 +39,8 @@
 				}
 			})
 			.catch((error) => {
-				console.error(error);
-				let explanation =
-					error.response.statusText == 'Bad Request' ? 'your data is invalid!' : 'internal error!';
 				const t: ToastSettings = {
-					message: `Registration failed: ${explanation}`,
+					message: `Registration failed: ${error.response.data}`,
 					timeout: 10000,
 					background: 'variant-filled-primary',
 					autohide: true,
@@ -59,7 +54,6 @@
 		axios
 			.post($data.backend_url + '/login', login_form_data)
 			.then((response) => {
-				console.log(response);
 				$data.jwt = response.data;
 				let decoded: any = jwt_decode(response.data);
 				$data.username = decoded?.sub || '';
@@ -69,13 +63,46 @@
 				localStorage.setItem('username', $data.username);
 				localStorage.setItem('email', $data.email);
 				localStorage.setItem('id', $data.id);
+
+				const t: ToastSettings = {
+					message: 'Logged in successfully!',
+					timeout: 5000,
+					background: 'variant-filled-success',
+					autohide: true,
+					hideDismiss: false
+				};
+				toastStore.trigger(t);
 			})
 			.catch((error) => {
-				console.error(error);
-				if (error.response.status === 400) {
-					alert('wrong username or password');
-				}
+				const t: ToastSettings = {
+					message: `Log-in failed`,
+					timeout: 10000,
+					background: 'variant-filled-primary',
+					autohide: true,
+					hideDismiss: false
+				};
+				toastStore.trigger(t);
 			});
+	}
+
+	function log_out() {
+		$data.jwt = '';
+		$data.username = '';
+		$data.email = '';
+		$data.id = '';
+		localStorage.removeItem('jwt');
+		localStorage.removeItem('username');
+		localStorage.removeItem('email');
+		localStorage.removeItem('id');
+
+		const t: ToastSettings = {
+			message: 'Logged out successfully!',
+			timeout: 5000,
+			background: 'variant-filled-success',
+			autohide: true,
+			hideDismiss: false
+		};
+		toastStore.trigger(t);
 	}
 </script>
 
@@ -83,19 +110,7 @@
 	<div class="card p-6">
 		Logged in as {$data.username} ({$data.email})
 	</div>
-	<button
-		on:click={() => {
-			$data.jwt = '';
-			$data.username = '';
-			$data.email = '';
-			$data.id = '';
-			localStorage.removeItem('jwt');
-			localStorage.removeItem('username');
-			localStorage.removeItem('email');
-			localStorage.removeItem('id');
-		}}
-		class="btn variant-filled-primary">log out</button
-	>
+	<button on:click={log_out} class="btn variant-filled-primary">log out</button>
 {:else}
 	<form>
 		<div class="card p-6" style="display: flex; flex-direction: column; color: black;">

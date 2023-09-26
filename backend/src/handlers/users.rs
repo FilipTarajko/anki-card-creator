@@ -47,7 +47,7 @@ pub struct LoginFormData {
 pub async fn register_user(
     State(client): State<Client>,
     registration_form_data: Json<RegistrationFormData>,
-) -> Result<String, StatusCode> {
+) -> Result<String, (StatusCode, String)> {
     let user_collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
         .collection("Users");
@@ -72,25 +72,40 @@ pub async fn register_user(
         || user_to_insert.username.len() < 3
         || user_to_insert.password.len() < 8
     {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err((StatusCode::BAD_REQUEST, "invalid input".to_string()));
     }
 
     match user_collection
         .find_one(doc! { "email": &user_to_insert.email }, None)
         .await
     {
-        Ok(Some(_)) => return Err(StatusCode::BAD_REQUEST),
+        Ok(Some(_)) => return Err((StatusCode::BAD_REQUEST, "email already in use".to_string())),
         Ok(None) => {}
-        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(_) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal error".to_string(),
+            ))
+        }
     }
 
     match user_collection
         .find_one(doc! { "username": &user_to_insert.username }, None)
         .await
     {
-        Ok(Some(_)) => return Err(StatusCode::BAD_REQUEST),
+        Ok(Some(_)) => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                "username already in use".to_string(),
+            ))
+        }
         Ok(None) => {}
-        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(_) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal error".to_string(),
+            ))
+        }
     }
 
     let hashed_password = argon2::hash_encoded(
@@ -105,7 +120,10 @@ pub async fn register_user(
     let result = user_collection.insert_one(user_to_insert, None);
     match result.await {
         Ok(_) => Ok("Registered".to_string()),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(_) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal error".to_string(),
+        )),
     }
 }
 
