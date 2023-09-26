@@ -2,6 +2,10 @@
 	import { data } from '../store';
 	import jwt_decode from 'jwt-decode';
 	import axios from 'axios';
+	import type { ToastSettings } from '@skeletonlabs/skeleton';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
 
 	let login_form_data = {
 		username_or_email: 'test',
@@ -24,9 +28,30 @@
 			.post($data.backend_url + '/register_user', registration_form_data)
 			.then((response) => {
 				console.log(response);
+				console.log(response.data);
+				if (response.data === 'Registered') {
+					const t: ToastSettings = {
+						message: 'Registered successfully! You can now log in.',
+						timeout: 5000,
+						background: 'variant-filled-success',
+						autohide: true,
+						hideDismiss: false
+					};
+					toastStore.trigger(t);
+				}
 			})
 			.catch((error) => {
 				console.error(error);
+				let explanation =
+					error.response.statusText == 'Bad Request' ? 'your data is invalid!' : 'internal error!';
+				const t: ToastSettings = {
+					message: `Registration failed: ${explanation}`,
+					timeout: 10000,
+					background: 'variant-filled-primary',
+					autohide: true,
+					hideDismiss: false
+				};
+				toastStore.trigger(t);
 			});
 	}
 
