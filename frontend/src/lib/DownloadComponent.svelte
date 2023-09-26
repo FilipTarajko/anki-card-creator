@@ -75,7 +75,7 @@
 	<br />
 	<br />
 	<SlideToggle name="slide" active="bg-success-500" bind:checked={$data.display_csv_headers}
-		>display <abbr title="data added to file for Anki to undestand the file during import"
+		>display <abbr title="data added to file for Anki to understand the file during import"
 			>file headers</abbr
 		></SlideToggle
 	>
@@ -83,4 +83,10 @@
 	<span style="color: green;">green text</span> - synced notes
 	<br />
 	<span style="color: yellow;">yellow text</span> - unsynced notes
+	<div class="card mt-4 p-4 variant-ghost-warning">
+		Note: Anki 2.1.55 (2022-12-16) or newer is <abbr
+			title="file will contain headers supported (after tweaking settings) since 2.1.54 and supported by default since 2.1.55"
+			>expected</abbr
+		>.
+	</div>
 </div>
