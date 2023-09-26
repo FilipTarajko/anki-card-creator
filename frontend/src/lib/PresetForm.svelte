@@ -299,13 +299,12 @@
 								<button
 									type="button"
 									class="btn-icon variant-filled-success"
-									style="font-size: 1.6rem;"
 									on:click={() => {
 										field.options.push(field.current_inputs[0] || '');
 										field.current_inputs = [''];
 									}}
 								>
-									+
+									<i class="fa-solid fa-plus" />
 								</button>
 							</div>
 						</ListBox>
@@ -340,13 +339,12 @@
 								<button
 									type="button"
 									class="btn-icon variant-filled-success"
-									style="font-size: 1.6rem;"
 									on:click={() => {
 										field.options.push(field.current_inputs[0] || '');
 										field.current_inputs = [''];
 									}}
 								>
-									+
+									<i class="fa-solid fa-plus" />
 								</button>
 							</div>
 						</ListBox>
