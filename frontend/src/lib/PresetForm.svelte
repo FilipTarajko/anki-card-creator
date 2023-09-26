@@ -67,7 +67,11 @@
 			alert('Preset with this name already exists!');
 		} else {
 			fields.forEach((field) => {
-				field.current_inputs = JSON.parse(JSON.stringify(field.default));
+				if (field.type !== 'selectMany') {
+					field.current_inputs = [JSON.parse(JSON.stringify(field.default[0] || ''))];
+				} else {
+					field.current_inputs = JSON.parse(JSON.stringify(field.default));
+				}
 				field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
 			});
 
@@ -102,7 +106,11 @@
 			alert('Preset with this name already exists!');
 		} else {
 			fields.forEach((field) => {
-				field.current_inputs = JSON.parse(JSON.stringify(field.default));
+				if (field.type !== 'selectMany') {
+					field.current_inputs = [JSON.parse(JSON.stringify(field.default[0] || ''))];
+				} else {
+					field.current_inputs = JSON.parse(JSON.stringify(field.default));
+				}
 				field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
 			});
 
