@@ -20,11 +20,11 @@
 </script>
 
 <h2 class="h2 mt-12 mb-6">Wiktionary</h2>
-<div style="display: flex; flex-direction: row; justify-content: center; gap: 1rem;">
+<form style="display: flex; flex-direction: row; justify-content: center; gap: 1rem;">
 	<input type="text" bind:value={wiktionary_language} placeholder="Language" />
 	<input type="text" bind:value={wiktionary_search} placeholder="word" />
 	<button on:click={update_wiktionary_page} class="btn variant-filled">search</button>
-</div>
+</form>
 
 <div style="display: flex; flex-direction: row;">
 	<button
