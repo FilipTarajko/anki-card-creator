@@ -63,8 +63,6 @@ pub async fn register_user(
         presets: vec![],
     };
 
-    println!("{:?}", user_to_insert);
-
     let email_regex = Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();
     let username_regex = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
     if !email_regex.is_match(&user_to_insert.email)
@@ -84,7 +82,7 @@ pub async fn register_user(
         Err(_) => {
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "internal error".to_string(),
+                "internal server error".to_string(),
             ))
         }
     }
@@ -103,7 +101,7 @@ pub async fn register_user(
         Err(_) => {
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "internal error".to_string(),
+                "internal server error".to_string(),
             ))
         }
     }
@@ -122,7 +120,7 @@ pub async fn register_user(
         Ok(_) => Ok("Registered".to_string()),
         Err(_) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
-            "internal error".to_string(),
+            "internal server error".to_string(),
         )),
     }
 }
@@ -130,7 +128,7 @@ pub async fn register_user(
 pub async fn login(
     State(client): State<Client>,
     login_form_data: Json<LoginFormData>,
-) -> Result<String, StatusCode> {
+) -> Result<String, (StatusCode, String)> {
     let user_collection: Collection<User> = client
         .database(std::env::var("DATABASE_NAME").unwrap().as_str())
         .collection("Users");
@@ -148,8 +146,13 @@ pub async fn login(
         .await
     {
         Ok(Some(user)) => user,
-        Ok(None) => return Err(StatusCode::BAD_REQUEST),
-        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Ok(None) => return Err((StatusCode::BAD_REQUEST, "invalid credentials".to_string())),
+        Err(_) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal server error".to_string(),
+            ))
+        }
     };
 
     let password_matches = argon2::verify_encoded(
@@ -174,7 +177,10 @@ pub async fn login(
 
     match password_matches {
         Ok(true) => Ok(super::jwt::generate_jwt(user_to_check).await.unwrap()),
-        Ok(false) => Err(StatusCode::BAD_REQUEST),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Ok(false) => Err((StatusCode::BAD_REQUEST, "invalid credentials".to_string())),
+        Err(_) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal server error".to_string(),
+        )),
     }
 }

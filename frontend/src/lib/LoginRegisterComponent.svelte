@@ -40,7 +40,7 @@
 			})
 			.catch((error) => {
 				const t: ToastSettings = {
-					message: `Registration failed: ${error.response.data}`,
+					message: `Registration failed: ${error?.response?.data || 'no connection'}`,
 					timeout: 10000,
 					background: 'variant-filled-primary',
 					autohide: true,
@@ -75,7 +75,7 @@
 			})
 			.catch((error) => {
 				const t: ToastSettings = {
-					message: `Log-in failed`,
+					message: `Log-in failed: ${error?.response?.data || 'no connection'}`,
 					timeout: 10000,
 					background: 'variant-filled-primary',
 					autohide: true,
