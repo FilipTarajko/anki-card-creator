@@ -356,7 +356,7 @@
 
 	<div
 		class="card p-4"
-		style="display: grid; grid-template-columns: 15ch 5fr 4.5ch 4.5ch 7ch 4.5ch; gap: 1ch; margin-top: 1.5ch;"
+		style="display: grid; grid-template-columns: 17.8ch 40ch 4.5ch 4.5ch 7ch 4.5ch; gap: 1ch; margin-top: 1.5ch;"
 	>
 		<input type="text" style="grid-column: 1; margin-right: 0.5ch;" bind:value={new_field_name} />
 		<RadioGroup>
