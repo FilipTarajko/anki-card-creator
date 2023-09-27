@@ -199,7 +199,7 @@
 	{#each fields as field, i_field}
 		<div
 			class="card p-4"
-			style="display: grid; grid-template-columns: 15ch 5fr 4.5ch 4.5ch 7ch 4.5ch; gap: 0.9ch; margin-top: 1ch;"
+			style="display: grid; grid-template-columns: 17.8ch 40ch 4.5ch 4.5ch 7ch 4.5ch; gap: 0.9ch; margin-top: 1ch;"
 		>
 			<input type="text" style="grid-column: 1; margin-right: 0.5ch;" bind:value={field.name} />
 			<RadioGroup>
@@ -265,12 +265,10 @@
 				<i class="fa-solid fa-remove" /></button
 			>
 			{#if field.currently_visible}
-				{#if field.type === 'text'}
-					<div style="grid-column: 2">
+				<div style="grid-column-start: 2; grid-column-end: 4;">
+					{#if field.type === 'text'}
 						default: <input style="width: 25ch;" type="text" bind:value={field.default[0]} />
-					</div>
-				{:else if field.type === 'selectOne'}
-					<div style="grid-column: 2">
+					{:else if field.type === 'selectOne'}
 						<div>
 							options: {field.options.join(', ')}
 						</div>
@@ -278,14 +276,16 @@
 							default: {field.default[0]}
 						</div>
 						<ListBox>
-							<div style="display: grid; grid-template-columns: 1fr 4.5ch; gap: 0.2ch;">
+							<div
+								style="display: grid; grid-template-columns: 1fr 4.5ch; row-gap: 0.5ch; column-gap: 0.9ch;"
+							>
 								{#each field.options as option, i_option}
 									<ListBoxItem bind:group={field.default[0]} name="option" value={option}
 										>{option || '(empty)'}</ListBoxItem
 									>
 									<button
 										type="button"
-										class="btn-icon variant-filled-warning"
+										class="btn btn-sm variant-filled-warning"
 										style="font-weight: bold;"
 										on:click={() => {
 											field.options.splice(i_option, 1);
@@ -298,7 +298,7 @@
 								<input type="text" bind:value={field.current_inputs[0]} />
 								<button
 									type="button"
-									class="btn-icon variant-filled-success"
+									class="btn btn-sm variant-filled-success"
 									on:click={() => {
 										field.options.push(field.current_inputs[0] || '');
 										field.current_inputs = [''];
@@ -308,9 +308,7 @@
 								</button>
 							</div>
 						</ListBox>
-					</div>
-				{:else if field.type === 'selectMany'}
-					<div style="grid-column: 2">
+					{:else if field.type === 'selectMany'}
 						<div>
 							options: {field.options.join(', ')}
 						</div>
@@ -318,14 +316,16 @@
 							default: {field.default.join(', ')}
 						</div>
 						<ListBox multiple>
-							<div style="display: grid; grid-template-columns: 1fr 4.5ch; gap: 0.25ch;">
+							<div
+								style="display: grid; grid-template-columns: 1fr 4.5ch; row-gap: 0.5ch; column-gap: 0.9ch;"
+							>
 								{#each field.options as option, i_option}
 									<ListBoxItem bind:group={field.default} name="option" value={option}
 										>{option || '(empty)'}</ListBoxItem
 									>
 									<button
 										type="button"
-										class="btn-icon variant-filled-warning"
+										class="btn btn-sm variant-filled-warning"
 										style="font-weight: bold;"
 										on:click={() => {
 											field.options.splice(i_option, 1);
@@ -338,7 +338,7 @@
 								<input type="text" bind:value={field.current_inputs[0]} />
 								<button
 									type="button"
-									class="btn-icon variant-filled-success"
+									class="btn btn-sm variant-filled-success"
 									on:click={() => {
 										field.options.push(field.current_inputs[0] || '');
 										field.current_inputs = [''];
@@ -348,8 +348,8 @@
 								</button>
 							</div>
 						</ListBox>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			{/if}
 		</div>
 	{/each}
