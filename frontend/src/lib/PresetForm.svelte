@@ -2,6 +2,7 @@
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
+	import axios from 'axios';
 
 	const toastStore = getToastStore();
 
@@ -10,6 +11,16 @@
 			message,
 			timeout: 5000,
 			background: 'variant-filled-primary',
+			autohide: true,
+			hideDismiss: false
+		});
+	}
+
+	function showWarningToast(message: string) {
+		toastStore.trigger({
+			message,
+			timeout: 5000,
+			background: 'variant-filled-warning',
 			autohide: true,
 			hideDismiss: false
 		});
@@ -166,6 +177,55 @@
 			}
 		}
 	}
+
+	function sync_presets() {
+		axios
+			.post(
+				$data.backend_url + '/sync_presets',
+				JSON.stringify([
+					$data.presets.filter((e: Preset) => e.status == 'unsynced'),
+					$data.presets.filter((e: Preset) => e.status == 'to_update'),
+					$data.ids_of_presets_to_remove || []
+				]),
+				{
+					headers: {
+						Authorization: `Bearer ${$data.jwt}`,
+						'Content-Type': 'application/json'
+					}
+				}
+			)
+			.then((response) => {
+				console.log(response);
+				if (response.status === 200) {
+					console.log(response.data[0]);
+					let sync_report = response.data[0];
+					if (sync_report.ignored_presets.length > 0) {
+						showWarningToast(
+							`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
+								'<br/>'
+							)}`
+						);
+					}
+					if (sync_report.unfound_presets.length > 0) {
+						showWarningToast(
+							`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
+								'<br/>'
+							)}`
+						);
+					}
+					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
+						showSuccessToast('Presets synced!');
+					}
+					$data.presets = response.data[1];
+					localStorage.setItem('presets', JSON.stringify($data.presets));
+					$data.ids_of_presets_to_remove = [];
+					localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
 </script>
 
 <h2 class="h2 mt-12">Create a card preset</h2>
@@ -204,6 +264,7 @@
 		<b><i>new preset</i></b>
 	</button>
 </div>
+<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
 <div>
 	<div class="mb-4">
 		{#if based_on_preset}

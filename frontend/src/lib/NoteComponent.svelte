@@ -195,6 +195,7 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		You have no presets yet! Create them in the
 		<span
+			style="cursor: pointer;"
 			on:click={() => {
 				$data.current_page = 'presets';
 				localStorage.setItem('current_page', 'presets');

@@ -1,6 +1,29 @@
 <script lang="ts">
-	import { ListBox, ListBoxItem, RadioGroup, RadioItem, SlideToggle } from '@skeletonlabs/skeleton';
+	import { SlideToggle, getToastStore } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
+	import axios from 'axios';
+
+	const toastStore = getToastStore();
+
+	function showErrorToast(message: string) {
+		toastStore.trigger({
+			message,
+			timeout: 5000,
+			background: 'variant-filled-primary',
+			autohide: true,
+			hideDismiss: false
+		});
+	}
+
+	function showSuccessToast(message: string) {
+		toastStore.trigger({
+			message,
+			timeout: 5000,
+			background: 'variant-filled-success',
+			autohide: true,
+			hideDismiss: false
+		});
+	}
 
 	function download(filename: string, text: string) {
 		const element = document.createElement('a');
@@ -10,6 +33,71 @@
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
+		showSuccessToast('Notes downloaded!');
+	}
+
+	function upload_notes() {
+		axios
+			.post($data.backend_url + '/upload_notes', JSON.stringify($data.notes_unsynced), {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				$data.notes_synced = $data.notes_synced + $data.notes_unsynced;
+				localStorage.setItem('notes_synced', $data.notes_synced);
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', '');
+				console.log(response);
+				showSuccessToast('Notes uploaded!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Notes upload failed!');
+			});
+	}
+
+	function delete_notes() {
+		axios
+			.post($data.backend_url + '/delete_notes', '', {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				$data.notes_synced = '';
+				localStorage.setItem('notes_synced', '');
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', '');
+				showSuccessToast('Local and cloud notes deleted!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Notes deletion failed!');
+			});
+	}
+
+	function sync_notes() {
+		axios
+			.post($data.backend_url + '/sync_notes', JSON.stringify($data.notes_unsynced), {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				$data.notes_synced = response.data;
+				localStorage.setItem('notes_synced', $data.notes_synced);
+				$data.notes_unsynced = '';
+				localStorage.setItem('notes_unsynced', '');
+				showSuccessToast('Notes synced!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Notes sync failed!');
+			});
 	}
 </script>
 
@@ -40,35 +128,50 @@
 	</span>
 	)
 </div>
-<div>
+<div class="space-y-2 flex flex-col items-center">
+	<div>
+		<button
+			disabled={!$data.notes_synced && !$data.notes_unsynced}
+			class={`btn-icon ${
+				$data.notes_synced || $data.notes_unsynced
+					? 'variant-filled-success'
+					: 'variant-soft-success'
+			}`}
+			on:click={() => {
+				let to_download = $data.prefix_for_exports;
+				if ($data.notes_unsynced) {
+					to_download += $data.notes_synced + $data.notes_unsynced.slice(0, -1);
+				} else {
+					to_download += $data.notes_synced.slice(0, -1);
+				}
+				download('AnkiCC.txt', to_download);
+			}}
+		>
+			<i class="fa-solid fa-download" />
+		</button>
+		<button class="btn-icon variant-filled-success" on:click={upload_notes}>
+			<i class="fa-solid fa-cloud-arrow-up" /></button
+		>
+		<button class="btn-icon variant-filled-success" on:click={sync_notes}>
+			<i class="fa-solid fa-rotate" /></button
+		>
+	</div>
 	<button
-		disabled={!$data.notes_synced && !$data.notes_unsynced}
-		class={`btn-icon ${
-			$data.notes_synced || $data.notes_unsynced ? 'variant-filled-success' : 'variant-soft-success'
-		}`}
-		on:click={() => {
-			let to_download = $data.prefix_for_exports;
-			if ($data.notes_unsynced) {
-				to_download += $data.notes_synced + $data.notes_unsynced.slice(0, -1);
-			} else {
-				to_download += $data.notes_synced.slice(0, -1);
-			}
-			download('AnkiCC.txt', to_download);
-		}}
-	>
-		<i class="fa-solid fa-download" />
-	</button>
-	<button
-		class="btn-icon variant-filled-primary"
+		class="btn variant-filled-primary"
 		on:click={() => {
 			$data.notes_synced = '';
 			localStorage.setItem('notes_synced', $data.notes_synced);
 			$data.notes_unsynced = '';
 			localStorage.setItem('notes_unsynced', $data.notes_unsynced);
+			showSuccessToast('Local notes deleted!');
 		}}
 	>
-		<i class="fa-solid fa-remove" />
+		<!-- <i class="fa-solid fa-remove" /> -->
+		delete local notes
 	</button>
+	<button class="btn variant-filled-primary" on:click={delete_notes}
+		>delete local and cloud notes</button
+	>
 </div>
 <div>
 	Press <kbd class="kbd">Ctrl + Shift + i</kbd> in Anki to open import window.
