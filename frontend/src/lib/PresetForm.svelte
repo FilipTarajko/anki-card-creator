@@ -15,6 +15,16 @@
 		});
 	}
 
+	function showSuccessToast(message: string) {
+		toastStore.trigger({
+			message,
+			timeout: 5000,
+			background: 'variant-filled-success',
+			autohide: true,
+			hideDismiss: false
+		});
+	}
+
 	let preset_name = 'new preset';
 	let selected_hue: string = '';
 	let new_field_name = '';
@@ -77,14 +87,21 @@
 		) {
 			showErrorToast('Preset with this name already exists!');
 		} else {
-			fields.forEach((field) => {
-				if (field.type !== 'selectMany') {
-					field.current_inputs = [JSON.parse(JSON.stringify(field.default[0] || ''))];
-				} else {
-					field.current_inputs = JSON.parse(JSON.stringify(field.default));
+			for (let i = 0; i < fields.length; i++) {
+				if (
+					fields[i].options.length < 2 &&
+					(fields[i].type == 'selectOne' || fields[i].type == 'selectMany')
+				) {
+					showErrorToast('Select fields must have at least 2 options!');
+					return;
 				}
-				field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
-			});
+				if (fields[i].type !== 'selectMany') {
+					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
+				} else {
+					fields[i].current_inputs = JSON.parse(JSON.stringify(fields[i].default));
+				}
+				fields[i].currently_visible = JSON.parse(JSON.stringify(fields[i].visible_by_default));
+			}
 
 			$data.presets = [
 				...$data.presets,
@@ -97,6 +114,7 @@
 				}
 			];
 			localStorage.setItem('presets', JSON.stringify($data.presets));
+			showSuccessToast(`Preset "${preset_name}" saved!`);
 		}
 	}
 
@@ -114,15 +132,23 @@
 		) {
 			showErrorToast('Preset with this name already exists!');
 		} else {
-			fields.forEach((field) => {
-				if (field.type !== 'selectMany') {
-					field.current_inputs = [JSON.parse(JSON.stringify(field.default[0] || ''))];
-				} else {
-					field.current_inputs = JSON.parse(JSON.stringify(field.default));
+			for (let i = 0; i < fields.length; i++) {
+				if (
+					fields[i].options.length < 2 &&
+					(fields[i].type == 'selectOne' || fields[i].type == 'selectMany')
+				) {
+					showErrorToast('Select fields must have at least 2 options!');
+					return;
 				}
-				field.currently_visible = JSON.parse(JSON.stringify(field.visible_by_default));
-			});
+				if (fields[i].type !== 'selectMany') {
+					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
+				} else {
+					fields[i].current_inputs = JSON.parse(JSON.stringify(fields[i].default));
+				}
+				fields[i].currently_visible = JSON.parse(JSON.stringify(fields[i].visible_by_default));
+			}
 
+			let old_preset_name = based_on_preset.name;
 			based_on_preset.fields = fields;
 			based_on_preset.name = preset_name;
 			based_on_preset.last_edited = new Date().getTime();
@@ -133,6 +159,11 @@
 			}
 			$data.presets = $data.presets;
 			localStorage.setItem('presets', JSON.stringify($data.presets));
+			if (old_preset_name == preset_name) {
+				showSuccessToast(`Preset "${preset_name}" updated!`);
+			} else {
+				showSuccessToast(`Preset "${old_preset_name}" updated as "${preset_name}"!`);
+			}
 		}
 	}
 </script>
@@ -229,7 +260,7 @@
 						if (!field.options.includes(field.default[0])) {
 							field.options = [...field.options, field.default[0] ?? ''];
 						}
-						field.default = [field.default[0]];
+						field.default = [field.default[0] ?? ''];
 					}}
 					name="type"
 					value="selectOne">select one</RadioItem
@@ -306,18 +337,26 @@
 				<i class="fa-solid fa-remove" /></button
 			>
 			{#if field.currently_visible}
-				<div style="grid-column-start: 2; grid-column-end: 4;">
-					{#if field.type === 'text'}
-						default: <input style="width: 14.3rem;" type="text" bind:value={field.default[0]} />
-					{:else if field.type === 'selectOne'}
-						<div>
+				{#if field.type === 'text'}
+					<div style="grid-column: 2">
+						default: <input
+							class="mt-2"
+							style="width: calc(100% - 9ch);"
+							type="text"
+							bind:value={field.default[0]}
+						/>
+					</div>
+				{:else if field.type === 'selectOne'}
+					<div style="grid-column-start: 2; grid-column-end: 4">
+						<!-- <div>
 							options: {field.options.join(', ')}
 						</div>
 						<div style="margin-bottom: 0.572rem;">
 							default: {field.default[0]}
-						</div>
+						</div> -->
 						<ListBox>
 							<div
+								class="mt-2"
 								style="display: grid; grid-template-columns: 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
 							>
 								{#each field.options as option, i_option}
@@ -356,15 +395,18 @@
 								</button>
 							</div>
 						</ListBox>
-					{:else if field.type === 'selectMany'}
-						<div>
+					</div>
+				{:else if field.type === 'selectMany'}
+					<div style="grid-column-start: 2; grid-column-end: 4">
+						<!-- <div>
 							options: {field.options.join(', ')}
 						</div>
 						<div style="margin-bottom: 0.572rem;">
 							default: {field.default.join(', ')}
-						</div>
+						</div> -->
 						<ListBox multiple>
 							<div
+								class="mt-2"
 								style="display: grid; grid-template-columns: 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
 							>
 								{#each field.options as option, i_option}
@@ -407,8 +449,8 @@
 								</button>
 							</div>
 						</ListBox>
-					{/if}
-				</div>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/each}

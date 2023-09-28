@@ -321,5 +321,16 @@
 			</div>
 		{/each}
 	</div>
-	<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
+	<div>
+		<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
+		<button
+			class="btn-icon variant-filled-primary"
+			on:click={() => {
+				$data.presets = [];
+				localStorage.setItem('presets', $data.presets);
+			}}
+		>
+			<i class="fa-solid fa-remove" />
+		</button>
+	</div>
 {/if}
