@@ -303,6 +303,10 @@
 									type="button"
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
+										if (field.options.includes(field.current_inputs[0])) {
+											alert('Value already added!');
+											return;
+										}
 										field.options.push(field.current_inputs[0] || '');
 										field.current_inputs = [''];
 									}}
@@ -343,6 +347,10 @@
 									type="button"
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
+										if (field.options.includes(field.current_inputs[0])) {
+											alert('Value already added!');
+											return;
+										}
 										field.options.push(field.current_inputs[0] || '');
 										field.current_inputs = [''];
 									}}
