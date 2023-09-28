@@ -215,9 +215,38 @@
 		>
 			<input type="text" style="grid-column: 1; margin-right: 0.286rem;" bind:value={field.name} />
 			<RadioGroup>
-				<RadioItem bind:group={field.type} name="type" value="text">text</RadioItem>
-				<RadioItem bind:group={field.type} name="type" value="selectOne">select one</RadioItem>
-				<RadioItem bind:group={field.type} name="type" value="selectMany">select many</RadioItem>
+				<RadioItem
+					bind:group={field.type}
+					on:click={() => {
+						field.default = [field.default[0] ?? ''];
+					}}
+					name="type"
+					value="text">text</RadioItem
+				>
+				<RadioItem
+					bind:group={field.type}
+					on:click={() => {
+						if (!field.options.includes(field.default[0])) {
+							field.options = [...field.options, field.default[0] ?? ''];
+						}
+						field.default = [field.default[0]];
+					}}
+					name="type"
+					value="selectOne">select one</RadioItem
+				>
+				<RadioItem
+					bind:group={field.type}
+					on:click={() => {
+						console.log(field.options);
+						field.options = field.options.filter((e) => e);
+						if (field.default[0]?.length > 0 && !field.options.includes(field.default[0])) {
+							field.options = [...field.options, field.default[0]];
+						}
+						field.default = field.default.filter((e) => e);
+					}}
+					name="type"
+					value="selectMany">select many</RadioItem
+				>
 			</RadioGroup>
 			<button
 				on:click={() => {
@@ -302,6 +331,9 @@
 										on:click={() => {
 											field.options.splice(i_option, 1);
 											field.options = field.options;
+											if (field.default[0] == option) {
+												field.default = [];
+											}
 										}}
 									>
 										<i class="fa-solid fa-remove" />
@@ -346,6 +378,9 @@
 										on:click={() => {
 											field.options.splice(i_option, 1);
 											field.options = field.options;
+											if (field.default.includes(option)) {
+												field.default = field.default.filter((e) => e != option);
+											}
 										}}
 									>
 										<i class="fa-solid fa-remove" />
@@ -356,6 +391,10 @@
 									type="button"
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
+										if (!field.current_inputs[0]?.length) {
+											showErrorToast("Value of 'select many' must not be empty!");
+											return;
+										}
 										if (field.options.includes(field.current_inputs[0])) {
 											showErrorToast('Value already exists!');
 											return;
