@@ -21,7 +21,13 @@
 
 	function try_to_register() {
 		if (registration_form_data.password !== password_repeat) {
-			alert('passwords do not match');
+			toastStore.trigger({
+				message: 'Passwords do not match!',
+				timeout: 5000,
+				background: 'variant-filled-primary',
+				autohide: true,
+				hideDismiss: false
+			});
 			return;
 		}
 		axios

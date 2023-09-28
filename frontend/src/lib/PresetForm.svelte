@@ -1,6 +1,19 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
+
+	function showErrorToast(message: string) {
+		toastStore.trigger({
+			message,
+			timeout: 5000,
+			background: 'variant-filled-primary',
+			autohide: true,
+			hideDismiss: false
+		});
+	}
 
 	let preset_name = 'new preset';
 	let selected_hue: string = '';
@@ -57,14 +70,12 @@
 
 	function save_preset_as_new() {
 		if (!preset_name) {
-			// TODO: handle it better
-			alert("Please enter preset's name");
+			showErrorToast("Please enter preset's name");
 		} else if (
 			// @ts-ignore
 			$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
 		) {
-			// TODO: handle it better
-			alert('Preset with this name already exists!');
+			showErrorToast('Preset with this name already exists!');
 		} else {
 			fields.forEach((field) => {
 				if (field.type !== 'selectMany') {
@@ -93,8 +104,7 @@
 		if (!based_on_preset) {
 			console.error('based_on_preset is null');
 		} else if (!preset_name) {
-			// TODO: handle it better
-			alert("Please enter preset's name");
+			showErrorToast("Please enter preset's name");
 		} else if (
 			// @ts-ignore
 			$data.presets.find(
@@ -102,8 +112,7 @@
 					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== based_on_preset
 			)
 		) {
-			// TODO: handle it better
-			alert('Preset with this name already exists!');
+			showErrorToast('Preset with this name already exists!');
 		} else {
 			fields.forEach((field) => {
 				if (field.type !== 'selectMany') {
@@ -304,7 +313,7 @@
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
 										if (field.options.includes(field.current_inputs[0])) {
-											alert('Value already added!');
+											showErrorToast('Value already exists!');
 											return;
 										}
 										field.options.push(field.current_inputs[0] || '');
@@ -348,7 +357,7 @@
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
 										if (field.options.includes(field.current_inputs[0])) {
-											alert('Value already added!');
+											showErrorToast('Value already exists!');
 											return;
 										}
 										field.options.push(field.current_inputs[0] || '');
