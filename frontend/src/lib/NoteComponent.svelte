@@ -92,7 +92,7 @@
 				{/if}
 			</button>
 		</div>
-		<div style="display: grid; grid-template-columns: 15ch 1fr 5ch 5ch;">
+		<div style="display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem;">
 			{#each selected_preset.fields as field}
 				{#if field.currently_visible || currently_all_forced_visible}
 					<div style="display: flex; justify-content: center; align-items: center;">
@@ -120,7 +120,7 @@
 						</ListBox>
 					{/if}
 					<button
-						style="width: 4.5ch;"
+						style="width: 2.574rem;"
 						class="btn btn-large variant-filled"
 						on:click={() => {
 							field.current_inputs = JSON.parse(JSON.stringify(field.default));
@@ -129,7 +129,7 @@
 						<abbr title={`reset to '${field.default}'`}><i class="fa-solid fa-rotate-left" /></abbr>
 					</button>
 					<button
-						style="width: 4.5ch;"
+						style="width: 2.574rem;"
 						class="btn btn-large {field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
 						on:click={() => {
 							field.currently_frozen = !field.currently_frozen;
@@ -145,7 +145,7 @@
 					</button>
 
 					<!-- <button
-                    style="width: 4.5ch;"
+                    style="width: 2.574rem;"
                     on:click={() => {
                         field.currently_visible = !field.currently_visible;
                     }}
@@ -166,7 +166,7 @@
 			{/each}
 		</div>
 		<button
-			style="margin-top: 1.5ch;"
+			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-success"
 			on:click={() => {
 				$data.notes_unsynced +=

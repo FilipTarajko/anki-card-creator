@@ -176,7 +176,7 @@
 	<input type="text" bind:value={preset_name} />
 
 	<div
-		style={`display: grid; grid-template-columns: 7ch repeat(16, 1fr); color: hsl(${selected_hue} 50% 50%)`}
+		style={`display: grid; grid-template-columns: 4.004rem repeat(16, 1fr); color: hsl(${selected_hue} 50% 50%)`}
 		class="mt-2"
 	>
 		color:
@@ -186,7 +186,7 @@
 			on:click={() => {
 				selected_hue = '';
 			}}
-			style={`background-color: white; width: 100%; height: 2.7ch;`}
+			style={`background-color: white; width: 100%; height: 1.5444rem;`}
 		/>
 		{#each Array.from(new Array(15), (_, i) => i * 24) as hue}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -195,16 +195,16 @@
 				on:click={() => {
 					selected_hue = hue.toString();
 				}}
-				style={`background-color: hsl(${hue} 50% 50%); width: 100%; height: 2.7ch;`}
+				style={`background-color: hsl(${hue} 50% 50%); width: 100%; height: 1.5444rem;`}
 			/>
 		{/each}
 	</div>
 	{#each fields as field, i_field}
 		<div
 			class="card p-4"
-			style="display: grid; grid-template-columns: 18.5ch 40ch 4.5ch 4.5ch 1fr 4.5ch; gap: 0.9ch; margin-top: 1ch;"
+			style="display: grid; grid-template-columns: 10.582rem 22.88rem 2.574rem 2.574rem 1fr 2.574rem; gap: 0.5148rem; margin-top: 0.572rem;"
 		>
-			<input type="text" style="grid-column: 1; margin-right: 0.5ch;" bind:value={field.name} />
+			<input type="text" style="grid-column: 1; margin-right: 0.286rem;" bind:value={field.name} />
 			<RadioGroup>
 				<RadioItem bind:group={field.type} name="type" value="text">text</RadioItem>
 				<RadioItem bind:group={field.type} name="type" value="selectOne">select one</RadioItem>
@@ -236,7 +236,7 @@
 			</button>
 			<div style="display: flex; direction: row;">
 				<button
-					style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0.5ch;"
+					style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0.286rem;"
 					class="btn btn-sm {i_field == 0 ? 'variant-ghost-secondary' : 'variant-filled-secondary'}"
 					disabled={i_field == 0}
 					on:click={() => {
@@ -246,7 +246,7 @@
 					}}><i class="fa-solid fa-arrow-up" /></button
 				>
 				<button
-					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 0.5ch;"
+					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 0.286rem;"
 					class="btn btn-sm {i_field == fields.length - 1
 						? 'variant-ghost-secondary'
 						: 'variant-filled-secondary'}"
@@ -270,17 +270,17 @@
 			{#if field.currently_visible}
 				<div style="grid-column-start: 2; grid-column-end: 4;">
 					{#if field.type === 'text'}
-						default: <input style="width: 25ch;" type="text" bind:value={field.default[0]} />
+						default: <input style="width: 14.3rem;" type="text" bind:value={field.default[0]} />
 					{:else if field.type === 'selectOne'}
 						<div>
 							options: {field.options.join(', ')}
 						</div>
-						<div style="margin-bottom: 1ch;">
+						<div style="margin-bottom: 0.572rem;">
 							default: {field.default[0]}
 						</div>
 						<ListBox>
 							<div
-								style="display: grid; grid-template-columns: 1fr 4.5ch; row-gap: 0.5ch; column-gap: 0.9ch;"
+								style="display: grid; grid-template-columns: 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
 							>
 								{#each field.options as option, i_option}
 									<ListBoxItem bind:group={field.default[0]} name="option" value={option}
@@ -315,12 +315,12 @@
 						<div>
 							options: {field.options.join(', ')}
 						</div>
-						<div style="margin-bottom: 1ch;">
+						<div style="margin-bottom: 0.572rem;">
 							default: {field.default.join(', ')}
 						</div>
 						<ListBox multiple>
 							<div
-								style="display: grid; grid-template-columns: 1fr 4.5ch; row-gap: 0.5ch; column-gap: 0.9ch;"
+								style="display: grid; grid-template-columns: 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
 							>
 								{#each field.options as option, i_option}
 									<ListBoxItem bind:group={field.default} name="option" value={option}
@@ -359,9 +359,13 @@
 
 	<div
 		class="card p-4"
-		style="display: grid; grid-template-columns: 18.5ch 40ch 4.5ch 4.5ch 7ch 4.5ch; gap: 1ch; margin-top: 1.5ch;"
+		style="display: grid; grid-template-columns: 10.582rem 22.88rem 2.574rem 2.574rem 4.004rem 2.574rem; gap: 0.572rem; margin-top: 0.858rem;"
 	>
-		<input type="text" style="grid-column: 1; margin-right: 0.5ch;" bind:value={new_field_name} />
+		<input
+			type="text"
+			style="grid-column: 1; margin-right: 0.286rem;"
+			bind:value={new_field_name}
+		/>
 		<RadioGroup>
 			<RadioItem bind:group={new_field_type} name="type" value="text">text</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="selectOne">select one</RadioItem>
@@ -377,18 +381,18 @@
 	</div>
 	{#if based_on_preset}
 		<button
-			style="margin-top: 1.5ch;"
+			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-warning"
 			on:click={update_preset}>update {based_on_preset.name}</button
 		>
 		<button
-			style="margin-top: 1.5ch;"
+			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-success"
 			on:click={save_preset_as_new}>save as new</button
 		>
 	{:else}
 		<button
-			style="margin-top: 1.5ch;"
+			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-success"
 			on:click={save_preset_as_new}>save preset</button
 		>
