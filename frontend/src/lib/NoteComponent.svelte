@@ -31,7 +31,7 @@
 			>
 		{/each}
 	</RadioGroup> -->
-	<div class="card p-2">
+	<div class="card p-2 ml-6 mr-6">
 		{#each $data.presets as preset}
 			<button
 				style={`color: hsl(${preset.hue} ${

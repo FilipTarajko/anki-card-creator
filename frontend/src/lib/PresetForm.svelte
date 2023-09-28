@@ -129,17 +129,7 @@
 </script>
 
 <h2 class="h2 mt-12">Create a card preset</h2>
-<div class="card p-2">
-	<button
-		class={`btn ${!based_on_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
-		on:click={() => {
-			preset_name = 'new preset';
-			fields = JSON.parse(JSON.stringify(default_fields));
-			based_on_preset = null;
-		}}
-	>
-		<b><i>new preset</i></b>
-	</button>
+<div class="card p-2 ml-6 mr-6">
 	{#each $data.presets as preset}
 		<button
 			style={`color: hsl(${preset.hue} ${
@@ -160,6 +150,19 @@
 			{preset.name}
 		</button>
 	{/each}
+	{#if $data.presets.length}
+		<br />
+	{/if}
+	<button
+		class={`btn ${!based_on_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
+		on:click={() => {
+			preset_name = 'new preset';
+			fields = JSON.parse(JSON.stringify(default_fields));
+			based_on_preset = null;
+		}}
+	>
+		<b><i>new preset</i></b>
+	</button>
 </div>
 <div>
 	<div class="mb-4">
