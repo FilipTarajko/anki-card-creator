@@ -10,11 +10,34 @@
 		if (selected_preset) {
 			let output = '';
 			selected_preset.fields.forEach((field) => {
-				output += field.current_inputs.join(' ');
+				if (field.type == 'bound') {
+					output += calculate_result_of_bound_field(field);
+				} else {
+					output += field.current_inputs.join(' ');
+				}
 				output += ';';
 			});
 			current_output = output.slice(0, -1);
 		}
+	}
+
+	function calculate_result_of_bound_field(field: Field) {
+		if (!field.bindings || !selected_preset?.fields) {
+			return field.default;
+		}
+		let binding_value = null;
+		for (let i = 0; i < selected_preset?.fields?.length; i++) {
+			if (field.bound_to == selected_preset?.fields[i].id) {
+				binding_value = selected_preset?.fields[i].current_inputs[0];
+				break;
+			}
+		}
+		for (let i = 0; i < field?.bindings.length; i++) {
+			if (field?.bindings[i][0] == binding_value) {
+				return field?.bindings[i][1];
+			}
+		}
+		return field.default;
 	}
 </script>
 
@@ -97,7 +120,7 @@
 						</ListBox>
 					{:else if field.type === 'bound'}
 						<div style="display: flex; justify-content: center; align-items: center;">
-							TODO, default: {field.default[0] || '(empty)'}
+							{calculate_result_of_bound_field(field)} (default: {field.default[0] || '(empty)'})
 						</div>
 					{/if}
 					<button
