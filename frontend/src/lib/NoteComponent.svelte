@@ -95,6 +95,10 @@
 								{/each}
 							</div>
 						</ListBox>
+					{:else if field.type === 'bound'}
+						<div style="display: flex; justify-content: center; align-items: center;">
+							TODO, default: {field.default[0] || '(empty)'}
+						</div>
 					{/if}
 					<button
 						style="width: 2.574rem;"
