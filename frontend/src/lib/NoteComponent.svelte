@@ -43,7 +43,7 @@
 					selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 				} m-0.5`}
 				on:click={() => {
-					selected_preset = preset;
+					selected_preset = JSON.parse(JSON.stringify(preset));
 				}}
 			>
 				{preset.name}
