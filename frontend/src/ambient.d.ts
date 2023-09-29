@@ -8,7 +8,7 @@ type Field = {
 	visible_by_default: boolean;
 	currently_visible?: boolean;
 	currently_frozen?: boolean;
-	bound_to?: string;
+	bound_to?: number;
 	bindings?: string[][];
 };
 

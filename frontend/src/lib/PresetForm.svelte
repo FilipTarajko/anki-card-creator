@@ -651,6 +651,23 @@
 							bind:value={field.default[0]}
 						/>
 					</div>
+					<div style="grid-column: 2;">
+						bound to:
+						<div class="card p-2 pr-2">
+							{#each fields.filter((e) => e != field) as field_to_bind}
+								<button
+									class={`btn ${
+										field_to_bind.id == field?.bound_to ? 'variant-filled' : 'variant-ghost'
+									} m-0.5`}
+									on:click={() => {
+										field.bound_to = field_to_bind.id;
+									}}
+								>
+									{field_to_bind.name}
+								</button>
+							{/each}
+						</div>
+					</div>
 					<div style="grid-column-start: 2; grid-column-end: 4;">
 						<div
 							class="mt-2"
