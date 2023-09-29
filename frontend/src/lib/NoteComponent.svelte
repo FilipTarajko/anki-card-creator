@@ -52,29 +52,6 @@
 	</div>
 
 	{#if selected_preset}
-		<div class="card p-4 variant-ghost-warning">
-			delete preset {selected_preset.name}
-			<button
-				type="button"
-				class="btn-icon variant-filled-primary"
-				style="font-weight: bold;"
-				on:click={() => {
-					if (selected_preset?.status !== 'unsynced' && selected_preset?._id) {
-						$data.ids_of_presets_to_remove.push(selected_preset?._id);
-						localStorage.setItem(
-							'ids_of_presets_to_remove',
-							JSON.stringify($data.ids_of_presets_to_remove)
-						);
-					}
-					// @ts-ignore
-					$data.presets = $data.presets.filter((p) => p !== selected_preset);
-					selected_preset = null;
-					localStorage.setItem('presets', JSON.stringify($data.presets));
-				}}
-			>
-				<i class="fa-solid fa-remove" />
-			</button>
-		</div>
 		<div class="card p-4 variant-ghost-secondary">
 			force each field visible
 			<button

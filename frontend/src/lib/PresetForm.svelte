@@ -40,7 +40,7 @@
 	let selected_hue: string = '';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
-	let based_on_preset: Preset | null = null;
+	let selected_preset: Preset | null = null;
 	let default_fields = [
 		{
 			id: 0,
@@ -130,15 +130,15 @@
 	}
 
 	function update_preset() {
-		if (!based_on_preset) {
-			console.error('based_on_preset is null');
+		if (!selected_preset) {
+			console.error('selected_preset is null');
 		} else if (!preset_name) {
 			showErrorToast("Please enter preset's name");
 		} else if (
 			// @ts-ignore
 			$data.presets.find(
 				(e: Preset) =>
-					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== based_on_preset
+					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== selected_preset
 			)
 		) {
 			showErrorToast('Preset with this name already exists!');
@@ -159,14 +159,14 @@
 				fields[i].currently_visible = JSON.parse(JSON.stringify(fields[i].visible_by_default));
 			}
 
-			let old_preset_name = based_on_preset.name;
-			based_on_preset.fields = fields;
-			based_on_preset.name = preset_name;
-			based_on_preset.last_edited = new Date().getTime();
-			based_on_preset.hue = selected_hue;
+			let old_preset_name = selected_preset.name;
+			selected_preset.fields = fields;
+			selected_preset.name = preset_name;
+			selected_preset.last_edited = new Date().getTime();
+			selected_preset.hue = selected_hue;
 
-			if (based_on_preset.status == 'synced') {
-				based_on_preset.status = 'to_update';
+			if (selected_preset.status == 'synced') {
+				selected_preset.status = 'to_update';
 			}
 			$data.presets = $data.presets;
 			localStorage.setItem('presets', JSON.stringify($data.presets));
@@ -233,17 +233,17 @@
 	{#each $data.presets as preset}
 		<button
 			style={`color: hsl(${preset.hue} ${
-				based_on_preset?.name == preset.name
+				selected_preset?.name == preset.name
 					? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
 					: '70% 50%);'
 			}`}
 			class={`btn ${
-				based_on_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+				selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 			} m-0.5`}
 			on:click={() => {
 				preset_name = preset.name;
 				fields = JSON.parse(JSON.stringify(preset.fields));
-				based_on_preset = preset;
+				selected_preset = preset;
 				selected_hue = preset.hue;
 			}}
 		>
@@ -254,21 +254,111 @@
 		<br />
 	{/if}
 	<button
-		class={`btn ${!based_on_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
+		class={`btn ${!selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
 		on:click={() => {
 			preset_name = 'new preset';
 			fields = JSON.parse(JSON.stringify(default_fields));
-			based_on_preset = null;
+			selected_preset = null;
 		}}
 	>
 		<b><i>new preset</i></b>
 	</button>
 </div>
+<div class="card p-4">
+	<button
+		class={`btn-icon ${
+			selected_preset && $data.presets.indexOf(selected_preset) > 0
+				? 'variant-filled'
+				: 'variant-ghost'
+		} m-0.5`}
+		on:click={() => {
+			if (selected_preset && $data.presets.indexOf(selected_preset) > 0) {
+				// @ts-ignore
+				$data.presets = $data.presets.filter((p) => p !== selected_preset);
+				$data.presets.unshift(selected_preset);
+				localStorage.setItem('presets', JSON.stringify($data.presets));
+			}
+		}}
+		><i class="fa-solid fa-angles-left" />
+	</button>
+	<button
+		class={`btn-icon ${
+			selected_preset && $data.presets.indexOf(selected_preset) > 0
+				? 'variant-filled'
+				: 'variant-ghost'
+		} m-0.5`}
+		on:click={() => {
+			if (selected_preset && $data.presets.indexOf(selected_preset) > 0) {
+				// @ts-ignore
+				let index = $data.presets.indexOf(selected_preset);
+				let temp = $data.presets[index - 1];
+				$data.presets[index - 1] = selected_preset;
+				$data.presets[index] = temp;
+				localStorage.setItem('presets', JSON.stringify($data.presets));
+			}
+		}}
+		><i class="fa-solid fa-chevron-left" />
+	</button>
+	<button
+		type="button"
+		class={`btn-icon ${selected_preset ? 'variant-filled-primary' : 'variant-ghost-primary'} m-0.5`}
+		style="font-weight: bold;"
+		on:click={() => {
+			if (selected_preset?.status !== 'unsynced' && selected_preset?._id) {
+				$data.ids_of_presets_to_remove.push(selected_preset?._id);
+				localStorage.setItem(
+					'ids_of_presets_to_remove',
+					JSON.stringify($data.ids_of_presets_to_remove)
+				);
+			}
+			// @ts-ignore
+			$data.presets = $data.presets.filter((p) => p !== selected_preset);
+			selected_preset = null;
+			localStorage.setItem('presets', JSON.stringify($data.presets));
+		}}
+	>
+		<i class="fa-solid fa-remove" />
+	</button>
+	<button
+		class={`btn-icon ${
+			selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1
+				? 'variant-filled'
+				: 'variant-ghost'
+		} m-0.5`}
+		on:click={() => {
+			if (selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1) {
+				// @ts-ignore
+				let index = $data.presets.indexOf(selected_preset);
+				let temp = $data.presets[index + 1];
+				$data.presets[index + 1] = selected_preset;
+				$data.presets[index] = temp;
+				localStorage.setItem('presets', JSON.stringify($data.presets));
+			}
+		}}
+		><i class="fa-solid fa-chevron-right" />
+	</button>
+	<button
+		class={`btn-icon ${
+			selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1
+				? 'variant-filled'
+				: 'variant-ghost'
+		} m-0.5`}
+		on:click={() => {
+			if (selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1) {
+				// @ts-ignore
+				$data.presets = $data.presets.filter((p) => p !== selected_preset);
+				$data.presets.push(selected_preset);
+				localStorage.setItem('presets', JSON.stringify($data.presets));
+			}
+		}}
+		><i class="fa-solid fa-angles-right" />
+	</button>
+</div>
 <button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
 <div>
 	<div class="mb-4">
-		{#if based_on_preset}
-			based on: {based_on_preset.name}
+		{#if selected_preset}
+			based on: {selected_preset.name}
 		{:else}
 			creating preset from scratch
 		{/if}
@@ -538,11 +628,11 @@
 			}}>add field</button
 		>
 	</div>
-	{#if based_on_preset}
+	{#if selected_preset}
 		<button
 			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-warning"
-			on:click={update_preset}>update {based_on_preset.name}</button
+			on:click={update_preset}>update {selected_preset.name}</button
 		>
 		<button
 			style="margin-top: 0.858rem;"
