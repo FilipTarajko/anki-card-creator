@@ -220,6 +220,8 @@
 					localStorage.setItem('presets', JSON.stringify($data.presets));
 					$data.ids_of_presets_to_remove = [];
 					localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
+					fields = JSON.parse(JSON.stringify(default_fields));
+					selected_preset = null;
 				}
 			})
 			.catch((error) => {
