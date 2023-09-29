@@ -45,11 +45,15 @@
 		{
 			id: 0,
 			name: 'deck',
-			type: 'text',
+			type: 'bound',
 			options: [],
 			default: [],
 			visible_by_default: true,
-			current_inputs: []
+			current_inputs: [],
+			bindings: [
+				['nl', 'Dutch'],
+				['en', 'English']
+			]
 		},
 		{
 			id: 1,
@@ -66,6 +70,24 @@
 			type: 'selectMany',
 			options: ['AnkiCC', 'test', 'test::AnkiCC', 'test::foo::baz::baz'],
 			default: ['AnkiCC', 'test'],
+			visible_by_default: true,
+			current_inputs: []
+		},
+		{
+			id: 3,
+			name: 'front',
+			type: 'text',
+			options: [],
+			default: [],
+			visible_by_default: true,
+			current_inputs: []
+		},
+		{
+			id: 4,
+			name: 'back',
+			type: 'text',
+			options: [],
+			default: [],
 			visible_by_default: true,
 			current_inputs: []
 		}
@@ -416,7 +438,7 @@
 						field.default = [field.default[0] ?? ''];
 					}}
 					name="type"
-					value="selectOne">select one</RadioItem
+					value="selectOne">single</RadioItem
 				>
 				<RadioItem
 					bind:group={field.type}
@@ -429,7 +451,24 @@
 						field.default = field.default.filter((e) => e);
 					}}
 					name="type"
-					value="selectMany">select many</RadioItem
+					value="selectMany">multiple</RadioItem
+				>
+				<RadioItem
+					bind:group={field.type}
+					on:click={() => {
+						field.bindings = [
+							['nl', 'Dutch'],
+							['en', 'English']
+						];
+						// console.log(field.options);
+						// field.options = field.options.filter((e) => e);
+						// if (field.default[0]?.length > 0 && !field.options.includes(field.default[0])) {
+						// 	field.options = [...field.options, field.default[0]];
+						// }
+						// field.default = field.default.filter((e) => e);
+					}}
+					name="type"
+					value="bound">bound</RadioItem
 				>
 			</RadioGroup>
 			<button
@@ -491,7 +530,7 @@
 			>
 			{#if field.currently_visible}
 				{#if field.type === 'text'}
-					<div style="grid-column: 2">
+					<div style="grid-column: 2;">
 						default: <input
 							class="mt-2"
 							style="width: calc(100% - 9ch);"
@@ -603,6 +642,54 @@
 							</div>
 						</ListBox>
 					</div>
+				{:else if field.type === 'bound'}
+					<div style="grid-column: 2;">
+						default: <input
+							class="mt-2"
+							style="width: calc(100% - 3.85rem);"
+							type="text"
+							bind:value={field.default[0]}
+						/>
+					</div>
+					<div style="grid-column-start: 2; grid-column-end: 4;">
+						<div
+							class="mt-2"
+							style="display: grid; grid-template-columns: 1fr 3ch 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
+						>
+							{#each field.bindings || [] as binding, i_binding}
+								<div>
+									<input style="width:100%" type="text" bind:value={binding[0]} />
+								</div>
+								<div>
+									{'->'}
+								</div>
+								<div>
+									<input style="width:100%" type="text" bind:value={binding[1]} />
+								</div>
+								<button
+									type="button"
+									class="btn btn-sm variant-filled-warning"
+									style="font-weight: bold;"
+									on:click={() => {
+										field?.bindings?.splice(i_binding, 1);
+										field.bindings = field.bindings;
+									}}
+								>
+									<i class="fa-solid fa-remove" />
+								</button>
+							{/each}
+							<button
+								style="grid-column: 4; height: 2.574rem;"
+								type="button"
+								class="btn btn-sm variant-filled-success"
+								on:click={() => {
+									field.bindings = [...(field.bindings || []), ['', '']];
+								}}
+							>
+								<i class="fa-solid fa-plus" />
+							</button>
+						</div>
+					</div>
 				{/if}
 			{/if}
 		</div>
@@ -619,8 +706,9 @@
 		/>
 		<RadioGroup>
 			<RadioItem bind:group={new_field_type} name="type" value="text">text</RadioItem>
-			<RadioItem bind:group={new_field_type} name="type" value="selectOne">select one</RadioItem>
-			<RadioItem bind:group={new_field_type} name="type" value="selectMany">select many</RadioItem>
+			<RadioItem bind:group={new_field_type} name="type" value="selectOne">single</RadioItem>
+			<RadioItem bind:group={new_field_type} name="type" value="selectMany">multiple</RadioItem>
+			<RadioItem bind:group={new_field_type} name="type" value="bound">bound</RadioItem>
 		</RadioGroup>
 		<button
 			style="grid-column: 3/7;"
