@@ -23,6 +23,8 @@ pub struct Field {
     pub visible_by_default: bool,
     pub currently_visible: Option<bool>,
     pub currently_frozen: Option<bool>,
+    pub bound_to: Option<i32>,
+    pub bindings: Option<Vec<Vec<String>>>,
 }
 
 impl From<Field> for Bson {
@@ -37,6 +39,8 @@ impl From<Field> for Bson {
             "visible_by_default": field.visible_by_default,
             "currently_visible": field.currently_visible,
             "currently_frozen": field.currently_frozen,
+            "bound_to": field.bound_to,
+            "bindings": field.bindings,
         })
     }
 }
