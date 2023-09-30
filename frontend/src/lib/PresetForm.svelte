@@ -50,6 +50,7 @@
 			default: [],
 			visible_by_default: true,
 			current_inputs: [],
+			bound_to: 5,
 			bindings: [
 				['nl', 'Dutch'],
 				['en', 'English']
@@ -87,6 +88,15 @@
 			name: 'back',
 			type: 'text',
 			options: [],
+			default: [],
+			visible_by_default: true,
+			current_inputs: []
+		},
+		{
+			id: 5,
+			name: 'theme',
+			type: 'selectOne',
+			options: ['nl', 'en', 'de', 'pl'],
 			default: [],
 			visible_by_default: true,
 			current_inputs: []
@@ -249,6 +259,51 @@
 			.catch((error) => {
 				console.error(error);
 			});
+	}
+
+	function add_missing_bindings(field: Field) {
+		if (!field.bindings || !fields) {
+			return;
+		}
+		let binding_field = null;
+		for (let i = 0; i < fields?.length; i++) {
+			if (field.bound_to == fields[i].id) {
+				binding_field = fields[i];
+				break;
+			}
+		}
+		if (!binding_field) {
+			return;
+		}
+		let to_check: string[] = [];
+		console.log(binding_field.type);
+		switch (binding_field.type) {
+			case 'text':
+				to_check = [binding_field.default[0]];
+				break;
+			case 'selectOne': // fall-through for both selectOne and selectMany
+			case 'selectMany':
+				to_check = binding_field.options;
+				console.log(binding_field.options);
+				break;
+			case 'bound':
+				// @ts-ignore
+				to_check = binding_field?.bindings.map((e) => e[1]);
+				break;
+			default:
+				to_check = [];
+				break;
+		}
+		loop_outer: for (let i = 0; i < to_check.length; i++) {
+			for (let j = 0; j < field.bindings.length; j++) {
+				if (field.bindings[j][0] == to_check[i]) {
+					console.log(to_check[i]);
+					continue loop_outer;
+				}
+			}
+			field.bindings.push([to_check[i], '']);
+		}
+		fields = fields;
 	}
 </script>
 
@@ -695,6 +750,16 @@
 									<i class="fa-solid fa-remove" />
 								</button>
 							{/each}
+							<button
+								style="grid-column: 1; height: 2.574rem;"
+								type="button"
+								class="btn btn-sm variant-filled-success"
+								on:click={() => {
+									add_missing_bindings(field);
+								}}
+							>
+								add missing
+							</button>
 							<button
 								style="grid-column: 4; height: 2.574rem;"
 								type="button"
