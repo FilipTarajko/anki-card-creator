@@ -23,6 +23,7 @@
 
 	function calculate_result_of_bound_field(field: Field) {
 		if (!field.bindings || !selected_preset?.fields) {
+			field.current_inputs = structuredClone(field.default);
 			return field.default;
 		}
 		let binding_value = null;
@@ -34,9 +35,11 @@
 		}
 		for (let i = 0; i < field?.bindings.length; i++) {
 			if (field?.bindings[i][0] == binding_value) {
+				field.current_inputs = [structuredClone(field?.bindings[i][1])];
 				return field?.bindings[i][1];
 			}
 		}
+		field.current_inputs = structuredClone(field.default);
 		return field.default;
 	}
 </script>
