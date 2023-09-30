@@ -6,14 +6,26 @@
 	let selected_preset: Preset | null = null;
 	let current_output: string = '';
 
+	function sanitize(text: String) {
+		if (text.length == 0) {
+			return '';
+		}
+		text = text.replaceAll('"', '""');
+		if (text.includes(';')) {
+			text = '"' + text + '"';
+		}
+		return text;
+	}
+
 	$: {
 		if (selected_preset) {
 			let output = '';
 			selected_preset.fields.forEach((field) => {
 				if (field.type == 'bound') {
-					output += calculate_result_of_bound_field(field);
+					// @ts-ignore
+					output += sanitize(calculate_result_of_bound_field(field));
 				} else {
-					output += field.current_inputs.join(' ');
+					output += sanitize(field.current_inputs.join(' '));
 				}
 				output += ';';
 			});
