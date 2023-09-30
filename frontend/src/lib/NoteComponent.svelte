@@ -7,7 +7,7 @@
 	let current_output: string = '';
 
 	function sanitize(text: String) {
-		if (text.length == 0) {
+		if (!text) {
 			return '';
 		}
 		text = text.replaceAll('"', '""');
@@ -35,8 +35,8 @@
 
 	function calculate_result_of_bound_field(field: Field) {
 		if (!field.bindings || !selected_preset?.fields) {
-			field.current_inputs = structuredClone(field.default);
-			return field.default;
+			field.current_inputs = [structuredClone(field.default)[0]];
+			return field.default[0];
 		}
 		let binding_value = null;
 		for (let i = 0; i < selected_preset?.fields?.length; i++) {
@@ -51,8 +51,8 @@
 				return field?.bindings[i][1];
 			}
 		}
-		field.current_inputs = structuredClone(field.default);
-		return field.default;
+		field.current_inputs = [structuredClone(field.default)[0]];
+		return field.default[0];
 	}
 </script>
 
