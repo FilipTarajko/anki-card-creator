@@ -87,6 +87,9 @@
 							selected_preset.fields[i].current_inputs = JSON.parse(
 								JSON.stringify(selected_preset?.fields[i].default)
 							);
+							selected_preset.fields[i].currently_frozen = true;
+							selected_preset.fields[i].currently_visible =
+								selected_preset.fields[i].visible_by_default;
 						}
 					}
 				}}
@@ -156,7 +159,7 @@
 					</button>
 					<button
 						style="width: 2.574rem;"
-						class="btn btn-large {field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
+						class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
 						on:click={() => {
 							field.currently_frozen = !field.currently_frozen;
 						}}
