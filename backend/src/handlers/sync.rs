@@ -21,7 +21,7 @@ pub struct Field {
     pub default: Vec<String>,
     pub current_inputs: Vec<String>,
     pub visible_by_default: bool,
-    pub expanded_in_editor: bool,
+    pub expanded_in_editor: Option<bool>,
     pub currently_visible: Option<bool>,
     pub currently_frozen: Option<bool>,
     pub bound_to: Option<i32>,
