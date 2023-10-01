@@ -82,6 +82,13 @@
 				} m-0.5`}
 				on:click={() => {
 					selected_preset = JSON.parse(JSON.stringify(preset));
+					if (selected_preset) {
+						for (let i = 0; i < selected_preset.fields.length; i++) {
+							selected_preset.fields[i].current_inputs = JSON.parse(
+								JSON.stringify(selected_preset?.fields[i].default)
+							);
+						}
+					}
 				}}
 			>
 				{preset.name}

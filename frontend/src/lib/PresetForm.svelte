@@ -121,6 +121,20 @@
 		new_field_type = null;
 	}
 
+	function validate_and_prepare_fields() {
+		for (let i = 0; i < fields.length; i++) {
+			if (
+				fields[i].options.length < 2 &&
+				(fields[i].type == 'selectOne' || fields[i].type == 'selectMany')
+			) {
+				showErrorToast('Select fields must have at least 2 options!');
+				return false;
+			}
+			fields[i].current_inputs = [];
+		}
+		return true;
+	}
+
 	function save_preset_as_new() {
 		if (!preset_name) {
 			showErrorToast("Please enter preset's name");
@@ -129,22 +143,9 @@
 			$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
 		) {
 			showErrorToast('Preset with this name already exists!');
+		} else if (!validate_and_prepare_fields()) {
+			return;
 		} else {
-			for (let i = 0; i < fields.length; i++) {
-				if (
-					fields[i].options.length < 2 &&
-					(fields[i].type == 'selectOne' || fields[i].type == 'selectMany')
-				) {
-					showErrorToast('Select fields must have at least 2 options!');
-					return;
-				}
-				if (fields[i].type == 'selectMany') {
-					fields[i].current_inputs = JSON.parse(JSON.stringify(fields[i].default));
-				} else {
-					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
-				}
-			}
-
 			$data.presets = [
 				...$data.presets,
 				{
@@ -173,22 +174,9 @@
 			)
 		) {
 			showErrorToast('Preset with this name already exists!');
+		} else if (!validate_and_prepare_fields()) {
+			return;
 		} else {
-			for (let i = 0; i < fields.length; i++) {
-				if (
-					fields[i].options.length < 2 &&
-					(fields[i].type == 'selectOne' || fields[i].type == 'selectMany')
-				) {
-					showErrorToast('Select fields must have at least 2 options!');
-					return;
-				}
-				if (fields[i].type == 'selectMany') {
-					fields[i].current_inputs = JSON.parse(JSON.stringify(fields[i].default));
-				} else {
-					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
-				}
-			}
-
 			let old_preset_name = selected_preset.name;
 			selected_preset.fields = fields;
 			selected_preset.name = preset_name;
