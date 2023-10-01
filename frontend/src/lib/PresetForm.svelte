@@ -138,12 +138,11 @@
 					showErrorToast('Select fields must have at least 2 options!');
 					return;
 				}
-				if (fields[i].type !== 'selectMany') {
-					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
-				} else {
+				if (fields[i].type == 'selectMany') {
 					fields[i].current_inputs = JSON.parse(JSON.stringify(fields[i].default));
+				} else {
+					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
 				}
-				fields[i].currently_visible = JSON.parse(JSON.stringify(fields[i].visible_by_default));
 			}
 
 			$data.presets = [
@@ -183,12 +182,11 @@
 					showErrorToast('Select fields must have at least 2 options!');
 					return;
 				}
-				if (fields[i].type !== 'selectMany') {
-					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
-				} else {
+				if (fields[i].type == 'selectMany') {
 					fields[i].current_inputs = JSON.parse(JSON.stringify(fields[i].default));
+				} else {
+					fields[i].current_inputs = [JSON.parse(JSON.stringify(fields[i].default[0] || ''))];
 				}
-				fields[i].currently_visible = JSON.parse(JSON.stringify(fields[i].visible_by_default));
 			}
 
 			let old_preset_name = selected_preset.name;
@@ -528,11 +526,11 @@
 			</RadioGroup>
 			<button
 				on:click={() => {
-					field.currently_visible = !field.currently_visible;
+					field.expanded_in_editor = !field.expanded_in_editor;
 				}}
-				class="btn btn-sm {field.currently_visible ? 'variant-filled' : 'variant-ghost'}"
+				class="btn btn-sm {field.expanded_in_editor ? 'variant-filled' : 'variant-ghost'}"
 			>
-				{#if field.currently_visible}
+				{#if field.expanded_in_editor}
 					<i class="fa-solid fa-chevron-up" />
 				{:else}
 					<i class="fa-solid fa-chevron-down" />
@@ -583,7 +581,7 @@
 			>
 				<i class="fa-solid fa-remove" /></button
 			>
-			{#if field.currently_visible}
+			{#if field.expanded_in_editor}
 				{#if field.type === 'text'}
 					<div style="grid-column: 2;">
 						default: <input
