@@ -243,7 +243,7 @@
 				}
 			})
 			.catch((error) => {
-				console.error(error);
+				showErrorToast('Presets sync failed!');
 			});
 	}
 
