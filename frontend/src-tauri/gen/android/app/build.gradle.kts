@@ -6,10 +6,10 @@ plugins {
 
 android {
     compileSdk = 33
-    namespace = "com.tauri.app"
+    namespace = "ftankicc.app"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
-        applicationId = "com.tauri.app"
+        applicationId = "ftankicc.app"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

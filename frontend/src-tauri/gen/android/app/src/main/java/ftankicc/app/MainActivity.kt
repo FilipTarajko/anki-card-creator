@@ -1,3 +1,3 @@
-package com.tauri.app
+package ftankicc.app
 
 class MainActivity : TauriActivity()
