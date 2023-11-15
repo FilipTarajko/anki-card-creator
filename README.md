@@ -33,3 +33,4 @@ fly deploy
       - HTML
       - CSS
       - JavaScript
+- Tauri
