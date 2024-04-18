@@ -32,7 +32,7 @@ MongoDB: MongoDB Atlas
 
 ## Running locally
 
-frotend:
+frontend:
 
 ```
 cd frontend
