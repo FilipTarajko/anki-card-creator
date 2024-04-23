@@ -61,7 +61,7 @@
 				</a>
 				<a
 					class="btn btn-sm variant-ghost-surface"
-					href="https://github.com/FilipTarajko/anki-card-generator"
+					href="https://github.com/FilipTarajko/anki-card-creator"
 					target="_blank"
 					rel="noreferrer"
 				>
