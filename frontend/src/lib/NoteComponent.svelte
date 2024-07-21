@@ -1,6 +1,19 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
+
+	function showSuccessToast(message: string) {
+		toastStore.trigger({
+			message,
+			timeout: 5000,
+			background: 'variant-filled-success',
+			autohide: true,
+			hideDismiss: false
+		});
+	}
 
 	let currently_all_forced_visible: boolean = false;
 	let selected_preset: Preset | null = null;
@@ -119,6 +132,7 @@
 	</div>
 		<form 
 			on:submit={() => {
+				showSuccessToast('Note added!');
 				$data.notes_unsynced +=
 					current_output +
 					`
@@ -169,6 +183,7 @@
 						<button
 							style="width: 2.574rem;"
 							class="btn btn-large variant-filled"
+							type="button"
 							on:click={() => {
 								field.current_inputs = JSON.parse(JSON.stringify(field.default));
 							}}
@@ -178,6 +193,7 @@
 						<button
 							style="width: 2.574rem;"
 							class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
+							type="button"
 							on:click={() => {
 								field.currently_frozen = !field.currently_frozen;
 							}}
