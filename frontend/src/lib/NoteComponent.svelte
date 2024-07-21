@@ -100,104 +100,25 @@
 	</div>
 
 	{#if selected_preset}
-		<div class="card p-4 variant-ghost-secondary">
-			force each field visible
-			<button
-				type="button"
-				class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
-				style="font-weight: bold;"
-				on:click={() => {
-					currently_all_forced_visible = !currently_all_forced_visible;
-				}}
-			>
-				{#if currently_all_forced_visible}
-					<i class="fa-solid fa-eye" />
-				{:else}
-					<i class="fa-solid fa-eye-slash" />
-				{/if}
-			</button>
-		</div>
-		<div style="display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem;">
-			{#each selected_preset.fields as field}
-				{#if field.currently_visible || currently_all_forced_visible}
-					<div style="display: flex; justify-content: center; align-items: center;">
-						{field.name}
-					</div>
-					{#if field.type === 'text'}
-						<input type="text" bind:value={field.current_inputs[0]} />
-					{:else if field.type === 'selectOne'}
-						<RadioGroup>
-							{#each field.options as option}
-								<RadioItem bind:group={field.current_inputs[0]} name="type" value={option}
-									>{option || '(empty)'}</RadioItem
-								>
-							{/each}
-						</RadioGroup>
-					{:else if field.type === 'selectMany'}
-						<ListBox multiple>
-							<div class="card" style="display: flex; flex-direction: row;">
-								{#each field.options as option}
-									<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
-										>{option || '(empty)'}</ListBoxItem
-									>
-								{/each}
-							</div>
-						</ListBox>
-					{:else if field.type === 'bound'}
-						<div style="display: flex; justify-content: center; align-items: center;">
-							{calculate_result_of_bound_field(field)} (default: {field.default[0] || '(empty)'})
-						</div>
-					{/if}
-					<button
-						style="width: 2.574rem;"
-						class="btn btn-large variant-filled"
-						on:click={() => {
-							field.current_inputs = JSON.parse(JSON.stringify(field.default));
-						}}
-					>
-						<abbr title={`reset to '${field.default}'`}><i class="fa-solid fa-rotate-left" /></abbr>
-					</button>
-					<button
-						style="width: 2.574rem;"
-						class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
-						on:click={() => {
-							field.currently_frozen = !field.currently_frozen;
-						}}
-					>
-						<abbr title={`reset to '${field.default}'`}>
-							{#if field.currently_frozen}
-								<i class="fa-solid fa-lock" />
-							{:else}
-								<i class="fa-solid fa-lock-open" />
-							{/if}
-						</abbr>
-					</button>
-
-					<!-- <button
-                    style="width: 2.574rem;"
-                    on:click={() => {
-                        field.currently_visible = !field.currently_visible;
-                    }}
-                    class="btn btn-large {field.currently_visible
-                        ? `variant-filled${field.visible_by_default ? '' : '-primary'}`
-                        : `variant-ghost${field.visible_by_default ? '-primary' : ''}`}"
-                >
-                    <div>
-                        {#if field.currently_visible}
-                            <i class="fa-solid fa-eye" />
-                        {:else}
-                            <i class="fa-solid fa-eye-slash" />
-                        {/if}
-                    </div>
-                </button> -->
-					<!-- </div> -->
-				{/if}
-			{/each}
-		</div>
+	<div class="card p-4 variant-ghost-secondary">
+		force each field visible
 		<button
-			style="margin-top: 0.858rem;"
-			class="btn btn-large variant-filled-success"
+			type="button"
+			class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
+			style="font-weight: bold;"
 			on:click={() => {
+				currently_all_forced_visible = !currently_all_forced_visible;
+			}}
+		>
+			{#if currently_all_forced_visible}
+				<i class="fa-solid fa-eye" />
+			{:else}
+				<i class="fa-solid fa-eye-slash" />
+			{/if}
+		</button>
+	</div>
+		<form 
+			on:submit={() => {
 				$data.notes_unsynced +=
 					current_output +
 					`
@@ -212,8 +133,92 @@
 					}
 				}
 				localStorage.setItem('notes_unsynced', $data.notes_unsynced);
-			}}>add card</button
+			}}
 		>
+			<div style="display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem;">
+				{#each selected_preset.fields as field}
+					{#if field.currently_visible || currently_all_forced_visible}
+						<div style="display: flex; justify-content: center; align-items: center;">
+							{field.name}
+						</div>
+						{#if field.type === 'text'}
+							<input type="text" bind:value={field.current_inputs[0]} />
+						{:else if field.type === 'selectOne'}
+							<RadioGroup>
+								{#each field.options as option}
+									<RadioItem bind:group={field.current_inputs[0]} name="type" value={option}
+										>{option || '(empty)'}</RadioItem
+									>
+								{/each}
+							</RadioGroup>
+						{:else if field.type === 'selectMany'}
+							<ListBox multiple>
+								<div class="card" style="display: flex; flex-direction: row;">
+									{#each field.options as option}
+										<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
+											>{option || '(empty)'}</ListBoxItem
+										>
+									{/each}
+								</div>
+							</ListBox>
+						{:else if field.type === 'bound'}
+							<div style="display: flex; justify-content: center; align-items: center;">
+								{calculate_result_of_bound_field(field)} (default: {field.default[0] || '(empty)'})
+							</div>
+						{/if}
+						<button
+							style="width: 2.574rem;"
+							class="btn btn-large variant-filled"
+							on:click={() => {
+								field.current_inputs = JSON.parse(JSON.stringify(field.default));
+							}}
+						>
+							<abbr title={`reset to '${field.default}'`}><i class="fa-solid fa-rotate-left" /></abbr>
+						</button>
+						<button
+							style="width: 2.574rem;"
+							class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
+							on:click={() => {
+								field.currently_frozen = !field.currently_frozen;
+							}}
+						>
+							<abbr title={`reset to '${field.default}'`}>
+								{#if field.currently_frozen}
+									<i class="fa-solid fa-lock" />
+								{:else}
+									<i class="fa-solid fa-lock-open" />
+								{/if}
+							</abbr>
+						</button>
+
+						<!-- <button
+						style="width: 2.574rem;"
+						on:click={() => {
+							field.currently_visible = !field.currently_visible;
+						}}
+						class="btn btn-large {field.currently_visible
+							? `variant-filled${field.visible_by_default ? '' : '-primary'}`
+							: `variant-ghost${field.visible_by_default ? '-primary' : ''}`}"
+					>
+						<div>
+							{#if field.currently_visible}
+								<i class="fa-solid fa-eye" />
+							{:else}
+								<i class="fa-solid fa-eye-slash" />
+							{/if}
+						</div>
+					</button> -->
+						<!-- </div> -->
+					{/if}
+				{/each}
+			</div>
+			<button
+				type="submit"
+				style="margin-top: 0.858rem;"
+				class="btn btn-large variant-filled-success"
+				>add card</button
+			>
+		</form>
 		<div>
 			current result: <pre>{current_output}</pre>
 		</div>
