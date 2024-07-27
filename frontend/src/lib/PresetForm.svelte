@@ -3,7 +3,7 @@
 	import { data } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
-	import { BindingType, type Field, type Preset } from '../types'
+	import { BindingType, type Field, type Preset } from '../types';
 
 	const toastStore = getToastStore();
 
@@ -510,6 +510,17 @@
 							['nl', 'Dutch'],
 							['en', 'English']
 						];
+						field.binding_type = BindingType.EQUALS;
+						if ((fields?.length ?? 0) >= 3 && field.id != 3) {
+							field.bound_to = 3;
+						} else {
+							for (let i=0; i<fields.length; i++) {
+								if (fields[i].id != field.id) {
+									field.bound_to = fields[i].id;
+									break;
+								}
+							}
+						}
 						// console.log(field.options);
 						// field.options = field.options.filter((e) => e);
 						// if (field.default[0]?.length > 0 && !field.options.includes(field.default[0])) {
