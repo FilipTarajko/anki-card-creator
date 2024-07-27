@@ -239,6 +239,7 @@
 
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import LoginRegisterComponent from './LoginRegisterComponent.svelte';
+	import { type Preset } from '../types';
 
 	const toastStore = getToastStore();
 

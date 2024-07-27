@@ -34,21 +34,18 @@ MongoDB: MongoDB Atlas
 
 frontend:
 
-```
-cd frontend
-npm run dev
+```bash
+cd frontend && npm run dev
 ```
 
 backend:
 
-```
-cd backend
-cargo run
+```bash
+cd backend && cargo run
 ```
 
 ## Updating backend
 
 ```bash
-cargo build --release
-fly deploy
+cd backend && cargo build --release && fly deploy
 ```

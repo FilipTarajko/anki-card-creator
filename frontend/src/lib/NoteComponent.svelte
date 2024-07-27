@@ -289,10 +289,8 @@
 			current result: <pre>{current_output}</pre>
 		</div>
 		{#if selected_preset.iframe}
-			<div>
-				{iframe_with_replacements}
-				<iframe title="iframe" src={iframe_with_replacements} width="100%" height="500" />
-			</div>
+			{iframe_with_replacements}
+			<iframe title="iframe" src={iframe_with_replacements} style="width: 100%; height: 100vh;" />
 		{/if}
 	{/if}
 {:else}
