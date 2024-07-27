@@ -31,6 +31,9 @@
 		return text;
 	}
 
+	// @ts-ignore
+	$: did_current_preset_change = (selected_preset ?? false ) && !$data.presets.some((preset)=>preset.last_edited === selected_preset?.last_edited);
+
 	$: {
 		if (selected_preset) {
 			let output = '';
@@ -125,6 +128,11 @@
 	</div>
 
 	{#if selected_preset}
+		{#if did_current_preset_change}
+			<div class="card p-4 variant-ghost-error">
+				The current preset has been updated! To load the changes, press its name again. Current input will be lost!
+			</div>
+		{/if}
 		<div class="card p-4 variant-ghost-secondary">
 			force each field visible
 			<button
