@@ -3,6 +3,7 @@
 	import { data } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
+	import { BindingType, type Field, type Preset } from '../types'
 
 	const toastStore = getToastStore();
 
@@ -55,7 +56,8 @@
 			bindings: [
 				['nl', 'Dutch'],
 				['en', 'English']
-			]
+			],
+			binding_type: 'equals'
 		},
 		{
 			id: 1,
@@ -727,6 +729,13 @@
 								</button>
 							{/each}
 						</div>
+						<RadioGroup>
+							{#each Object.values(BindingType) as binding_type}
+								<RadioItem bind:group={field.binding_type} name="binding_type" value={binding_type}
+									>{binding_type}</RadioItem
+								>
+							{/each}
+						</RadioGroup>
 					</div>
 					<div style="grid-column-start: 2; grid-column-end: 4;">
 						<div

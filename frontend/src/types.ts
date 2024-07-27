@@ -1,4 +1,4 @@
-type Field = {
+export type Field = {
 	id: number;
 	name: string;
 	type: 'text' | 'selectOne' | 'selectMany' | 'bound';
@@ -12,13 +12,22 @@ type Field = {
 	currently_frozen?: boolean;
 	bound_to?: number;
 	bindings?: string[][];
+	binding_type?: BindingType;
 };
 
-type Preset = {
+export type Preset = {
 	_id?: any;
 	last_edited: number;
 	name: string;
 	fields: Field[];
 	status: 'synced' | 'unsynced' | 'to_update';
 	hue: string;
+};
+
+export enum BindingType {
+	EQUALS = 'equals',
+	CONTAINS = 'contains',
+	STARTS = 'starts',
+	ENDS = 'ends',
+	REGEX = 'regex',
 };

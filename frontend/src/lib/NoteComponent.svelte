@@ -2,6 +2,7 @@
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { BindingType, type Field, type Preset } from '../types';
 
 	const toastStore = getToastStore();
 
@@ -51,6 +52,7 @@
 			field.current_inputs = [structuredClone(field.default)[0]];
 			return field.default[0];
 		}
+
 		let binding_value = null;
 		for (let i = 0; i < selected_preset?.fields?.length; i++) {
 			if (field.bound_to == selected_preset?.fields[i].id) {
@@ -58,12 +60,21 @@
 				break;
 			}
 		}
-		for (let i = 0; i < field?.bindings.length; i++) {
-			if (field?.bindings[i][0] == binding_value) {
-				field.current_inputs = [structuredClone(field?.bindings[i][1])];
-				return field?.bindings[i][1];
+
+		if (binding_value) {
+			for (let i = 0; i < field?.bindings.length; i++) {
+				const matchedByRegex = field?.binding_type === BindingType.REGEX && new RegExp(field?.bindings[i][0]).test(binding_value);
+				const matchedByStarts = field?.binding_type === BindingType.STARTS && binding_value?.startsWith(field?.bindings[i][0]);
+				const matchedByEnds = field?.binding_type === BindingType.ENDS && binding_value?.endsWith(field?.bindings[i][0]);
+				const matchedByContains = field?.binding_type === BindingType.CONTAINS && binding_value?.includes(field?.bindings[i][0]);
+				const matchedByEquals = (!field?.binding_type || field?.binding_type === BindingType.EQUALS) && field?.bindings[i][0] == binding_value;
+				if (matchedByRegex || matchedByStarts || matchedByEnds || matchedByContains || matchedByEquals) {
+					field.current_inputs = [structuredClone(field?.bindings[i][1])];
+					return field?.bindings[i][1];
+				}
 			}
 		}
+
 		field.current_inputs = [structuredClone(field.default)[0]];
 		return field.default[0];
 	}
@@ -189,7 +200,9 @@
 								field.current_inputs = JSON.parse(JSON.stringify(field.default));
 							}}
 						>
-							<abbr title={`reset to '${field.default}'`}><i class="fa-solid fa-rotate-left" /></abbr>
+							<abbr title={`reset to '${field.default}'`}
+								><i class="fa-solid fa-rotate-left" /></abbr
+							>
 						</button>
 						<button
 							style="width: 2.574rem;"
@@ -232,8 +245,7 @@
 			<button
 				type="submit"
 				style="margin-top: 0.858rem;"
-				class="btn btn-large variant-filled-success"
-				>add card</button
+				class="btn btn-large variant-filled-success">add card</button
 			>
 		</form>
 		<div>
