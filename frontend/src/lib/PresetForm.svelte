@@ -49,6 +49,7 @@
 			options: [],
 			default: [],
 			visible_by_default: true,
+			frozen_by_default: true,
 			current_inputs: [],
 			bound_to: 5,
 			bindings: [
@@ -63,6 +64,7 @@
 			options: ['2X22', '3X22'],
 			default: ['2X22'],
 			visible_by_default: true,
+			frozen_by_default: true,
 			current_inputs: []
 		},
 		{
@@ -72,6 +74,7 @@
 			options: ['AnkiCC', 'test', 'test::AnkiCC', 'test::foo::baz::baz'],
 			default: ['AnkiCC', 'test'],
 			visible_by_default: true,
+			frozen_by_default: true,
 			current_inputs: []
 		},
 		{
@@ -81,6 +84,7 @@
 			options: [],
 			default: [],
 			visible_by_default: true,
+			frozen_by_default: false,
 			current_inputs: []
 		},
 		{
@@ -90,6 +94,7 @@
 			options: [],
 			default: [],
 			visible_by_default: true,
+			frozen_by_default: false,
 			current_inputs: []
 		},
 		{
@@ -99,6 +104,7 @@
 			options: ['nl', 'en', 'de', 'pl'],
 			default: [],
 			visible_by_default: true,
+			frozen_by_default: true,
 			current_inputs: []
 		}
 	];
@@ -114,6 +120,7 @@
 				options: [],
 				default: [],
 				visible_by_default: true,
+				frozen_by_default: true,
 				current_inputs: []
 			}
 		];
@@ -458,7 +465,7 @@
 	{#each fields as field, i_field}
 		<div
 			class="card p-4"
-			style="display: grid; grid-template-columns: 10.582rem 22.88rem 2.574rem 2.574rem 1fr 2.574rem; gap: 0.5148rem; margin-top: 0.572rem;"
+			style="display: grid; grid-template-columns: 10.582rem 22.88rem 2.574rem 2.574rem 2.574rem 1fr 2.574rem; gap: 0.5148rem; margin-top: 0.572rem;"
 		>
 			<input type="text" style="grid-column: 1; margin-right: 0.286rem;" bind:value={field.name} />
 			<RadioGroup>
@@ -534,6 +541,18 @@
 					<i class="fa-solid fa-eye" />
 				{:else}
 					<i class="fa-solid fa-eye-slash" />
+				{/if}
+			</button>
+			<button
+				on:click={() => {
+					field.frozen_by_default = !field.frozen_by_default;
+				}}
+				class="btn btn-sm {!field.frozen_by_default ? 'variant-filled' : 'variant-ghost'}"
+			>
+				{#if field.frozen_by_default}
+					<i class="fa-solid fa-lock" />
+				{:else}
+					<i class="fa-solid fa-lock-open" />
 				{/if}
 			</button>
 			<div style="display: flex; direction: row;">

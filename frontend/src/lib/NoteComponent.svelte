@@ -100,7 +100,8 @@
 							selected_preset.fields[i].current_inputs = JSON.parse(
 								JSON.stringify(selected_preset?.fields[i].default)
 							);
-							selected_preset.fields[i].currently_frozen = true;
+							selected_preset.fields[i].currently_frozen =
+								selected_preset.fields[i].frozen_by_default;
 							selected_preset.fields[i].currently_visible =
 								selected_preset.fields[i].visible_by_default;
 						}
@@ -113,24 +114,24 @@
 	</div>
 
 	{#if selected_preset}
-	<div class="card p-4 variant-ghost-secondary">
-		force each field visible
-		<button
-			type="button"
-			class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
-			style="font-weight: bold;"
-			on:click={() => {
-				currently_all_forced_visible = !currently_all_forced_visible;
-			}}
-		>
-			{#if currently_all_forced_visible}
-				<i class="fa-solid fa-eye" />
-			{:else}
-				<i class="fa-solid fa-eye-slash" />
-			{/if}
-		</button>
-	</div>
-		<form 
+		<div class="card p-4 variant-ghost-secondary">
+			force each field visible
+			<button
+				type="button"
+				class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
+				style="font-weight: bold;"
+				on:click={() => {
+					currently_all_forced_visible = !currently_all_forced_visible;
+				}}
+			>
+				{#if currently_all_forced_visible}
+					<i class="fa-solid fa-eye" />
+				{:else}
+					<i class="fa-solid fa-eye-slash" />
+				{/if}
+			</button>
+		</div>
+		<form
 			on:submit={() => {
 				showSuccessToast('Note added!');
 				$data.notes_unsynced +=

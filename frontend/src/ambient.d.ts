@@ -6,6 +6,7 @@ type Field = {
 	default: string[];
 	current_inputs: string[];
 	visible_by_default: boolean;
+	frozen_by_default: boolean;
 	expanded_in_editor?: boolean;
 	currently_visible?: boolean;
 	currently_frozen?: boolean;
