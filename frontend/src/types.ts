@@ -22,6 +22,7 @@ export type Preset = {
 	fields: Field[];
 	status: 'synced' | 'unsynced' | 'to_update';
 	hue: string;
+	iframe?: string;
 };
 
 export enum BindingType {

@@ -38,6 +38,7 @@
 	}
 
 	let preset_name = 'new preset';
+	let preset_iframe = '';
 	let selected_hue: string = '';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
@@ -159,6 +160,7 @@
 				...$data.presets,
 				{
 					name: preset_name,
+					iframe: preset_iframe,
 					fields: JSON.parse(JSON.stringify(fields)),
 					last_edited: new Date().getTime(),
 					status: 'unsynced',
@@ -187,6 +189,7 @@
 			return;
 		} else {
 			let old_preset_name = selected_preset.name;
+			selected_preset.iframe = preset_iframe;
 			selected_preset.fields = fields;
 			selected_preset.name = preset_name;
 			selected_preset.last_edited = new Date().getTime();
@@ -316,6 +319,7 @@
 			} m-0.5`}
 			on:click={() => {
 				preset_name = preset.name;
+				preset_iframe = preset.iframe;
 				fields = JSON.parse(JSON.stringify(preset.fields));
 				selected_preset = preset;
 				selected_hue = preset.hue;
@@ -331,6 +335,7 @@
 		class={`btn ${!selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
 		on:click={() => {
 			preset_name = 'new preset';
+			preset_iframe = '';
 			fields = JSON.parse(JSON.stringify(default_fields));
 			selected_preset = null;
 		}}
@@ -439,6 +444,9 @@
 	</div>
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
+	<br>
+	<span style="font-weight: bold"> <abbr title={"eg: https://en.wiktionary.org/wiki/${front.skipFirstWord}#Dutch"}>preset iframe</abbr>: </span>
+	<input type="text" bind:value={preset_iframe} />
 
 	<div
 		style={`display: grid; grid-template-columns: 4.004rem repeat(16, 1fr); color: hsl(${selected_hue} 50% 50%)`}

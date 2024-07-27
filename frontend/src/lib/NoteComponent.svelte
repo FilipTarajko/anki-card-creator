@@ -81,6 +81,35 @@
 		field.current_inputs = [structuredClone(field.default)[0]];
 		return field.default[0];
 	}
+
+	function calculateIframeWithReplacements() {
+		if (!selected_preset?.iframe) {
+			return '';
+		}
+		let str = selected_preset.iframe;
+		for (let i = 0; i<selected_preset.fields.length; i++) {
+			const field = selected_preset.fields[i];
+			while (str.match(`\\$\{${field.name}[^\}]*\}`)) {
+				const match = str.match(`\\$\{${field.name}[^\}]*\}`);
+				let toReplaceWith = '';
+
+				if (field.type == 'bound') {
+					toReplaceWith = calculate_result_of_bound_field(field)
+				} else {
+					toReplaceWith = field.current_inputs.join(' ');
+				}
+
+				if (match![0].includes('.skipFirstWord')) {
+					toReplaceWith = toReplaceWith.replace(/^[^\s]*\s/, '');
+				}
+
+				str = str.replace(new RegExp(`\\$\{${field.name}[^\}]*\}`), toReplaceWith);
+			}
+		}
+		return str;
+	};
+
+	$: iframe_with_replacements = selected_preset && calculateIframeWithReplacements();
 </script>
 
 <h2 class="h2 mt-12">Create a card</h2>
@@ -259,6 +288,12 @@
 		<div>
 			current result: <pre>{current_output}</pre>
 		</div>
+		{#if selected_preset.iframe}
+			<div>
+				{iframe_with_replacements}
+				<iframe title="iframe" src={iframe_with_replacements} width="100%" height="500" />
+			</div>
+		{/if}
 	{/if}
 {:else}
 	<div class="card mt-12 variant-ghost-warning p-4">

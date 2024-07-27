@@ -58,13 +58,14 @@ pub struct Preset {
     pub last_edited: i64,
     pub status: String,
     pub hue: String,
+    pub iframe: Option<String>,
 }
 
 impl From<Preset> for Bson {
     fn from(preset: Preset) -> Self {
         let id_to_set = match preset.id {
             Some(id) => id,
-            None => mongodb::bson::oid::ObjectId::new(),
+            _ => mongodb::bson::oid::ObjectId::new(),
         };
         Bson::Document(doc! {
             "_id": id_to_set,
@@ -73,6 +74,7 @@ impl From<Preset> for Bson {
             "last_edited": preset.last_edited,
             "status": "synced".to_string(),
             "hue": preset.hue,
+            "iframe": preset.iframe,
         })
     }
 }
@@ -222,6 +224,8 @@ pub async fn sync_presets(
                     hay_preset.fields = needle_preset.fields.clone();
                     hay_preset.last_edited = needle_preset.last_edited;
                     hay_preset.status = "synced".to_string();
+                    hay_preset.hue = needle_preset.hue.clone();
+                    hay_preset.iframe = needle_preset.iframe.clone();
                 } else {
                     ignored_presets.push(hay_preset.name.clone());
                 }
