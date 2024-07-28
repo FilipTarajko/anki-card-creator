@@ -37,8 +37,9 @@
 		});
 	}
 
+	let is_iframe_list_visible = false;
 	let preset_name = 'new preset';
-	let preset_iframe = '';
+	let preset_iframes: [string, string][] = [];
 	let selected_hue: string = '';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
@@ -160,7 +161,7 @@
 				...$data.presets,
 				{
 					name: preset_name,
-					iframe: preset_iframe,
+					iframes: preset_iframes,
 					fields: JSON.parse(JSON.stringify(fields)),
 					last_edited: new Date().getTime(),
 					status: 'unsynced',
@@ -189,7 +190,7 @@
 			return;
 		} else {
 			let old_preset_name = selected_preset.name;
-			selected_preset.iframe = preset_iframe;
+			selected_preset.iframes = preset_iframes;
 			selected_preset.fields = fields;
 			selected_preset.name = preset_name;
 			selected_preset.last_edited = new Date().getTime();
@@ -319,7 +320,7 @@
 			} m-0.5`}
 			on:click={() => {
 				preset_name = preset.name;
-				preset_iframe = preset.iframe;
+				preset_iframes = preset.iframes;
 				fields = JSON.parse(JSON.stringify(preset.fields));
 				selected_preset = preset;
 				selected_hue = preset.hue;
@@ -335,7 +336,7 @@
 		class={`btn ${!selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
 		on:click={() => {
 			preset_name = 'new preset';
-			preset_iframe = '';
+			preset_iframes = [];
 			fields = JSON.parse(JSON.stringify(default_fields));
 			selected_hue = '';
 			selected_preset = null;
@@ -446,12 +447,76 @@
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
 	<br />
-	<span style="font-weight: bold">
-		<abbr title={'eg: https://en.wiktionary.org/wiki/${front.skipFirstWord}#Dutch'}
-			>preset iframe</abbr
-		>:
-	</span>
-	<input type="text" bind:value={preset_iframe} />
+	<div>
+		<span style="font-weight: bold">
+			<abbr title={'eg: https://en.wiktionary.org/wiki/${front.skipFirstWord}#Dutch'}
+				>preset iframes</abbr
+			>
+		</span>
+		<button
+			on:click={() => {
+				is_iframe_list_visible = !is_iframe_list_visible;
+			}}
+			class="btn mt-2 mb-2 btn-sm btn-icon order-6 md:order-none {is_iframe_list_visible
+				? 'variant-filled'
+				: 'variant-ghost'}"
+		>
+			{#if is_iframe_list_visible}
+				<i class="fa-solid fa-chevron-up" />
+			{:else}
+				<i class="fa-solid fa-chevron-down" />
+			{/if}
+		</button>
+		{#if is_iframe_list_visible}
+			<div class='w-full md:px-12'>
+				{#if !preset_iframes?.length}
+					<div class="card p-2 mt-2 variant-ghost-error">no iframes defined yet</div>
+				{/if}
+				<div
+					class="mt-2"
+					style="display: grid; grid-template-columns: 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
+				>
+					{#each preset_iframes || [] as iframe, position}
+						<input id={`iframe_name_${position}`} placeholder="wiktionary" style="width:100%" type="text" bind:value={iframe[0]} />
+						<button
+							type="button"
+							class="btn btn-sm variant-filled-warning"
+							style="font-weight: bold;"
+							on:click={() => {
+								preset_iframes?.splice(position, 1);
+								preset_iframes = preset_iframes;
+							}}
+						>
+							<i class="fa-solid fa-remove" />
+						</button>
+						<div class='col-span-full'>
+							<textarea placeholder={"https://en.m.wiktionary.org/wiki/${front.skipFirstWord}#Dutch"} style="width:100%;" class='text-black' bind:value={iframe[1]} />
+						</div>
+					{/each}
+					<!-- <button
+						style="grid-column: 1; height: 2.574rem;"
+						type="button"
+						class="btn btn-sm variant-filled-success"
+						on:click={() => {
+							add_missing_bindings(field);
+						}}
+					>
+						add missing
+					</button> -->
+					<button
+						style="height: 2.574rem;"
+						type="button"
+						class="btn btn-sm variant-filled-success col-start-2"
+						on:click={() => {
+							preset_iframes = [...(preset_iframes || []), ['', '']];
+						}}
+					>
+						<i class="fa-solid fa-plus" />
+					</button>
+				</div>
+			</div>
+		{/if}
+	</div>
 
 	<div
 		style={`display: grid; grid-template-columns: 4.004rem repeat(25, 1fr); color: hsl(${selected_hue} 50% 50%)`}
@@ -826,14 +891,14 @@
 			style="grid-column: 1; margin-right: 0.286rem;"
 			bind:value={new_field_name}
 		/>
-		<RadioGroup class="sm:hidden md:inline-flex">
+		<RadioGroup class="hidden md:inline-flex">
 			<RadioItem bind:group={new_field_type} name="type" value="text">text</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="selectOne">single</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="selectMany">multiple</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="bound">bound</RadioItem>
 		</RadioGroup>
 		<button
-			class="btn btn-sm variant-filled-success col-start-2 md:col-start-3 col-end-7 md:col-end-8"
+			class="btn btn-sm variant-filled-success col-start-2 md:col-start-3 col-end-7 md:col-end-8 md:mr-1 mr-4"
 			on:click={() => {
 				create_field();
 			}}>add field</button

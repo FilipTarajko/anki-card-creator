@@ -83,10 +83,10 @@
 	}
 
 	function calculateIframeWithReplacements() {
-		if (!selected_preset?.iframe) {
+		if (!selected_preset || !iframe_source_template) {
 			return '';
 		}
-		let str = selected_preset.iframe;
+		let str = iframe_source_template;
 		for (let i = 0; i<selected_preset.fields.length; i++) {
 			const field = selected_preset.fields[i];
 			while (str.match(`\\$\{${field.name}[^\}]*\}`)) {
@@ -109,6 +109,8 @@
 		return str;
 	};
 
+	let iframe_source_template = '';
+
 	function selectPreset(preset: Preset) {
 		selected_preset = JSON.parse(JSON.stringify(preset));
 		if (selected_preset) {
@@ -122,6 +124,7 @@
 					selected_preset.fields[i].visible_by_default;
 			}
 		}
+		iframe_source_template = selected_preset?.iframes?.length && selected_preset.iframes[0][1] || '';
 	}
 
 	function addNote() {
@@ -142,10 +145,13 @@
 		localStorage.setItem('notes_unsynced', $data.notes_unsynced);
 	}
 
-	$: iframe_with_replacements = selected_preset && calculateIframeWithReplacements();
+	// @ts-ignore
+	$: current_presets_hue_as_number = Math.floor(selected_preset?.hue || 0);
+
+	$: iframe_with_replacements = selected_preset && iframe_source_template && calculateIframeWithReplacements();
 </script>
 
-<div class={`flex ${selected_preset?.iframe ? 'w-full' : ''} flex-col space-y-10 xl:space-x-10 xl:flex-row`}>
+<div class={`flex ${selected_preset?.iframes?.length ? 'w-full' : ''} flex-col space-y-10 xl:space-x-10 xl:flex-row`}>
 	<div class='space-y-10 text-center flex flex-col items-center'>
 		<h2 class="h2 mt-12">Create a card</h2>
 		{#if $data.presets.length}
@@ -310,8 +316,25 @@
 			</div>
 		{/if}
 	</div>
-	{#if selected_preset?.iframe}
+	{#if selected_preset?.iframes?.length}
 		<div class='w-full'>
+			<div class="card p-2 ml-6 mr-6">
+				{#each selected_preset.iframes as iframe, index}
+					<button
+						style={`color: hsl(${current_presets_hue_as_number + index*45} ${
+							iframe_source_template == iframe[1]
+								? '100% 20%); background-color: hsl(' + (current_presets_hue_as_number + index*45) + ' 100% 87%);'
+								: '70% 50%);'
+						}`}
+						class={`btn ${
+							iframe_source_template == iframe[1] ? 'variant-filled' : 'variant-ghost'
+						} m-0.5`}
+						on:click={()=>{iframe_source_template = iframe[1]}}
+					>
+						{iframe[0]}
+					</button>
+				{/each}
+			</div>
 			{iframe_with_replacements}
 			<iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh;" />
 		</div>

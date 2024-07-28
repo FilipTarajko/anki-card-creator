@@ -59,6 +59,7 @@ pub struct Preset {
     pub status: String,
     pub hue: String,
     pub iframe: Option<String>,
+    pub iframes: Option<Vec<Vec<String>>>,
 }
 
 impl From<Preset> for Bson {
@@ -75,6 +76,7 @@ impl From<Preset> for Bson {
             "status": "synced".to_string(),
             "hue": preset.hue,
             "iframe": preset.iframe,
+            "iframes": preset.iframes,
         })
     }
 }
@@ -226,6 +228,7 @@ pub async fn sync_presets(
                     hay_preset.status = "synced".to_string();
                     hay_preset.hue = needle_preset.hue.clone();
                     hay_preset.iframe = needle_preset.iframe.clone();
+                    hay_preset.iframes = needle_preset.iframes.clone();
                 } else {
                     ignored_presets.push(hay_preset.name.clone());
                 }
