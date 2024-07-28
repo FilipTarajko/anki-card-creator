@@ -109,6 +109,39 @@
 		return str;
 	};
 
+	function selectPreset(preset: Preset) {
+		selected_preset = JSON.parse(JSON.stringify(preset));
+		if (selected_preset) {
+			for (let i = 0; i < selected_preset.fields.length; i++) {
+				selected_preset.fields[i].current_inputs = JSON.parse(
+					JSON.stringify(selected_preset?.fields[i].default)
+				);
+				selected_preset.fields[i].currently_frozen =
+					selected_preset.fields[i].frozen_by_default;
+				selected_preset.fields[i].currently_visible =
+					selected_preset.fields[i].visible_by_default;
+			}
+		}
+	}
+
+	function addNote() {
+		showSuccessToast('Note added!');
+		$data.notes_unsynced +=
+			current_output +
+			`
+`;
+		if (selected_preset?.fields?.length) {
+			for (let i = 0; i < selected_preset?.fields?.length || 0; i++) {
+				if (!selected_preset?.fields[i].currently_frozen) {
+					selected_preset.fields[i].current_inputs = JSON.parse(
+						JSON.stringify(selected_preset?.fields[i].default)
+					);
+				}
+			}
+		}
+		localStorage.setItem('notes_unsynced', $data.notes_unsynced);
+	}
+
 	$: iframe_with_replacements = selected_preset && calculateIframeWithReplacements();
 </script>
 
@@ -136,20 +169,7 @@
 				class={`btn ${
 					selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 				} m-0.5`}
-				on:click={() => {
-					selected_preset = JSON.parse(JSON.stringify(preset));
-					if (selected_preset) {
-						for (let i = 0; i < selected_preset.fields.length; i++) {
-							selected_preset.fields[i].current_inputs = JSON.parse(
-								JSON.stringify(selected_preset?.fields[i].default)
-							);
-							selected_preset.fields[i].currently_frozen =
-								selected_preset.fields[i].frozen_by_default;
-							selected_preset.fields[i].currently_visible =
-								selected_preset.fields[i].visible_by_default;
-						}
-					}
-				}}
+				on:click={()=>selectPreset(preset)}
 			>
 				{preset.name}
 			</button>
@@ -180,25 +200,9 @@
 			</button>
 		</div>
 		<form
-			on:submit={() => {
-				showSuccessToast('Note added!');
-				$data.notes_unsynced +=
-					current_output +
-					`
-`;
-				if (selected_preset?.fields?.length) {
-					for (let i = 0; i < selected_preset?.fields?.length || 0; i++) {
-						if (!selected_preset?.fields[i].currently_frozen) {
-							selected_preset.fields[i].current_inputs = JSON.parse(
-								JSON.stringify(selected_preset?.fields[i].default)
-							);
-						}
-					}
-				}
-				localStorage.setItem('notes_unsynced', $data.notes_unsynced);
-			}}
+			on:submit={addNote}
 		>
-			<div style="display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem;">
+			<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ?  ' 2.86rem' : ''};`}>
 				{#each selected_preset.fields as field}
 					{#if field.currently_visible || currently_all_forced_visible}
 						<div style="display: flex; justify-content: center; align-items: center;">
@@ -257,25 +261,25 @@
 								{/if}
 							</abbr>
 						</button>
-
-						<!-- <button
-						style="width: 2.574rem;"
-						on:click={() => {
-							field.currently_visible = !field.currently_visible;
-						}}
-						class="btn btn-large {field.currently_visible
-							? `variant-filled${field.visible_by_default ? '' : '-primary'}`
-							: `variant-ghost${field.visible_by_default ? '-primary' : ''}`}"
-					>
-						<div>
-							{#if field.currently_visible}
-								<i class="fa-solid fa-eye" />
-							{:else}
-								<i class="fa-solid fa-eye-slash" />
-							{/if}
-						</div>
-					</button> -->
-						<!-- </div> -->
+						{#if currently_all_forced_visible}
+							<button
+							style="width: 2.574rem;"
+							on:click={() => {
+								field.currently_visible = !field.currently_visible;
+							}}
+							class="btn btn-large {field.currently_visible
+								? `variant-filled${field.visible_by_default ? '' : '-warning'}`
+								: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
+						>
+							<div>
+								{#if field.currently_visible}
+									<i class="fa-solid fa-eye" />
+								{:else}
+									<i class="fa-solid fa-eye-slash" />
+								{/if}
+							</div>
+						</button>
+						{/if}
 					{/if}
 				{/each}
 			</div>
@@ -290,7 +294,7 @@
 		</div>
 		{#if selected_preset.iframe}
 			{iframe_with_replacements}
-			<iframe title="iframe" src={iframe_with_replacements} style="width: 100%; height: 100vh;" />
+			<iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh;" />
 		{/if}
 	{/if}
 {:else}
