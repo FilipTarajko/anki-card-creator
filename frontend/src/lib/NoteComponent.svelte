@@ -145,172 +145,178 @@
 	$: iframe_with_replacements = selected_preset && calculateIframeWithReplacements();
 </script>
 
-<h2 class="h2 mt-12">Create a card</h2>
-{#if $data.presets.length}
-	<!-- TODO -->
-	<!-- <RadioGroup class="card">
-		{#each $data.presets as preset}
-			<RadioItem
-				class={`${selected_preset?.name !== preset.name ? 'variant-ghost' : ''}`}
-				bind:group={selected_preset}
-				name="type"
-				value={preset}>{preset.name}</RadioItem
-			>
-		{/each}
-	</RadioGroup> -->
-	<div class="card p-2 ml-6 mr-6">
-		{#each $data.presets as preset}
-			<button
-				style={`color: hsl(${preset.hue} ${
-					selected_preset?.name == preset.name
-						? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
-						: '70% 50%);'
-				}`}
-				class={`btn ${
-					selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
-				} m-0.5`}
-				on:click={()=>selectPreset(preset)}
-			>
-				{preset.name}
-			</button>
-		{/each}
-	</div>
-
-	{#if selected_preset}
-		{#if did_current_preset_change}
-			<div class="card p-4 variant-ghost-error">
-				The current preset has been updated! To load the changes, press its name again. Current input will be lost!
-			</div>
-		{/if}
-		<div class="card p-4 variant-ghost-secondary">
-			force each field visible
-			<button
-				type="button"
-				class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
-				style="font-weight: bold;"
-				on:click={() => {
-					currently_all_forced_visible = !currently_all_forced_visible;
-				}}
-			>
-				{#if currently_all_forced_visible}
-					<i class="fa-solid fa-eye" />
-				{:else}
-					<i class="fa-solid fa-eye-slash" />
-				{/if}
-			</button>
-		</div>
-		<form
-			on:submit={addNote}
-		>
-			<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ?  ' 2.86rem' : ''};`}>
-				{#each selected_preset.fields as field}
-					{#if field.currently_visible || currently_all_forced_visible}
-						<div style="display: flex; justify-content: center; align-items: center;">
-							{field.name}
-						</div>
-						{#if field.type === 'text'}
-							<input type="text" bind:value={field.current_inputs[0]} />
-						{:else if field.type === 'selectOne'}
-							<RadioGroup>
-								{#each field.options as option}
-									<RadioItem bind:group={field.current_inputs[0]} name="type" value={option}
-										>{option || '(empty)'}</RadioItem
-									>
-								{/each}
-							</RadioGroup>
-						{:else if field.type === 'selectMany'}
-							<ListBox multiple>
-								<div class="card" style="display: flex; flex-direction: row;">
-									{#each field.options as option}
-										<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
-											>{option || '(empty)'}</ListBoxItem
-										>
-									{/each}
-								</div>
-							</ListBox>
-						{:else if field.type === 'bound'}
-							<div style="display: flex; justify-content: center; align-items: center;">
-								{calculate_result_of_bound_field(field)} (default: {field.default[0] || '(empty)'})
-							</div>
-						{/if}
-						<button
-							style="width: 2.574rem;"
-							class="btn btn-large variant-filled"
-							type="button"
-							on:click={() => {
-								field.current_inputs = JSON.parse(JSON.stringify(field.default));
-							}}
-						>
-							<abbr title={`reset to '${field.default}'`}
-								><i class="fa-solid fa-rotate-left" /></abbr
-							>
-						</button>
-						<button
-							style="width: 2.574rem;"
-							class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
-							type="button"
-							on:click={() => {
-								field.currently_frozen = !field.currently_frozen;
-							}}
-						>
-							<abbr title={`reset to '${field.default}'`}>
-								{#if field.currently_frozen}
-									<i class="fa-solid fa-lock" />
-								{:else}
-									<i class="fa-solid fa-lock-open" />
-								{/if}
-							</abbr>
-						</button>
-						{#if currently_all_forced_visible}
-							<button
-							style="width: 2.574rem;"
-							on:click={() => {
-								field.currently_visible = !field.currently_visible;
-							}}
-							class="btn btn-large {field.currently_visible
-								? `variant-filled${field.visible_by_default ? '' : '-warning'}`
-								: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
-						>
-							<div>
-								{#if field.currently_visible}
-									<i class="fa-solid fa-eye" />
-								{:else}
-									<i class="fa-solid fa-eye-slash" />
-								{/if}
-							</div>
-						</button>
-						{/if}
-					{/if}
+<div class={`flex ${selected_preset?.iframe ? 'w-full' : ''} flex-col space-y-10 xl:space-x-10 xl:flex-row`}>
+	<div class='space-y-10 text-center flex flex-col items-center'>
+		<h2 class="h2 mt-12">Create a card</h2>
+		{#if $data.presets.length}
+			<!-- TODO -->
+			<!-- <RadioGroup class="card">
+				{#each $data.presets as preset}
+					<RadioItem
+						class={`${selected_preset?.name !== preset.name ? 'variant-ghost' : ''}`}
+						bind:group={selected_preset}
+						name="type"
+						value={preset}>{preset.name}</RadioItem
+					>
+				{/each}
+			</RadioGroup> -->
+			<div class="card p-2 ml-6 mr-6">
+				{#each $data.presets as preset}
+					<button
+						style={`color: hsl(${preset.hue} ${
+							selected_preset?.name == preset.name
+								? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
+								: '70% 50%);'
+						}`}
+						class={`btn ${
+							selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+						} m-0.5`}
+						on:click={()=>selectPreset(preset)}
+					>
+						{preset.name}
+					</button>
 				{/each}
 			</div>
-			<button
-				type="submit"
-				style="margin-top: 0.858rem;"
-				class="btn btn-large variant-filled-success">add card</button
-			>
-		</form>
-		<div>
-			current result: <pre>{current_output}</pre>
-		</div>
-		{#if selected_preset.iframe}
+
+			{#if selected_preset}
+				{#if did_current_preset_change}
+					<div class="card p-4 variant-ghost-error">
+						The current preset has been updated! To load the changes, press its name again. Current input will be lost!
+					</div>
+				{/if}
+				<div class="card p-4 variant-ghost-secondary">
+					force each field visible
+					<button
+						type="button"
+						class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
+						style="font-weight: bold;"
+						on:click={() => {
+							currently_all_forced_visible = !currently_all_forced_visible;
+						}}
+					>
+						{#if currently_all_forced_visible}
+							<i class="fa-solid fa-eye" />
+						{:else}
+							<i class="fa-solid fa-eye-slash" />
+						{/if}
+					</button>
+				</div>
+				<form
+					on:submit={addNote}
+				>
+					<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ?  ' 2.86rem' : ''};`}>
+						{#each selected_preset.fields as field}
+							{#if field.currently_visible || currently_all_forced_visible}
+								<div style="display: flex; justify-content: center; align-items: center;">
+									{field.name}
+								</div>
+								{#if field.type === 'text'}
+									<input type="text" bind:value={field.current_inputs[0]} />
+								{:else if field.type === 'selectOne'}
+									<RadioGroup>
+										{#each field.options as option}
+											<RadioItem bind:group={field.current_inputs[0]} name="type" value={option}
+												>{option || '(empty)'}</RadioItem
+											>
+										{/each}
+									</RadioGroup>
+								{:else if field.type === 'selectMany'}
+									<ListBox multiple>
+										<div class="card" style="display: flex; flex-direction: row;">
+											{#each field.options as option}
+												<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
+													>{option || '(empty)'}</ListBoxItem
+												>
+											{/each}
+										</div>
+									</ListBox>
+								{:else if field.type === 'bound'}
+									<div style="display: flex; justify-content: center; align-items: center;">
+										{calculate_result_of_bound_field(field)} (default: {field.default[0] || '(empty)'})
+									</div>
+								{/if}
+								<button
+									style="width: 2.574rem;"
+									class="btn btn-large variant-filled"
+									type="button"
+									on:click={() => {
+										field.current_inputs = JSON.parse(JSON.stringify(field.default));
+									}}
+								>
+									<abbr title={`reset to '${field.default}'`}
+										><i class="fa-solid fa-rotate-left" /></abbr
+									>
+								</button>
+								<button
+									style="width: 2.574rem;"
+									class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
+									type="button"
+									on:click={() => {
+										field.currently_frozen = !field.currently_frozen;
+									}}
+								>
+									<abbr title={`reset to '${field.default}'`}>
+										{#if field.currently_frozen}
+											<i class="fa-solid fa-lock" />
+										{:else}
+											<i class="fa-solid fa-lock-open" />
+										{/if}
+									</abbr>
+								</button>
+								{#if currently_all_forced_visible}
+									<button
+									style="width: 2.574rem;"
+									on:click={() => {
+										field.currently_visible = !field.currently_visible;
+									}}
+									class="btn btn-large {field.currently_visible
+										? `variant-filled${field.visible_by_default ? '' : '-warning'}`
+										: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
+								>
+									<div>
+										{#if field.currently_visible}
+											<i class="fa-solid fa-eye" />
+										{:else}
+											<i class="fa-solid fa-eye-slash" />
+										{/if}
+									</div>
+								</button>
+								{/if}
+							{/if}
+						{/each}
+					</div>
+					<button
+						type="submit"
+						style="margin-top: 0.858rem;"
+						class="btn btn-large variant-filled-success">add card</button
+					>
+				</form>
+				<div>
+					current result: <pre>{current_output}</pre>
+				</div>
+			{/if}
+		{:else}
+			<div class="card mt-12 variant-ghost-warning p-4">
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				You have no presets yet! Create them in the
+				<span
+					style="cursor: pointer;"
+					on:click={() => {
+						$data.current_page = 'presets';
+						localStorage.setItem('current_page', 'presets');
+					}}>"<u>presets</u>"</span
+				> tab.
+			</div>
+		{/if}
+	</div>
+	{#if selected_preset?.iframe}
+		<div class='w-full'>
 			{iframe_with_replacements}
 			<iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh;" />
-		{/if}
+		</div>
 	{/if}
-{:else}
-	<div class="card mt-12 variant-ghost-warning p-4">
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		You have no presets yet! Create them in the
-		<span
-			style="cursor: pointer;"
-			on:click={() => {
-				$data.current_page = 'presets';
-				localStorage.setItem('current_page', 'presets');
-			}}>"<u>presets</u>"</span
-		> tab.
-	</div>
-{/if}
+</div>
 
 <style lang="postcss">
 	input {
