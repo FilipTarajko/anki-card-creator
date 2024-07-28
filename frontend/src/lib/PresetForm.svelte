@@ -337,6 +337,7 @@
 			preset_name = 'new preset';
 			preset_iframe = '';
 			fields = JSON.parse(JSON.stringify(default_fields));
+			selected_hue = '';
 			selected_preset = null;
 		}}
 	>
@@ -444,12 +445,16 @@
 	</div>
 	<span style="font-weight: bold"> preset name: </span>
 	<input type="text" bind:value={preset_name} />
-	<br>
-	<span style="font-weight: bold"> <abbr title={"eg: https://en.wiktionary.org/wiki/${front.skipFirstWord}#Dutch"}>preset iframe</abbr>: </span>
+	<br />
+	<span style="font-weight: bold">
+		<abbr title={'eg: https://en.wiktionary.org/wiki/${front.skipFirstWord}#Dutch'}
+			>preset iframe</abbr
+		>:
+	</span>
 	<input type="text" bind:value={preset_iframe} />
 
 	<div
-		style={`display: grid; grid-template-columns: 4.004rem repeat(16, 1fr); color: hsl(${selected_hue} 50% 50%)`}
+		style={`display: grid; grid-template-columns: 4.004rem repeat(25, 1fr); color: hsl(${selected_hue} 50% 50%)`}
 		class="mt-2"
 	>
 		color:
@@ -461,7 +466,7 @@
 			}}
 			style={`background-color: white; width: 100%; height: 1.5444rem;`}
 		/>
-		{#each Array.from(new Array(15), (_, i) => i * 24) as hue}
+		{#each Array.from(new Array(24), (_, i) => i * 15) as hue}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
@@ -474,11 +479,68 @@
 	</div>
 	{#each fields as field, i_field}
 		<div
-			class="card p-4"
-			style="display: grid; grid-template-columns: 10.582rem 22.88rem 2.574rem 2.574rem 2.574rem 1fr 2.574rem; gap: 0.5148rem; margin-top: 0.572rem;"
+			class="card p-4 grid-cols-[12.2rem,2.574rem,2.574rem,4.3rem,2.574rem] md:grid-cols-[8.8rem,22.88rem,2.574rem,2.574rem,2.574rem,4.3rem,2.574rem]"
+			style="display: grid; gap: 0.5148rem; margin-top: 0.572rem;"
 		>
 			<input type="text" style="grid-column: 1; margin-right: 0.286rem;" bind:value={field.name} />
-			<RadioGroup>
+			<button
+				on:click={() => {
+					field.visible_by_default = !field.visible_by_default;
+				}}
+				class="btn btn-sm order-1 {field.visible_by_default ? 'variant-filled' : 'variant-ghost'}"
+			>
+				{#if field.visible_by_default}
+					<i class="fa-solid fa-eye" />
+				{:else}
+					<i class="fa-solid fa-eye-slash" />
+				{/if}
+			</button>
+			<button
+				on:click={() => {
+					field.frozen_by_default = !field.frozen_by_default;
+				}}
+				class="btn btn-sm order-2 {!field.frozen_by_default ? 'variant-filled' : 'variant-ghost'}"
+			>
+				{#if field.frozen_by_default}
+					<i class="fa-solid fa-lock" />
+				{:else}
+					<i class="fa-solid fa-lock-open" />
+				{/if}
+			</button>
+			<div class="order-4" style="display: flex; direction: row;">
+				<button
+					style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0.286rem;"
+					class="btn btn-sm {i_field == 0 ? 'variant-ghost-secondary' : 'variant-filled-secondary'}"
+					disabled={i_field == 0}
+					on:click={() => {
+						let temp = fields[i_field - 1];
+						fields[i_field - 1] = field;
+						fields[i_field] = temp;
+					}}><i class="fa-solid fa-arrow-up" /></button
+				>
+				<button
+					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 0.286rem;"
+					class="btn btn-sm {i_field == fields.length - 1
+						? 'variant-ghost-secondary'
+						: 'variant-filled-secondary'}"
+					disabled={i_field == fields.length - 1}
+					on:click={() => {
+						let temp = fields[i_field + 1];
+						fields[i_field + 1] = field;
+						fields[i_field] = temp;
+					}}><i class="fa-solid fa-arrow-down" /></button
+				>
+			</div>
+			<button
+				style="font-weight: bold;"
+				class="btn btn-sm variant-filled-primary order-4"
+				on:click={() => {
+					fields = fields.filter((e) => e.id != field.id);
+				}}
+			>
+				<i class="fa-solid fa-remove" /></button
+			>
+			<RadioGroup class="order-5 md:order-none col-span-4 md:col-span-1">
 				<RadioItem
 					bind:group={field.type}
 					on:click={() => {
@@ -522,7 +584,7 @@
 						if ((fields?.length ?? 0) >= 3 && field.id != 3) {
 							field.bound_to = 3;
 						} else {
-							for (let i=0; i<fields.length; i++) {
+							for (let i = 0; i < fields.length; i++) {
 								if (fields[i].id != field.id) {
 									field.bound_to = fields[i].id;
 									break;
@@ -544,7 +606,9 @@
 				on:click={() => {
 					field.expanded_in_editor = !field.expanded_in_editor;
 				}}
-				class="btn btn-sm {field.expanded_in_editor ? 'variant-filled' : 'variant-ghost'}"
+				class="btn btn-sm order-6 md:order-none {field.expanded_in_editor
+					? 'variant-filled'
+					: 'variant-ghost'}"
 			>
 				{#if field.expanded_in_editor}
 					<i class="fa-solid fa-chevron-up" />
@@ -552,75 +616,18 @@
 					<i class="fa-solid fa-chevron-down" />
 				{/if}
 			</button>
-			<button
-				on:click={() => {
-					field.visible_by_default = !field.visible_by_default;
-				}}
-				class="btn btn-sm {field.visible_by_default ? 'variant-filled' : 'variant-ghost'}"
-			>
-				{#if field.visible_by_default}
-					<i class="fa-solid fa-eye" />
-				{:else}
-					<i class="fa-solid fa-eye-slash" />
-				{/if}
-			</button>
-			<button
-				on:click={() => {
-					field.frozen_by_default = !field.frozen_by_default;
-				}}
-				class="btn btn-sm {!field.frozen_by_default ? 'variant-filled' : 'variant-ghost'}"
-			>
-				{#if field.frozen_by_default}
-					<i class="fa-solid fa-lock" />
-				{:else}
-					<i class="fa-solid fa-lock-open" />
-				{/if}
-			</button>
-			<div style="display: flex; direction: row;">
-				<button
-					style="border-top-right-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0.286rem;"
-					class="btn btn-sm {i_field == 0 ? 'variant-ghost-secondary' : 'variant-filled-secondary'}"
-					disabled={i_field == 0}
-					on:click={() => {
-						let temp = fields[i_field - 1];
-						fields[i_field - 1] = field;
-						fields[i_field] = temp;
-					}}><i class="fa-solid fa-arrow-up" /></button
-				>
-				<button
-					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 0.286rem;"
-					class="btn btn-sm {i_field == fields.length - 1
-						? 'variant-ghost-secondary'
-						: 'variant-filled-secondary'}"
-					disabled={i_field == fields.length - 1}
-					on:click={() => {
-						let temp = fields[i_field + 1];
-						fields[i_field + 1] = field;
-						fields[i_field] = temp;
-					}}><i class="fa-solid fa-arrow-down" /></button
-				>
-			</div>
-			<button
-				style="font-weight: bold;"
-				class="btn btn-sm variant-filled-primary"
-				on:click={() => {
-					fields = fields.filter((e) => e.id != field.id);
-				}}
-			>
-				<i class="fa-solid fa-remove" /></button
-			>
 			{#if field.expanded_in_editor}
 				{#if field.type === 'text'}
-					<div style="grid-column: 2;">
+					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-3">
 						default: <input
 							class="mt-2"
-							style="width: calc(100% - 9ch);"
+							style="width: calc(100% - 7ch);"
 							type="text"
 							bind:value={field.default[0]}
 						/>
 					</div>
 				{:else if field.type === 'selectOne'}
-					<div style="grid-column-start: 2; grid-column-end: 4">
+					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-4">
 						<!-- <div>
 							options: {field.options.join(', ')}
 						</div>
@@ -670,7 +677,7 @@
 						</ListBox>
 					</div>
 				{:else if field.type === 'selectMany'}
-					<div style="grid-column-start: 2; grid-column-end: 4">
+					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-4">
 						<!-- <div>
 							options: {field.options.join(', ')}
 						</div>
@@ -724,7 +731,7 @@
 						</ListBox>
 					</div>
 				{:else if field.type === 'bound'}
-					<div style="grid-column: 2;">
+					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
 						default: <input
 							class="mt-2"
 							style="width: calc(100% - 3.85rem);"
@@ -732,7 +739,7 @@
 							bind:value={field.default[0]}
 						/>
 					</div>
-					<div style="grid-column: 2;">
+					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
 						bound to:
 						<div class="card p-2 pr-2">
 							{#each fields.filter((e) => e != field) as field_to_bind}
@@ -756,7 +763,7 @@
 							{/each}
 						</RadioGroup>
 					</div>
-					<div style="grid-column-start: 2; grid-column-end: 4;">
+					<div class="order-7 col-start-1 md:col-start-2 col-end-6 md:col-end-5">
 						<div
 							class="mt-2"
 							style="display: grid; grid-template-columns: 1fr 3ch 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
@@ -811,23 +818,22 @@
 	{/each}
 
 	<div
-		class="card p-4"
-		style="display: grid; grid-template-columns: 10.582rem 22.88rem 2.574rem 2.574rem 4.004rem 2.574rem; gap: 0.572rem; margin-top: 0.858rem;"
+		class="card p-4 grid-cols-[12.2rem,2.574rem,2.574rem,4.3rem,2.574rem] md:grid-cols-[8.8rem,22.88rem,2.574rem,2.574rem,2.574rem,4.3rem,2.574rem]"
+		style="display: grid; gap: 0.572rem; padding-right: 0px; margin-top: 0.858rem;"
 	>
 		<input
 			type="text"
 			style="grid-column: 1; margin-right: 0.286rem;"
 			bind:value={new_field_name}
 		/>
-		<RadioGroup>
+		<RadioGroup class="sm:hidden md:inline-flex">
 			<RadioItem bind:group={new_field_type} name="type" value="text">text</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="selectOne">single</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="selectMany">multiple</RadioItem>
 			<RadioItem bind:group={new_field_type} name="type" value="bound">bound</RadioItem>
 		</RadioGroup>
 		<button
-			style="grid-column: 3/7;"
-			class="btn btn-sm variant-filled-success"
+			class="btn btn-sm variant-filled-success col-start-2 md:col-start-3 col-end-7 md:col-end-8"
 			on:click={() => {
 				create_field();
 			}}>add field</button
