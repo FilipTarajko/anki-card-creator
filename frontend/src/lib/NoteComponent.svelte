@@ -297,8 +297,8 @@
 						class="btn btn-large variant-filled-success">add card</button
 					>
 				</form>
-				<div>
-					current result: <pre>{current_output}</pre>
+				<div style="max-width: 30rem; line-break: anywhere;">
+					current result: <br><span>{current_output}</span>
 				</div>
 			{/if}
 		{:else}
@@ -317,8 +317,8 @@
 		{/if}
 	</div>
 	{#if selected_preset?.iframes?.length}
-		<div class='w-full'>
-			<div class="card p-2 ml-6 mr-6">
+		<div class='w-full flex flex-col items-center'>
+			<div class="card p-2 w-11/12">
 				{#each selected_preset.iframes as iframe, index}
 					<button
 						style={`color: hsl(${current_presets_hue_as_number + index*45} ${
@@ -335,7 +335,7 @@
 					</button>
 				{/each}
 			</div>
-			{iframe_with_replacements}
+			<div style="word-wrap: break-word; line-break:anywhere; max-width: 96%;">{iframe_with_replacements}</div>
 			<iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh;" />
 		</div>
 	{/if}
