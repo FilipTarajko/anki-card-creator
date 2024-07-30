@@ -12,7 +12,7 @@
 </script>
 
 <div
-class={`space-y-10 text-center flex flex-col items-center ${
+class={`text-center flex flex-col items-center ${
 	$data.current_page == 'add cards' ? 'block' : 'hidden'
 }`}
 >
