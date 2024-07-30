@@ -3,6 +3,7 @@
 	import { data } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { BindingType, type Field, type Preset } from '../types';
+	import IframesComponent from './IframesComponent.svelte';
 
 	const toastStore = getToastStore();
 
@@ -149,9 +150,21 @@
 	$: current_presets_hue_as_number = Math.floor(selected_preset?.hue || 0);
 
 	$: iframe_with_replacements = selected_preset && iframe_source_template && calculateIframeWithReplacements();
+
+
+let cardFormWidth: number;
+let layoutWidth: number;
+let innerWidth: number;
+let innerHeight: number;
+
+$: twoColumnsCondition = layoutWidth-cardFormWidth>330;
+
 </script>
 
-<div class={`flex ${selected_preset?.iframes?.length ? 'w-full' : ''} flex-col space-y-10 xl:space-x-10 xl:flex-row`}>
+<svelte:window bind:innerHeight bind:innerWidth />
+<div class="w-full" bind:clientWidth={layoutWidth} />
+
+<div class={`flex w-full ${selected_preset?.iframes?.length ? 'w-full' : ''} ${twoColumnsCondition ? 'space-x-0 flex-row' : 'flex-col space-y-10'}`}>
 	<div class='space-y-10 text-center flex flex-col items-center'>
 		<h2 class="h2 mt-12">Create a card</h2>
 		{#if $data.presets.length}
@@ -190,6 +203,11 @@
 						The current preset has been updated! To load the changes, press its name again. Current input will be lost!
 					</div>
 				{/if}
+
+				<!-- {#if selected_preset?.iframes?.length}
+					<IframesComponent selected_preset />
+				{/if} -->
+
 				<div class="card p-4 variant-ghost-secondary">
 					force each field visible
 					<button
@@ -208,6 +226,7 @@
 					</button>
 				</div>
 				<form
+					bind:clientWidth={cardFormWidth}
 					on:submit={addNote}
 				>
 					<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ?  ' 2.86rem' : ''};`}>
@@ -317,27 +336,7 @@
 		{/if}
 	</div>
 	{#if selected_preset?.iframes?.length}
-		<div class='w-full flex flex-col items-center'>
-			<div class="card p-2 w-11/12">
-				{#each selected_preset.iframes as iframe, index}
-					<button
-						style={`color: hsl(${current_presets_hue_as_number + index*45} ${
-							iframe_source_template == iframe[1]
-								? '100% 20%); background-color: hsl(' + (current_presets_hue_as_number + index*45) + ' 100% 87%);'
-								: '70% 50%);'
-						}`}
-						class={`btn ${
-							iframe_source_template == iframe[1] ? 'variant-filled' : 'variant-ghost'
-						} m-0.5`}
-						on:click={()=>{iframe_source_template = iframe[1]}}
-					>
-						{iframe[0]}
-					</button>
-				{/each}
-			</div>
-			<div style="word-wrap: break-word; line-break:anywhere; max-width: 96%;">{iframe_with_replacements}</div>
-			<iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh;" />
-		</div>
+		<IframesComponent bind:iframe_source_template {selected_preset} {current_presets_hue_as_number} {iframe_with_replacements} />
 	{/if}
 </div>
 

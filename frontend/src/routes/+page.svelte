@@ -11,7 +11,14 @@
 	import WiktionaryComponent from '$lib/WiktionaryComponent.svelte';
 </script>
 
-<div class="container h-full mx-auto items-center">
+<div
+class={`space-y-10 text-center flex flex-col items-center ${
+	$data.current_page == 'add cards' ? 'block' : 'hidden'
+}`}
+>
+<NoteComponent />
+</div>
+<div class={`container h-full mx-auto items-center ${$data.current_page != 'add cards' ? 'block' : 'hidden'}`}>
 	<div
 		class={`space-y-10 text-center flex flex-col items-center ${
 			$data.current_page == 'about' ? 'block' : 'hidden'
@@ -25,13 +32,6 @@
 		}`}
 	>
 		<PresetForm />
-	</div>
-	<div
-		class={`space-y-10 text-center flex flex-col items-center ${
-			$data.current_page == 'add cards' ? 'block' : 'hidden'
-		}`}
-	>
-		<NoteComponent />
 	</div>
 	<div
 		class={`space-y-10 text-center flex flex-col items-center ${
