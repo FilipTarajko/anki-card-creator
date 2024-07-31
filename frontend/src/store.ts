@@ -16,5 +16,6 @@ export const data = writable({
 	email: (browser && window.localStorage.getItem('email')) || '',
 	id: (browser && window.localStorage.getItem('id')) || '',
 	display_csv_headers:
-		(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false
+		(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false,
+	duplicate_checking_values: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values') ?? '[]')) ?? []
 });
