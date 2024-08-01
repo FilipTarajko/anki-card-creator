@@ -234,13 +234,17 @@ let is_iframe_moved_to_top = false;
 						on:submit={addNote}
 					>
 						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ?  ' 2.86rem' : ''};`}>
-							{#each selected_preset.fields as field}
+							{#each selected_preset.fields as field, i}
 								{#if field.currently_visible || currently_all_forced_visible}
 									<div style="display: flex; justify-content: center; align-items: center;">
 										{field.name}
 									</div>
 									{#if field.type === 'text'}
-										<input type="text" bind:value={field.current_inputs[0]} />
+										<input
+											type="text"
+											style={$data.duplicate_checking_values.includes(field.current_inputs[0]) ? "color: rgb(200, 0, 0);" : ""}
+											bind:value={field.current_inputs[0]}
+										/>
 									{:else if field.type === 'selectOne'}
 										<RadioGroup>
 											{#each field.options as option}
