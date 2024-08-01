@@ -20,4 +20,16 @@ export const data = writable({
 	duplicate_checking_values: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values') ?? '[]')) ?? [],
 	note_export_columns_for_duplicate_checking: [0, 1],
 	preset_fields_for_duplicate_checking: [3, 4],
+	duplicate_checking_removed_needles: [/^(de)\s?/, /^(het)\s?/, /^.$/],
 });
+
+export function removeNeedlesForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
+	duplicate_checking_removed_needles.forEach(needle=>{
+		if (needle instanceof RegExp && !needle.global) {
+			text = text.replace(needle, "")
+		} else {
+			text = text.replaceAll(needle, "");
+		}
+	})
+	return text;
+}

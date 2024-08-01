@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LightSwitch } from '@skeletonlabs/skeleton';
-	import { data } from '../store';
+	import { data, removeNeedlesForDuplicateCheck } from '../store';
 
 	let fileForUniqueness: any;
 	let firstFields: string[][] = [];
@@ -40,8 +40,9 @@
 		for (let i = 0; i < rowsParsed.length; i++) {
 			const row = rowsParsed[i];
 			for (let j = 0; j < row.length; j++) {
-				const element = row[j];
-				if ($data.note_export_columns_for_duplicate_checking.includes(j)) {
+				let element = removeNeedlesForDuplicateCheck(row[j], $data.duplicate_checking_removed_needles);
+
+				if (element && $data.note_export_columns_for_duplicate_checking.includes(j)) {
 					result.add(element)
 				}
 			}
@@ -71,7 +72,7 @@
 	</table>
 	currently known entries: {$data.duplicate_checking_values.length}
 	<br>
-	currently known entries examples: {$data.duplicate_checking_values.slice(0, 20)}
+	currently known entries examples: {$data.duplicate_checking_values.slice(0, 20).join(", ")}
 </form>
 
 <style scoped>

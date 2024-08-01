@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data } from '../store';
+	import { data, removeNeedlesForDuplicateCheck } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { BindingType, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
@@ -242,7 +242,7 @@ let is_iframe_moved_to_top = false;
 									{#if field.type === 'text'}
 										<input
 											type="text"
-											style={$data.duplicate_checking_values.includes(field.current_inputs[0]) ? "color: rgb(200, 0, 0);" : ""}
+											style={field.current_inputs[0] && $data.duplicate_checking_values.includes(removeNeedlesForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)) ? "color: rgb(200, 0, 0);" : ""}
 											bind:value={field.current_inputs[0]}
 										/>
 									{:else if field.type === 'selectOne'}
