@@ -242,7 +242,7 @@ let is_iframe_moved_to_top = false;
 									{#if field.type === 'text'}
 										<input
 											type="text"
-											style={field.current_inputs[0] && $data.duplicate_checking_values.includes(removeNeedlesForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)) ? "color: rgb(200, 0, 0);" : ""}
+											style={field.current_inputs[0] && $data.duplicate_checking_values_unsynced.includes(removeNeedlesForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)) ? "color: rgb(200, 0, 0);" : ""}
 											bind:value={field.current_inputs[0]}
 										/>
 									{:else if field.type === 'selectOne'}

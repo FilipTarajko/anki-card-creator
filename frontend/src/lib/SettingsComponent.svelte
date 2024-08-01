@@ -2,6 +2,8 @@
 	import { LightSwitch } from '@skeletonlabs/skeleton';
 	import { data, removeNeedlesForDuplicateCheck } from '../store';
 
+	const EXAMPLES_TO_SHOW = 10;
+
 	let fileForUniqueness: any;
 	let firstFields: string[][] = [];
 
@@ -14,8 +16,8 @@
 			if (data as string && typeof data == "string") {
 				const result = tryParseStringFromFile(data);
 				if (shouldSave) {
-					$data.duplicate_checking_values = result;
-					localStorage.setItem("duplicate_checking_values", JSON.stringify(result));
+					$data.duplicate_checking_values_unsynced = result;
+					localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(result));
 				}
 			}
 		}
@@ -70,9 +72,21 @@
 			</tr>
 		{/each}
 	</table>
-	currently known entries: {$data.duplicate_checking_values.length}
-	<br>
-	currently known entries examples: {$data.duplicate_checking_values.slice(0, 20).join(", ")}
+	{#each [{elems: $data.duplicate_checking_values_synced, color: "green", name: "synced"}, {elems: $data.duplicate_checking_values_unsynced, color: "yellow", name: "unsynced"}] as part}
+		<div style={`color: ${part.color};`}>
+			currently {part.name} entries: {part.elems.length}
+			<br>
+			{#if part.elems.length > EXAMPLES_TO_SHOW}
+				examples: {part.elems.slice(0, Math.floor(EXAMPLES_TO_SHOW/2)).join(", ")},
+				...,
+				{part.elems.slice(part.elems.length-Math.ceil(EXAMPLES_TO_SHOW/2)-1, part.elems.length-1).join(", ")}
+			{:else if part.elems.length}
+				examples: {part.elems.join(", ")}
+			{:else}
+				no {part.name} entries
+			{/if}
+		</div>
+	{/each}
 </form>
 
 <style scoped>
