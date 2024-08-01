@@ -17,5 +17,7 @@ export const data = writable({
 	id: (browser && window.localStorage.getItem('id')) || '',
 	display_csv_headers:
 		(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false,
-	duplicate_checking_values: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values') ?? '[]')) ?? []
+	duplicate_checking_values: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values') ?? '[]')) ?? [],
+	note_export_columns_for_duplicate_checking: [0, 1],
+	preset_fields_for_duplicate_checking: [3, 4],
 });

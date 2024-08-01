@@ -41,7 +41,7 @@
 			const row = rowsParsed[i];
 			for (let j = 0; j < row.length; j++) {
 				const element = row[j];
-				if (j==0 || j==1) { // TODO
+				if ($data.note_export_columns_for_duplicate_checking.includes(j)) {
 					result.add(element)
 				}
 			}
@@ -63,8 +63,8 @@
 	<table>
 		{#each firstFields as row}
 			<tr>
-				{#each row as field}
-					<td style={"padding: 0 0.6rem; " + (field ? "" : "color: gray;")}>{field || "-"}</td>
+				{#each row as field, i}
+					<td style={"padding: 0 0.6rem; " + (field ? "" : "color: gray;") + ($data.note_export_columns_for_duplicate_checking.includes(i) ? 'background: rgba(127, 255, 127, 0.2);' : '')}>{field || "-"}</td>
 				{/each}
 			</tr>
 		{/each}
