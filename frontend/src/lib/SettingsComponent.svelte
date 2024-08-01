@@ -59,7 +59,7 @@
 <LightSwitch />
 <h3 class="h3">Note field duplication warning</h3>
 <img alt="export options" src="/ankiToCC.png">
-<form class="flex flex-col gap-4 card p-4 w-3/4">
+<form class="flex flex-col gap-4 card p-4 w-3/4 max-w-2xl">
 	File for uniqueness checks:
 	<input bind:files={fileForUniqueness} on:change={()=>{tryReadFile(false)}} type="file">
 	<button class="btn variant-filled" on:click={()=>{tryReadFile(true)}}>save</button>
@@ -79,7 +79,7 @@
 			{#if part.elems.length > EXAMPLES_TO_SHOW}
 				examples: {part.elems.slice(0, Math.floor(EXAMPLES_TO_SHOW/2)).join(", ")},
 				...,
-				{part.elems.slice(part.elems.length-Math.ceil(EXAMPLES_TO_SHOW/2)-1, part.elems.length-1).join(", ")}
+				{part.elems.slice(part.elems.length-Math.ceil(EXAMPLES_TO_SHOW/2), part.elems.length).join(", ")}
 			{:else if part.elems.length}
 				examples: {part.elems.join(", ")}
 			{:else}
