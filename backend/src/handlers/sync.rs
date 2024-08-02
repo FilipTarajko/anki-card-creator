@@ -27,6 +27,7 @@ pub struct Field {
     pub currently_frozen: Option<bool>,
     pub bound_to: Option<i32>,
     pub bindings: Option<Vec<Vec<String>>>,
+    pub binding_type: Option<String>,
 }
 
 impl From<Field> for Bson {
@@ -45,6 +46,7 @@ impl From<Field> for Bson {
             "currently_frozen": field.currently_frozen,
             "bound_to": field.bound_to,
             "bindings": field.bindings,
+            "binding_type": field.binding_type,
         })
     }
 }
