@@ -39,7 +39,7 @@
 
 	let is_iframe_list_visible = false;
 	let preset_name = 'new preset';
-	let preset_iframes: [string, string][] = [];
+	let preset_iframes: [string, string][] = [['source', '${source}']];
 	let selected_hue: string = '';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
@@ -65,9 +65,9 @@
 			id: 1,
 			name: 'notetype',
 			type: 'selectOne',
-			options: ['2X22', '3X22'],
-			default: ['2X22'],
-			visible_by_default: true,
+			options: ['2X26', '3X26'],
+			default: ['2X26'],
+			visible_by_default: false,
 			frozen_by_default: true,
 			current_inputs: []
 		},
@@ -77,7 +77,7 @@
 			type: 'selectMany',
 			options: ['AnkiCC', 'test', 'test::AnkiCC', 'test::foo::baz::baz'],
 			default: ['AnkiCC', 'test'],
-			visible_by_default: true,
+			visible_by_default: false,
 			frozen_by_default: true,
 			current_inputs: []
 		},
@@ -103,6 +103,36 @@
 		},
 		{
 			id: 5,
+			name: 'rev',
+			type: 'selectOne',
+			options: ['', 'y'],
+			default: [''],
+			visible_by_default: true,
+			frozen_by_default: true,
+			current_inputs: []
+		},
+		{
+			id: 6,
+			name: 'info',
+			type: 'text',
+			options: [],
+			default: [],
+			visible_by_default: true,
+			frozen_by_default: false,
+			current_inputs: []
+		},
+		{
+			id: 7,
+			name: 'source',
+			type: 'text',
+			options: [],
+			default: [],
+			visible_by_default: true,
+			frozen_by_default: false,
+			current_inputs: []
+		},
+		{
+			id: 8,
 			name: 'theme',
 			type: 'selectOne',
 			options: ['nl', 'en', 'de', 'pl'],
@@ -468,7 +498,7 @@
 			{/if}
 		</button>
 		{#if is_iframe_list_visible}
-			<div class='w-full md:px-12'>
+			<div class="w-full md:px-12">
 				{#if !preset_iframes?.length}
 					<div class="card p-2 mt-2 variant-ghost-error">no iframes defined yet</div>
 				{/if}
@@ -477,7 +507,13 @@
 					style="display: grid; grid-template-columns: 1fr 2.574rem; row-gap: 0.286rem; column-gap: 0.5148rem;"
 				>
 					{#each preset_iframes || [] as iframe, position}
-						<input id={`iframe_name_${position}`} placeholder="wiktionary" style="width:100%" type="text" bind:value={iframe[0]} />
+						<input
+							id={`iframe_name_${position}`}
+							placeholder="wiktionary"
+							style="width:100%"
+							type="text"
+							bind:value={iframe[0]}
+						/>
 						<button
 							type="button"
 							class="btn btn-sm variant-filled-warning"
@@ -489,8 +525,13 @@
 						>
 							<i class="fa-solid fa-remove" />
 						</button>
-						<div class='col-span-full'>
-							<textarea placeholder={"https://en.m.wiktionary.org/wiki/${front.skipFirstWord}#Dutch"} style="width:100%;" class='text-black' bind:value={iframe[1]} />
+						<div class="col-span-full">
+							<textarea
+								placeholder={'https://en.m.wiktionary.org/wiki/${front.skipFirstWord}#Dutch'}
+								style="width:100%;"
+								class="text-black"
+								bind:value={iframe[1]}
+							/>
 						</div>
 					{/each}
 					<!-- <button
