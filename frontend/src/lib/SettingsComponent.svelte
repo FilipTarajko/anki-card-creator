@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LightSwitch } from '@skeletonlabs/skeleton';
-	import { data, removeNeedlesForDuplicateCheck } from '../store';
+	import { data, transformTextForDuplicateCheck } from '../store';
 
 	const EXAMPLES_TO_SHOW = 10;
 
@@ -42,7 +42,7 @@
 		for (let i = 0; i < rowsParsed.length; i++) {
 			const row = rowsParsed[i];
 			for (let j = 0; j < row.length; j++) {
-				let element = removeNeedlesForDuplicateCheck(row[j], $data.duplicate_checking_removed_needles);
+				let element = transformTextForDuplicateCheck(row[j], $data.duplicate_checking_removed_needles);
 
 				if (element && $data.note_export_columns_for_duplicate_checking.includes(j)) {
 					result.add(element)

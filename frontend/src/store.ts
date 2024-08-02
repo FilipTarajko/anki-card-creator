@@ -24,7 +24,8 @@ export const data = writable({
 	duplicate_checking_removed_needles: [/^(de)\s?/, /^(het)\s?/, /^.$/],
 });
 
-export function removeNeedlesForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
+export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
+	text = text.toLowerCase();
 	duplicate_checking_removed_needles.forEach(needle=>{
 		if (needle instanceof RegExp && !needle.global) {
 			text = text.replace(needle, "")
