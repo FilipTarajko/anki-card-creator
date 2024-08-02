@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck } from '../store';
+	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced } from '../store';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { BindingType, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
@@ -33,7 +33,7 @@
 	}
 
 	// @ts-ignore
-	$: did_current_preset_change = (selected_preset ?? false ) && !$data.presets.some((preset)=>preset.last_edited === selected_preset?.last_edited);
+	$: did_current_preset_change = (selected_preset ?? false) && !$data.presets.some((preset: Preset) => preset.last_edited === selected_preset?.last_edited);
 
 	$: {
 		if (selected_preset) {
@@ -88,14 +88,14 @@
 			return '';
 		}
 		let str = iframe_source_template;
-		for (let i = 0; i<selected_preset.fields.length; i++) {
+		for (let i = 0; i < selected_preset.fields.length; i++) {
 			const field = selected_preset.fields[i];
 			while (str.match(`\\$\{${field.name}[^\}]*\}`)) {
 				const match = str.match(`\\$\{${field.name}[^\}]*\}`);
 				let toReplaceWith = '';
 
 				if (field.type == 'bound') {
-					toReplaceWith = calculate_result_of_bound_field(field)
+					toReplaceWith = calculate_result_of_bound_field(field);
 				} else {
 					toReplaceWith = field.current_inputs.join(' ');
 				}
@@ -119,10 +119,8 @@
 				selected_preset.fields[i].current_inputs = JSON.parse(
 					JSON.stringify(selected_preset?.fields[i].default)
 				);
-				selected_preset.fields[i].currently_frozen =
-					selected_preset.fields[i].frozen_by_default;
-				selected_preset.fields[i].currently_visible =
-					selected_preset.fields[i].visible_by_default;
+				selected_preset.fields[i].currently_frozen = selected_preset.fields[i].frozen_by_default;
+				selected_preset.fields[i].currently_visible = selected_preset.fields[i].visible_by_default;
 			}
 		}
 		iframe_source_template = selected_preset?.iframes?.length && selected_preset.iframes[0][1] || '';
@@ -134,6 +132,13 @@
 			current_output +
 			`
 `;
+		const values_to_append = [];
+		for (let i = 0; i < current_output.split(';').length; i++) {
+			if ($data.preset_fields_for_duplicate_checking.includes(i)) {
+				values_to_append.push(current_output.split(';')[i]);
+			}
+		}
+		appendToDuplicateCheckingValuesUnsynced($data, values_to_append);
 		if (selected_preset?.fields?.length) {
 			for (let i = 0; i < selected_preset?.fields?.length || 0; i++) {
 				if (!selected_preset?.fields[i].currently_frozen) {
@@ -151,24 +156,22 @@
 
 	$: iframe_with_replacements = selected_preset && iframe_source_template && calculateIframeWithReplacements();
 
+	let cardFormWidth: number;
+	let cardFormAndRelatedHeight: number;
+	let layoutWidth: number;
+	let innerWidth: number;
+	let innerHeight: number;
 
-let cardFormWidth: number;
-let cardFormAndRelatedHeight: number;
-let layoutWidth: number;
-let innerWidth: number;
-let innerHeight: number;
+	$: twoColumnsCondition = layoutWidth - cardFormWidth > 330;
 
-$: twoColumnsCondition = layoutWidth-cardFormWidth>330;
-
-let is_iframe_moved_to_top = false;
-
+	let is_iframe_moved_to_top = false;
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth />
 <div class="w-full" bind:clientWidth={layoutWidth} />
 
 <div class={`flex w-full ${selected_preset?.iframes?.length ? 'w-full' : ''} ${twoColumnsCondition ? 'space-x-0 flex-row' : 'flex-col space-y-10'}`}>
-	<div class='space-y-10 text-center flex flex-col items-center'>
+	<div class="space-y-10 text-center flex flex-col items-center">
 		<h2 class="h2 mt-12">Create a card</h2>
 		{#if $data.presets.length}
 			<!-- TODO -->
@@ -193,7 +196,7 @@ let is_iframe_moved_to_top = false;
 						class={`btn ${
 							selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 						} m-0.5`}
-						on:click={()=>selectPreset(preset)}
+						on:click={() => selectPreset(preset)}
 					>
 						{preset.name}
 					</button>
@@ -208,10 +211,22 @@ let is_iframe_moved_to_top = false;
 				{/if}
 
 				{#if selected_preset?.iframes?.length && is_iframe_moved_to_top}
-					<IframesComponent class="flex-col-reverse" style={`height: calc(calc(100vh - 7rem) - ${cardFormAndRelatedHeight}px);`} bind:iframe_source_template bind:is_moved_to_top={is_iframe_moved_to_top} is_on_side={twoColumnsCondition} {selected_preset} {current_presets_hue_as_number} {iframe_with_replacements} />
+					<IframesComponent
+						class="flex-col-reverse"
+						style={`height: calc(calc(100vh - 7rem) - ${cardFormAndRelatedHeight}px);`}
+						bind:iframe_source_template
+						bind:is_moved_to_top={is_iframe_moved_to_top}
+						is_on_side={twoColumnsCondition}
+						{selected_preset}
+						{current_presets_hue_as_number}
+						{iframe_with_replacements}
+					/>
 				{/if}
 
-				<div bind:clientHeight={cardFormAndRelatedHeight} class="space-y-10 text-center flex flex-col items-center">
+				<div
+					bind:clientHeight={cardFormAndRelatedHeight}
+					class="space-y-10 text-center flex flex-col items-center"
+				>
 					<div class="card p-4 variant-ghost-secondary">
 						force each field visible
 						<button
@@ -229,11 +244,8 @@ let is_iframe_moved_to_top = false;
 							{/if}
 						</button>
 					</div>
-					<form
-						bind:clientWidth={cardFormWidth}
-						on:submit={addNote}
-					>
-						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ?  ' 2.86rem' : ''};`}>
+					<form bind:clientWidth={cardFormWidth} on:submit={addNote}>
+						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ? ' 2.86rem' : ''};`}>
 							{#each selected_preset.fields as field, i}
 								{#if field.currently_visible || currently_all_forced_visible}
 									<div style="display: flex; justify-content: center; align-items: center;">
@@ -298,22 +310,22 @@ let is_iframe_moved_to_top = false;
 									</button>
 									{#if currently_all_forced_visible}
 										<button
-										style="width: 2.574rem;"
-										on:click={() => {
-											field.currently_visible = !field.currently_visible;
-										}}
-										class="btn btn-large {field.currently_visible
-											? `variant-filled${field.visible_by_default ? '' : '-warning'}`
-											: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
-									>
-										<div>
-											{#if field.currently_visible}
-												<i class="fa-solid fa-eye" />
-											{:else}
-												<i class="fa-solid fa-eye-slash" />
-											{/if}
-										</div>
-									</button>
+											style="width: 2.574rem;"
+											on:click={() => {
+												field.currently_visible = !field.currently_visible;
+											}}
+											class="btn btn-large {field.currently_visible
+												? `variant-filled${field.visible_by_default ? '' : '-warning'}`
+												: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
+										>
+											<div>
+												{#if field.currently_visible}
+													<i class="fa-solid fa-eye" />
+												{:else}
+													<i class="fa-solid fa-eye-slash" />
+												{/if}
+											</div>
+										</button>
 									{/if}
 								{/if}
 							{/each}
@@ -344,8 +356,17 @@ let is_iframe_moved_to_top = false;
 			</div>
 		{/if}
 	</div>
-	{#if selected_preset?.iframes?.length && (!is_iframe_moved_to_top || twoColumnsCondition) }
-		<IframesComponent class="mt-10" style="height: calc(100vh - 7rem);" bind:iframe_source_template bind:is_moved_to_top={is_iframe_moved_to_top} is_on_side={twoColumnsCondition} {selected_preset} {current_presets_hue_as_number} {iframe_with_replacements} />
+	{#if selected_preset?.iframes?.length && (!is_iframe_moved_to_top || twoColumnsCondition)}
+		<IframesComponent
+			class="mt-10"
+			style="height: calc(100vh - 7rem);"
+			bind:iframe_source_template
+			bind:is_moved_to_top={is_iframe_moved_to_top}
+			is_on_side={twoColumnsCondition}
+			{selected_preset}
+			{current_presets_hue_as_number}
+			{iframe_with_replacements}
+		/>
 	{/if}
 </div>
 

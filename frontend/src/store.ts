@@ -21,7 +21,7 @@ export const data = writable({
 	duplicate_checking_values_synced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_synced') ?? '[]')) ?? [],
 	note_export_columns_for_duplicate_checking: [0, 1],
 	preset_fields_for_duplicate_checking: [3, 4],
-	duplicate_checking_removed_needles: [/^(de)\s?/, /^(het)\s?/, /^.$/, /^de\/het\s/, /^the\s/],
+	duplicate_checking_removed_needles: [/^(de)\s/, /^(het)\s/, /^.$/, /^de\/het\s/, /^the\s/],
 });
 
 export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
@@ -34,4 +34,15 @@ export function transformTextForDuplicateCheck(text: string, duplicate_checking_
 		}
 	})
 	return text;
+}
+
+export function appendToDuplicateCheckingValuesUnsynced(data: {duplicate_checking_values_unsynced: string[], duplicate_checking_removed_needles: (string|RegExp)[]}, values: string[]) {
+	for (let i=0; i<values.length; i++) {
+		const val = transformTextForDuplicateCheck(values[i], data.duplicate_checking_removed_needles);
+		if (data.duplicate_checking_values_unsynced.includes(val)) {
+			continue;
+		}
+		data.duplicate_checking_values_unsynced.push(val);
+	}
+	localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(data.duplicate_checking_values_unsynced));
 }
