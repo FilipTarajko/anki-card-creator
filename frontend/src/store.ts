@@ -21,7 +21,7 @@ export const data = writable({
 	duplicate_checking_values_synced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_synced') ?? '[]')) ?? [],
 	note_export_columns_for_duplicate_checking: [0, 1],
 	preset_fields_for_duplicate_checking: [3, 4],
-	duplicate_checking_removed_needles: [/^(de)\s?/, /^(het)\s?/, /^.$/],
+	duplicate_checking_removed_needles: [/^(de)\s?/, /^(het)\s?/, /^.$/, /^de\/het\s/, /^the\s/],
 });
 
 export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {

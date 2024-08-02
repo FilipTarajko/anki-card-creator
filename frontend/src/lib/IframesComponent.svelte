@@ -1,6 +1,6 @@
 <script lang="ts">
-    export let iframe_source_template;
-    export let is_moved_to_top;
+    export let iframe_source_template: string;
+    export let is_moved_to_top: boolean;
 
     export let is_on_side;
 
@@ -49,5 +49,5 @@
         </div>
     </div>
     <div style="word-wrap: break-word; line-break:anywhere; max-width: 96%;">{iframe_with_replacements}</div>
-    <iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh;" />
+    <iframe title="iframe" src={iframe_with_replacements} style="width: 96%; height: 100vh; background-color: white;" />
 </div>
