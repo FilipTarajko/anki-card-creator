@@ -33,7 +33,7 @@
 		for (let i = 0; i < rows.length; i++) {
 			rowsParsed.push(rows[i].split("\t"));
 		}
-		const indices = [0, rowsParsed.length*0.75, rowsParsed.length*0.5, rowsParsed.length*0.75, rowsParsed.length-1]
+		const indices = [0, rowsParsed.length*0.25, rowsParsed.length*0.5, rowsParsed.length*0.75, rowsParsed.length-1]
 		firstFields = [];
 		indices.forEach(i => {
 			firstFields.push(rowsParsed[Math.round(i)]);
