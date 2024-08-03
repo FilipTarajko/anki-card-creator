@@ -30,6 +30,8 @@ export const data = writable({
 	noteAddingMode: (browser && window.localStorage.getItem('noteAddingMode')) ?? NoteAddingMode.FROM_SCRATCH,
 	currentlyWrittenPrompt: (browser && window.localStorage.getItem('currentlyWrittenPrompt')) ?? '',
 	prompts_unsynced: (browser && JSON.parse(window.localStorage.getItem('prompts_unsynced') ?? '[]')) ?? [],
+	shouldKeepPrompt: (browser && JSON.parse(window.localStorage.getItem('shouldKeepPrompt') ?? 'true')),
+	promptedFieldIndex: 3,
 });
 
 export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {

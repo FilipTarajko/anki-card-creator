@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast } from '../store';
+	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast } from '../store';
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
 
@@ -124,11 +124,23 @@
 	}
 
 	function addPrompt() {
+		if (!$data.currentlyWrittenPrompt) {
+			showErrorToast($data.toastStore, 'Cannot add empty prompt!');
+			return;
+		}
 		showSuccessToast($data.toastStore, 'Prompt added!');
 		$data.prompts_unsynced.push($data.currentlyWrittenPrompt);
-		localStorage.setItem('prompts_unsynced', JSON.stringify($data.prompts_unsynced));
+		rememberPromptsUnsynced();
 		$data.currentlyWrittenPrompt = '';
 		rememberCurrentlyWrittenPrompt();
+	}
+
+	function rememberPromptsUnsynced() {
+		localStorage.setItem('prompts_unsynced', JSON.stringify($data.prompts_unsynced));
+	}
+
+	function rememberShouldKeepPrompt() {
+		localStorage.setItem('shouldKeepPrompt', $data.shouldKeepPrompt);
 	}
 
 	function addNote() {
@@ -154,6 +166,14 @@
 			}
 		}
 		localStorage.setItem('notes_unsynced', $data.notes_unsynced);
+
+		if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
+			if (!$data.shouldKeepPrompt) {
+				$data.prompts_unsynced.shift();
+				rememberPromptsUnsynced();
+			}
+			selectNoteAddingMode(NoteAddingMode.FROM_PROMPT);
+		}
 	}
 
 	// @ts-ignore
@@ -244,6 +264,10 @@
 	function selectNoteAddingMode(mode: NoteAddingMode) {
 		$data.noteAddingMode = mode;
 		localStorage.setItem('noteAddingMode', mode);
+		if (mode === NoteAddingMode.FROM_PROMPT) {
+			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.prompts_unsynced[0] ?? '';
+			rememberCurrentPreset();
+		}
 	}
 </script>
 
@@ -346,6 +370,9 @@
 						</button>
 					</div>
 					<form bind:clientWidth={cardFormWidth} on:submit={addNote}>
+						{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
+							<span style={$data.prompts_unsynced.length ? 'color: rgb(100, 200, 200)' : 'color: rgb(255, 100, 100);'}>{ $data.prompts_unsynced[0] ?? 'no prompts left!' }</span>
+						{/if}
 						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${$data.currently_all_forced_visible ? ' 2.86rem' : ''};`}>
 							{#each $data.current_preset_for_notes.fields as field, i}
 								{#if field.currently_visible || $data.currently_all_forced_visible}
@@ -437,6 +464,18 @@
 									{/if}
 								{/if}
 							{/each}
+							{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
+								<div class="mt-2" style="display: flex; justify-content: center; align-items: center;">
+									{"prompt"}
+								</div>
+								<RadioGroup class="mt-2">
+									{#each [{label: "keep", value: true}, {label: "destroy", value: false}] as option}
+										<RadioItem bind:group={$data.shouldKeepPrompt} on:change={rememberShouldKeepPrompt} name="shouldKeepPrompt" value={option.value}
+											>{option.label}</RadioItem
+										>
+									{/each}
+								</RadioGroup>
+							{/if}
 						</div>
 						<button
 							type="submit"
