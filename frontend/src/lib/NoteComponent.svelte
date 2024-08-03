@@ -3,6 +3,7 @@
 	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast } from '../store';
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
+	import axios from 'axios';
 
 	let current_output: string = '';
 
@@ -140,6 +141,9 @@
 	function addPrompt(prompt: string) {
 		if (!prompt) {
 			showErrorToast($data.toastStore, 'Cannot add empty prompt!');
+			return;
+		} else if ($data.prompts_unsynced.includes(prompt)) {
+			showErrorToast($data.toastStore, 'Prompt already exists!');
 			return;
 		}
 		showSuccessToast($data.toastStore, 'Prompt added!');
@@ -291,10 +295,50 @@
 	function selectNoteAddingMode(mode: NoteAddingMode) {
 		$data.noteAddingMode = mode;
 		localStorage.setItem('noteAddingMode', mode);
-		if (mode === NoteAddingMode.FROM_PROMPT) {
+		if (mode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
 			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.prompts_unsynced[0] ?? '';
 			rememberCurrentPreset();
 		}
+	}
+
+	function delete_all_prompts() {
+		$data.prompts_unsynced = [];
+		localStorage.setItem('prompts_unsynced', '[]');
+		$data.prompts_deleted = $data.prompts_synced;
+		localStorage.setItem('prompts_deleted', $data.prompts_synced);
+		sync_prompts();
+	}
+
+	function delete_local_prompts() {
+		$data.prompts_unsynced = [];
+		localStorage.setItem('prompts_unsynced', '[]');
+	}
+
+	function sync_prompts() {
+		const data = JSON.stringify([
+			$data.prompts_unsynced,
+			$data.prompts_deleted,
+		]);
+		axios
+			.post($data.backend_url + '/sync_prompts', data, {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				$data.prompts_synced = response.data;
+				localStorage.setItem('prompts_synced', JSON.stringify($data.prompts_synced));
+				$data.prompts_unsynced = [];
+				localStorage.setItem('prompts_unsynced', '[]');
+				$data.prompts_deleted = [];
+				localStorage.setItem('prompts_deleted', '[]');
+				showSuccessToast($data.toastStore, "Synced prompts");
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast($data.toastStore, "Prompts sync failed!");
+			});
 	}
 </script>
 
@@ -533,14 +577,6 @@
 					</button>
 				</form>
 
-				<div>
-					{#if $data.prompts_unsynced.length }
-						saved prompts: "{ $data.prompts_unsynced.join('", "') }"
-					{:else}
-						no saved prompts
-					{/if}
-				</div>
-
 				<h2 class='h2'>Add multiple prompts</h2>
 				<form on:submit={addPromptsFromList}>
 					<label class="flex items-center justify-between w-full">
@@ -567,6 +603,38 @@
 						add prompt
 					</button>
 				</form>
+
+				<div style="color: yellow">
+					{#if $data.prompts_unsynced.length }
+						unsynced prompts: "{ $data.prompts_unsynced.join('", "') }"
+					{:else}
+						no unsynced prompts
+					{/if}
+				</div>
+
+				<div style="color: green">
+					{#if $data.prompts_synced.length }
+						synced prompts: "{ $data.prompts_synced.join('", "') }"
+					{:else}
+						no synced prompts
+					{/if}
+				</div>
+
+				<div style="color: red">
+					{#if $data.prompts_deleted.length }
+						prompts for sync deleting: "{ $data.prompts_deleted.join('", "') }"
+					{:else}
+						no promps for sync deleting
+					{/if}
+				</div>
+				<div class="flex flex-row w-full justify-center gap-2">
+					<button class="btn variant-filled-primary" on:click={delete_all_prompts}>delete all</button>
+					<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
+					<button class="btn-icon variant-filled-success" on:click={sync_prompts}>
+						<i class="fa-solid fa-rotate" />
+					</button>
+				</div>
+
 			{/if}
 		{:else}
 			<div class="card mt-12 variant-ghost-warning p-4">

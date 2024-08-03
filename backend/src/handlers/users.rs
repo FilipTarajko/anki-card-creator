@@ -30,6 +30,7 @@ pub struct User {
     pub notes: String,
     pub presets: Vec<Preset>,
     pub unique_questions: Vec<String>,
+    pub prompts: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -63,6 +64,7 @@ pub async fn register_user(
         notes: "".to_string(),
         presets: vec![],
         unique_questions: vec![],
+        prompts: vec![],
     };
 
     let email_regex = Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();

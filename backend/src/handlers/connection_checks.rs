@@ -25,6 +25,7 @@ pub async fn add_test_user(State(client): State<Client>) -> Html<&'static str> {
         notes: "".to_string(),
         presets: vec![],
         unique_questions: vec![],
+        prompts: vec![],
     };
 
     let collection: Collection<User> = client

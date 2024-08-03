@@ -8,6 +8,7 @@ use mongodb::bson::Bson;
 use mongodb::{bson::doc, Client, Collection};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 use crate::handlers::jwt::get_user_by_jwt;
 use crate::handlers::users::User;
@@ -142,6 +143,10 @@ fn append_unique_elements_to_vector<T: std::cmp::PartialEq>(mut vec1: Vec<T>, ve
     vec1
 }
 
+fn remove_common_elements_from_vector<T: std::cmp::Eq + std::cmp::Ord + std::clone::Clone>(vec1: Vec<T>, vec2: Vec<T>) -> Vec<T> {
+    BTreeSet::from_iter(vec1).difference(&BTreeSet::from_iter(vec2)).cloned().collect()
+}
+
 pub async fn sync_unique_questions(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
@@ -167,6 +172,33 @@ pub async fn sync_unique_questions(
         .unwrap()
         .unwrap();
     Json(loaded_user.unique_questions)
+}
+
+pub async fn sync_prompts(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+    Json((prompts_to_add, prompts_to_delete)): Json<(Vec<String>, Vec<String>)>,
+) -> Json<Vec<String>> {
+    let authenticated_user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    user_collection
+        .update_one(
+            doc! {"_id": authenticated_user.id.unwrap()},
+            doc! {"$set": {"prompts": append_unique_elements_to_vector(remove_common_elements_from_vector(authenticated_user.prompts, prompts_to_delete), prompts_to_add)}},
+            None,
+        )
+        .await
+        .unwrap();
+    let loaded_user = user_collection
+        .find_one(doc! {"_id": authenticated_user.id.unwrap()}, None)
+        .await
+        .unwrap()
+        .unwrap();
+    Json(loaded_user.prompts)
 }
 
 pub async fn delete_unique_questions(
