@@ -10,6 +10,10 @@
 
 	function tryUpdateUniquenessEntriesFromFile(shouldSave: boolean, shouldAppend: boolean = true) {
 		console.time("tryReadFile")
+		if (!fileForUniqueness?.length) {
+			showErrorToast($data.toastStore, "No file selected!");
+			return;
+		}
 		const file = fileForUniqueness[0]
 		const reader = new FileReader()
 		reader.onload = (e) => {
@@ -19,6 +23,7 @@
 				if (shouldSave) {
 					$data.duplicate_checking_values_unsynced = result;
 					localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(result));
+					showSuccessToast($data.toastStore, shouldAppend ? "Appended to unique question list" : "Overwritten unique questions list");
 				}
 			}
 		}
@@ -83,6 +88,7 @@
 	function deleteLocalUniquenessEntries() {
 		$data.duplicate_checking_values_unsynced = [];
 		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
+		showSuccessToast($data.toastStore, "Deleted unsynced unique questions list");
 	}
 
 	function sync_unique_questions() {
@@ -100,9 +106,11 @@
 				localStorage.setItem('duplicate_checking_values_synced', JSON.stringify($data.duplicate_checking_values_synced));
 				$data.duplicate_checking_values_unsynced = [];
 				localStorage.setItem('duplicate_checking_values_unsynced', '[]');
+				showSuccessToast($data.toastStore, "Synced unique question list");
 			})
 			.catch((error) => {
 				console.error(error);
+				showErrorToast($data.toastStore, "Unique question list sync failed!");
 			});
 	}
 </script>
