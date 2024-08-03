@@ -202,18 +202,23 @@
 
 		if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
 			if (!$data.shouldKeepPrompt) {
-				if ($data.prompts_synced.length) {
-					let prompt = $data.prompts_synced.shift();
-					rememberPromptsSynced();
-					$data.prompts_deleted.push(prompt);
-					rememberPromptsDeleted();
-				} else {
-					$data.prompts_unsynced.shift();
-					rememberPromptsUnsynced();
-				}
+				deleteFirstPrompt()
 			}
 			selectNoteAddingMode(NoteAddingMode.FROM_PROMPT);
 		}
+	}
+
+	function deleteFirstPrompt() {
+		if ($data.prompts_synced.length) {
+			let prompt = $data.prompts_synced.shift();
+			rememberPromptsSynced();
+			$data.prompts_deleted.push(prompt);
+			rememberPromptsDeleted();
+		} else {
+			$data.prompts_unsynced.shift();
+			rememberPromptsUnsynced();
+		}
+		selectNoteAddingMode(NoteAddingMode.FROM_PROMPT);
 	}
 
 	// @ts-ignore
@@ -276,6 +281,11 @@
 			} else if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "k") {
 				$data.shouldKeepPrompt = true;
 				rememberShouldKeepPrompt();
+			}
+		}
+		else if (event.altKey && !event.ctrlKey && event.shiftKey) {
+			if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "D") {
+				deleteFirstPrompt();
 			}
 		}
 		else if (event.key == "ArrowUp" && event.target.type == "text") {
@@ -563,6 +573,15 @@
 								</RadioGroup>
 							{/if}
 						</div>
+						{#if $data.noteAddingMode == NoteAddingMode.FROM_PROMPT}
+							<button
+								type="button"
+								on:click={deleteFirstPrompt}
+								class="btn btn-large variant-filled-primary"
+							>
+								delete prompt
+							</button>
+						{/if}
 						<button
 							type="submit"
 							style="margin-top: 0.858rem;"
