@@ -107,8 +107,11 @@
 				str = str.replace(new RegExp(`\\$\{${field.name}[^\}]*\}`), toReplaceWith);
 			}
 		}
+		debounce(()=>{debounced_iframe_src = str})
 		return str;
 	};
+
+	let debounced_iframe_src = ""
 
 	let iframe_source_template = '';
 
@@ -154,7 +157,17 @@
 	// @ts-ignore
 	$: current_presets_hue_as_number = Math.floor(selected_preset?.hue || 0);
 
-	$: iframe_with_replacements = selected_preset && iframe_source_template && calculateIframeWithReplacements();
+	let debounceTimeout: ReturnType<typeof setTimeout>;
+	function debounce(callback: Function, delay: number = 200) {
+		// console.log("clearing previous timeout")
+		clearTimeout(debounceTimeout);
+		debounceTimeout = setTimeout(()=>{
+			console.log("debounced")
+			callback()
+		}, delay);
+	}
+
+	$: selected_preset && iframe_source_template && calculateIframeWithReplacements();
 
 	let cardFormWidth: number;
 	let cardFormAndRelatedHeight: number;
@@ -219,7 +232,7 @@
 						is_on_side={twoColumnsCondition}
 						{selected_preset}
 						{current_presets_hue_as_number}
-						{iframe_with_replacements}
+						iframe_with_replacements={debounced_iframe_src}
 					/>
 				{/if}
 
@@ -365,7 +378,7 @@
 			is_on_side={twoColumnsCondition}
 			{selected_preset}
 			{current_presets_hue_as_number}
-			{iframe_with_replacements}
+			iframe_with_replacements={debounced_iframe_src}
 		/>
 	{/if}
 </div>
