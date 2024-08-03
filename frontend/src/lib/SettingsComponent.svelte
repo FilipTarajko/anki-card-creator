@@ -7,14 +7,14 @@
 	let fileForUniqueness: any;
 	let firstFields: string[][] = [];
 
-	function tryReadFile(shouldSave: boolean) {
+	function tryUpdateUniquenessEntriesFromFile(shouldSave: boolean, shouldAppend: boolean = true) {
 		console.time("tryReadFile")
 		const file = fileForUniqueness[0]
 		const reader = new FileReader()
 		reader.onload = (e) => {
 			const data = e?.target?.result
 			if (data as string && typeof data == "string") {
-				const result = tryParseStringFromFile(data);
+				const result = tryCreateNewUniquenessStateFromFile(data, shouldAppend);
 				if (shouldSave) {
 					$data.duplicate_checking_values_unsynced = result;
 					localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(result));
@@ -25,7 +25,7 @@
 		console.timeEnd("tryReadFile")
 	}
 
-	function tryParseStringFromFile(text: string): string[] {
+	function tryCreateNewUniquenessStateFromFile(text: string, shouldAppend: boolean = true): string[] {
 		console.time("tryParseStringFromFile")
 		const rows = text.split("\n").slice(2);
 		rows.pop();
@@ -38,7 +38,12 @@
 		indices.forEach(i => {
 			firstFields.push(rowsParsed[Math.round(i)]);
 		});
-		const result: Set<string> = new Set()
+		let result: Set<string>
+		if (shouldAppend) {
+			result = new Set($data.duplicate_checking_values_unsynced);
+		} else {
+			result = new Set();
+		}
 		for (let i = 0; i < rowsParsed.length; i++) {
 			const row = rowsParsed[i];
 			for (let j = 0; j < row.length; j++) {
@@ -52,6 +57,11 @@
 		console.timeEnd("tryParseStringFromFile")
 		return Array.from(result);
 	}
+
+	function deleteLocalUniquenessEntries() {
+		$data.duplicate_checking_values_unsynced = [];
+		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
+	}
 </script>
 
 <h2 class="h2 mt-12">Settings</h2>
@@ -59,10 +69,14 @@
 <LightSwitch />
 <h3 class="h3">Note field duplication warning</h3>
 <img alt="export options" src="/ankiToCC.png">
-<form class="flex flex-col gap-4 card p-4 w-3/4 max-w-2xl">
+<form class="flex flex-col gap-4 card p-4 w-3/4 max-w-2xl items-center">
 	File for uniqueness checks:
-	<input bind:files={fileForUniqueness} on:change={()=>{tryReadFile(false)}} type="file">
-	<button class="btn variant-filled" on:click={()=>{tryReadFile(true)}}>save</button>
+	<input bind:files={fileForUniqueness} on:change={()=>{tryUpdateUniquenessEntriesFromFile(false)}} type="file">
+	<div class="flex flex-row w-full justify-center gap-2">
+		<button class="btn variant-filled-error" on:click={deleteLocalUniquenessEntries}>delete unsynced</button>
+		<button class="btn variant-filled-warning" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true, false)}}>overwrite</button>
+		<button class="btn variant-filled-success" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true)}}>append</button>
+	</div>
 	<table>
 		{#each firstFields as row}
 			<tr>
