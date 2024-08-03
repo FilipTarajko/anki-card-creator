@@ -17,8 +17,6 @@
 		});
 	}
 
-	let currently_all_forced_visible: boolean = false;
-	let selected_preset: Preset | null = null;
 	let current_output: string = '';
 
 	function sanitize(text: String) {
@@ -33,12 +31,12 @@
 	}
 
 	// @ts-ignore
-	$: did_current_preset_change = (selected_preset ?? false) && !$data.presets.some((preset: Preset) => preset.last_edited === selected_preset?.last_edited);
+	$: did_current_preset_change = $data.current_preset_for_notes && !$data.presets.some((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
 
 	$: {
-		if (selected_preset) {
+		if ($data.current_preset_for_notes) {
 			let output = '';
-			selected_preset.fields.forEach((field) => {
+			$data.current_preset_for_notes.fields.forEach((field: Field) => {
 				if (field.type == 'bound') {
 					// @ts-ignore
 					output += sanitize(calculate_result_of_bound_field(field));
@@ -52,15 +50,15 @@
 	}
 
 	function calculate_result_of_bound_field(field: Field) {
-		if (!field.bindings || !selected_preset?.fields) {
+		if (!field.bindings || !$data.current_preset_for_notes?.fields) {
 			field.current_inputs = [structuredClone(field.default)[0]];
 			return field.default[0];
 		}
 
 		let binding_value = null;
-		for (let i = 0; i < selected_preset?.fields?.length; i++) {
-			if (field.bound_to == selected_preset?.fields[i].id) {
-				binding_value = selected_preset?.fields[i].current_inputs[0];
+		for (let i = 0; i < $data.current_preset_for_notes?.fields?.length; i++) {
+			if (field.bound_to == $data.current_preset_for_notes?.fields[i].id) {
+				binding_value = $data.current_preset_for_notes?.fields[i].current_inputs[0];
 				break;
 			}
 		}
@@ -84,12 +82,12 @@
 	}
 
 	function calculateIframeWithReplacements() {
-		if (!selected_preset || !iframe_source_template) {
+		if (!$data.current_preset_for_notes || !iframe_source_template) {
 			return '';
 		}
 		let str = iframe_source_template;
-		for (let i = 0; i < selected_preset.fields.length; i++) {
-			const field = selected_preset.fields[i];
+		for (let i = 0; i < $data.current_preset_for_notes.fields.length; i++) {
+			const field = $data.current_preset_for_notes.fields[i];
 			while (str.match(`\\$\{${field.name}[^\}]*\}`)) {
 				const match = str.match(`\\$\{${field.name}[^\}]*\}`);
 				let toReplaceWith = '';
@@ -116,17 +114,22 @@
 	let iframe_source_template = '';
 
 	function selectPreset(preset: Preset) {
-		selected_preset = JSON.parse(JSON.stringify(preset));
-		if (selected_preset) {
-			for (let i = 0; i < selected_preset.fields.length; i++) {
-				selected_preset.fields[i].current_inputs = JSON.parse(
-					JSON.stringify(selected_preset?.fields[i].default)
+		$data.current_preset_for_notes = JSON.parse(JSON.stringify(preset));
+		if ($data.current_preset_for_notes) {
+			for (let i = 0; i < $data.current_preset_for_notes.fields.length; i++) {
+				$data.current_preset_for_notes.fields[i].current_inputs = JSON.parse(
+					JSON.stringify($data.current_preset_for_notes?.fields[i].default)
 				);
-				selected_preset.fields[i].currently_frozen = selected_preset.fields[i].frozen_by_default;
-				selected_preset.fields[i].currently_visible = selected_preset.fields[i].visible_by_default;
+				$data.current_preset_for_notes.fields[i].currently_frozen = $data.current_preset_for_notes.fields[i].frozen_by_default;
+				$data.current_preset_for_notes.fields[i].currently_visible = $data.current_preset_for_notes.fields[i].visible_by_default;
 			}
 		}
-		iframe_source_template = selected_preset?.iframes?.length && selected_preset.iframes[0][1] || '';
+		localStorage.setItem('current_preset_for_notes', JSON.stringify($data.current_preset_for_notes));
+		iframe_source_template = $data.current_preset_for_notes?.iframes?.length && $data.current_preset_for_notes.iframes[0][1] || '';
+	}
+
+	function rememberCurrentPreset() {
+		localStorage.setItem('current_preset_for_notes', JSON.stringify($data.current_preset_for_notes));
 	}
 
 	function addNote() {
@@ -142,11 +145,11 @@
 			}
 		}
 		appendToDuplicateCheckingValuesUnsynced($data, values_to_append);
-		if (selected_preset?.fields?.length) {
-			for (let i = 0; i < selected_preset?.fields?.length || 0; i++) {
-				if (!selected_preset?.fields[i].currently_frozen) {
-					selected_preset.fields[i].current_inputs = JSON.parse(
-						JSON.stringify(selected_preset?.fields[i].default)
+		if ($data.current_preset_for_notes?.fields?.length) {
+			for (let i = 0; i < $data.current_preset_for_notes?.fields?.length || 0; i++) {
+				if (!$data.current_preset_for_notes?.fields[i].currently_frozen) {
+					$data.current_preset_for_notes.fields[i].current_inputs = JSON.parse(
+						JSON.stringify($data.current_preset_for_notes?.fields[i].default)
 					);
 				}
 			}
@@ -155,7 +158,7 @@
 	}
 
 	// @ts-ignore
-	$: current_presets_hue_as_number = Math.floor(selected_preset?.hue || 0);
+	$: current_presets_hue_as_number = Math.floor($data.current_preset_for_notes?.hue || 0);
 
 	let debounceTimeout: ReturnType<typeof setTimeout>;
 	function debounce(callback: Function, delay: number = 200) {
@@ -167,7 +170,7 @@
 		}, delay);
 	}
 
-	$: selected_preset && iframe_source_template && calculateIframeWithReplacements();
+	$: $data.current_preset_for_notes && iframe_source_template && calculateIframeWithReplacements();
 
 	let cardFormWidth: number;
 	let cardFormAndRelatedHeight: number;
@@ -183,7 +186,7 @@
 <svelte:window bind:innerHeight bind:innerWidth />
 <div class="w-full" bind:clientWidth={layoutWidth} />
 
-<div class={`flex w-full ${selected_preset?.iframes?.length ? 'w-full' : ''} ${twoColumnsCondition ? 'space-x-0 flex-row' : 'flex-col space-y-10'}`}>
+<div class={`flex w-full ${$data.current_preset_for_notes?.iframes?.length ? 'w-full' : ''} ${twoColumnsCondition ? 'space-x-0 flex-row' : 'flex-col space-y-10'}`}>
 	<div class="space-y-10 text-center flex flex-col items-center">
 		<h2 class="h2 mt-12">Create a card</h2>
 		{#if $data.presets.length}
@@ -191,8 +194,8 @@
 			<!-- <RadioGroup class="card">
 				{#each $data.presets as preset}
 					<RadioItem
-						class={`${selected_preset?.name !== preset.name ? 'variant-ghost' : ''}`}
-						bind:group={selected_preset}
+						class={`${$data.current_preset_for_notes?.name !== preset.name ? 'variant-ghost' : ''}`}
+						bind:group={$data.current_preset_for_notes}
 						name="type"
 						value={preset}>{preset.name}</RadioItem
 					>
@@ -202,12 +205,12 @@
 				{#each $data.presets as preset}
 					<button
 						style={`color: hsl(${preset.hue} ${
-							selected_preset?.name == preset.name
+							$data.current_preset_for_notes?.name == preset.name
 								? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
 								: '70% 50%);'
 						}`}
 						class={`btn ${
-							selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+							$data.current_preset_for_notes?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 						} m-0.5`}
 						on:click={() => selectPreset(preset)}
 					>
@@ -216,21 +219,21 @@
 				{/each}
 			</div>
 
-			{#if selected_preset}
+			{#if $data.current_preset_for_notes}
 				{#if did_current_preset_change}
 					<div class="card p-4 variant-ghost-error">
 						The current preset has been updated! To load the changes, press its name again. Current input will be lost!
 					</div>
 				{/if}
 
-				{#if selected_preset?.iframes?.length && is_iframe_moved_to_top}
+				{#if $data.current_preset_for_notes?.iframes?.length && is_iframe_moved_to_top}
 					<IframesComponent
 						class="flex-col-reverse"
 						style={`height: calc(calc(100vh - 7rem) - ${cardFormAndRelatedHeight}px);`}
 						bind:iframe_source_template
 						bind:is_moved_to_top={is_iframe_moved_to_top}
 						is_on_side={twoColumnsCondition}
-						{selected_preset}
+						selected_preset={$data.current_preset_for_notes}
 						{current_presets_hue_as_number}
 						iframe_with_replacements={debounced_iframe_src}
 					/>
@@ -244,13 +247,14 @@
 						force each field visible
 						<button
 							type="button"
-							class={`btn-icon variant-filled${currently_all_forced_visible ? '-warning' : ''}`}
+							class={`btn-icon variant-filled${$data.currently_all_forced_visible ? '-warning' : ''}`}
 							style="font-weight: bold;"
 							on:click={() => {
-								currently_all_forced_visible = !currently_all_forced_visible;
+								$data.currently_all_forced_visible = !$data.currently_all_forced_visible;
+								localStorage.setItem('currently_all_forced_visible', $data.currently_all_forced_visible);
 							}}
 						>
-							{#if currently_all_forced_visible}
+							{#if $data.currently_all_forced_visible}
 								<i class="fa-solid fa-eye" />
 							{:else}
 								<i class="fa-solid fa-eye-slash" />
@@ -258,9 +262,9 @@
 						</button>
 					</div>
 					<form bind:clientWidth={cardFormWidth} on:submit={addNote}>
-						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${currently_all_forced_visible ? ' 2.86rem' : ''};`}>
-							{#each selected_preset.fields as field, i}
-								{#if field.currently_visible || currently_all_forced_visible}
+						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${$data.currently_all_forced_visible ? ' 2.86rem' : ''};`}>
+							{#each $data.current_preset_for_notes.fields as field, i}
+								{#if field.currently_visible || $data.currently_all_forced_visible}
 									<div style="display: flex; justify-content: center; align-items: center;">
 										{field.name}
 									</div>
@@ -272,11 +276,12 @@
 												$data.duplicate_checking_values_unsynced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)))
 												? "color: rgb(200, 0, 0);" : ""}
 											bind:value={field.current_inputs[0]}
+											on:input={rememberCurrentPreset}
 										/>
 									{:else if field.type === 'selectOne'}
 										<RadioGroup>
 											{#each field.options as option}
-												<RadioItem bind:group={field.current_inputs[0]} name="type" value={option}
+												<RadioItem bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
 													>{option || '(empty)'}</RadioItem
 												>
 											{/each}
@@ -285,7 +290,7 @@
 										<ListBox multiple>
 											<div class="card" style="display: flex; flex-direction: row;">
 												{#each field.options as option}
-													<ListBoxItem bind:group={field.current_inputs} name="type" value={option}
+													<ListBoxItem bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
 														>{option || '(empty)'}</ListBoxItem
 													>
 												{/each}
@@ -302,6 +307,7 @@
 										type="button"
 										on:click={() => {
 											field.current_inputs = JSON.parse(JSON.stringify(field.default));
+											rememberCurrentPreset();
 										}}
 									>
 										<abbr title={`reset to '${field.default}'`}
@@ -314,6 +320,7 @@
 										type="button"
 										on:click={() => {
 											field.currently_frozen = !field.currently_frozen;
+											rememberCurrentPreset();
 										}}
 									>
 										<abbr title={`reset to '${field.default}'`}>
@@ -324,11 +331,12 @@
 											{/if}
 										</abbr>
 									</button>
-									{#if currently_all_forced_visible}
+									{#if $data.currently_all_forced_visible}
 										<button
 											style="width: 2.574rem;"
 											on:click={() => {
 												field.currently_visible = !field.currently_visible;
+												rememberCurrentPreset();
 											}}
 											class="btn btn-large {field.currently_visible
 												? `variant-filled${field.visible_by_default ? '' : '-warning'}`
@@ -372,14 +380,14 @@
 			</div>
 		{/if}
 	</div>
-	{#if selected_preset?.iframes?.length && (!is_iframe_moved_to_top || twoColumnsCondition)}
+	{#if $data.current_preset_for_notes?.iframes?.length && (!is_iframe_moved_to_top || twoColumnsCondition)}
 		<IframesComponent
 			class="mt-10"
 			style="height: calc(100vh - 7rem);"
 			bind:iframe_source_template
 			bind:is_moved_to_top={is_iframe_moved_to_top}
 			is_on_side={twoColumnsCondition}
-			{selected_preset}
+			selected_preset={$data.current_preset_for_notes}
 			{current_presets_hue_as_number}
 			iframe_with_replacements={debounced_iframe_src}
 		/>
