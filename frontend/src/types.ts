@@ -32,3 +32,9 @@ export enum BindingType {
 	ENDS = 'ends',
 	REGEX = 'regex',
 };
+
+export enum NoteAddingMode {
+	FROM_SCRATCH = 'from scratch',
+	FROM_PROMPT = 'from prompt',
+	NEW_PROMPT = 'new prompt',
+}

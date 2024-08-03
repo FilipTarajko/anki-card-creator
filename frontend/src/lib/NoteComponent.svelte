@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast } from '../store';
-	import { BindingType, type Field, type Preset } from '../types';
+	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
 
 	let current_output: string = '';
@@ -119,6 +119,18 @@
 		localStorage.setItem('current_preset_for_notes', JSON.stringify($data.current_preset_for_notes));
 	}
 
+	function rememberCurrentlyWrittenPrompt() {
+		localStorage.setItem('currentlyWrittenPrompt', $data.currentlyWrittenPrompt || '')
+	}
+
+	function addPrompt() {
+		showSuccessToast($data.toastStore, 'Prompt added!');
+		$data.prompts_unsynced.push($data.currentlyWrittenPrompt);
+		localStorage.setItem('prompts_unsynced', JSON.stringify($data.prompts_unsynced));
+		$data.currentlyWrittenPrompt = '';
+		rememberCurrentlyWrittenPrompt();
+	}
+
 	function addNote() {
 		showSuccessToast($data.toastStore, 'Note added!');
 		$data.notes_unsynced +=
@@ -228,14 +240,38 @@
 			}
 		}
 	}
+
+	function selectNoteAddingMode(mode: NoteAddingMode) {
+		$data.noteAddingMode = mode;
+		localStorage.setItem('noteAddingMode', mode);
+	}
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth />
 <div class="w-full" bind:clientWidth={layoutWidth} />
 
 <div class={`flex w-full ${$data.current_preset_for_notes?.iframes?.length ? 'w-full' : ''} ${twoColumnsCondition ? 'space-x-0 flex-row' : 'flex-col space-y-10'}`}>
-	<div class="space-y-10 text-center flex flex-col items-center">
+	<div class="space-y-4 text-center flex flex-col items-center">
 		<h2 class="h2 mt-12">Create a card</h2>
+
+		<div class="card p-2 ml-6 mr-6">
+			{#each Object.values(NoteAddingMode) as noteAddingMode, i}
+				<button
+					style={`color: hsl(${120+i*40} ${
+						$data.noteAddingMode == noteAddingMode
+							? '100% 20%); background-color: hsl(' + 120+i*40 + ' 100% 87%);'
+							: '70% 50%);'
+					}`}
+					class={`btn ${
+						$data.current_preset_for_notes?.name == noteAddingMode ? 'variant-filled' : 'variant-ghost'
+					} m-0.5`}
+					on:click={() => selectNoteAddingMode(noteAddingMode)}
+				>
+					{noteAddingMode}
+				</button>
+			{/each}
+		</div>
+
 		{#if $data.presets.length}
 			<!-- TODO -->
 			<!-- <RadioGroup class="card">
@@ -248,6 +284,7 @@
 					>
 				{/each}
 			</RadioGroup> -->
+			{#if ($data.noteAddingMode === NoteAddingMode.FROM_SCRATCH || $data.noteAddingMode === NoteAddingMode.FROM_PROMPT)}
 			<div class="card p-2 ml-6 mr-6">
 				{#each $data.presets as preset}
 					<button
@@ -265,8 +302,9 @@
 					</button>
 				{/each}
 			</div>
+			{/if}
 
-			{#if $data.current_preset_for_notes}
+			{#if $data.current_preset_for_notes && ($data.noteAddingMode === NoteAddingMode.FROM_SCRATCH || $data.noteAddingMode === NoteAddingMode.FROM_PROMPT)}
 				{#if did_current_preset_change}
 					<div class="card p-4 variant-ghost-error">
 						The current preset has been updated! To load the changes, press its name again. Current input will be lost!
@@ -288,9 +326,9 @@
 
 				<div
 					bind:clientHeight={cardFormAndRelatedHeight}
-					class="space-y-10 text-center flex flex-col items-center"
+					class="space-y-4 text-center flex flex-col items-center"
 				>
-					<div class="card p-4 variant-ghost-secondary">
+					<div class="card p-3 variant-ghost-secondary">
 						force each field visible
 						<button
 							type="button"
@@ -410,6 +448,25 @@
 						current result: <br><span>{current_output}</span>
 					</div>
 				</div>
+			{/if}
+			{#if $data.noteAddingMode === NoteAddingMode.NEW_PROMPT}
+				<form on:submit={addPrompt}>
+					<label>new prompt
+						<input
+							type="text"
+							bind:value={$data.currentlyWrittenPrompt}
+							on:keydown={rememberCurrentlyWrittenPrompt}
+						>
+					</label>
+					<button
+						type="submit"
+						style="margin-top: 0.858rem;"
+						class="btn btn-large variant-filled-success"
+					>
+						add prompt
+					</button>
+				</form>
+				saved prompts: { $data.prompts_unsynced.join(', ') }
 			{/if}
 		{:else}
 			<div class="card mt-12 variant-ghost-warning p-4">
