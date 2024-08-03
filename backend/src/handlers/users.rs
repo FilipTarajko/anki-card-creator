@@ -29,6 +29,7 @@ pub struct User {
     pub failed_login_attempts: i32,
     pub notes: String,
     pub presets: Vec<Preset>,
+    pub unique_questions: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -61,6 +62,7 @@ pub async fn register_user(
         failed_login_attempts: 0,
         notes: "".to_string(),
         presets: vec![],
+        unique_questions: vec![],
     };
 
     let email_regex = Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();

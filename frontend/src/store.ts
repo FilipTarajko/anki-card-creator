@@ -17,8 +17,8 @@ export const data = writable({
 	id: (browser && window.localStorage.getItem('id')) || '',
 	display_csv_headers:
 		(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false,
-	duplicate_checking_values_unsynced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_unsynced') ?? '[]')) ?? [],
 	duplicate_checking_values_synced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_synced') ?? '[]')) ?? [],
+	duplicate_checking_values_unsynced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_unsynced') ?? '[]')) ?? [],
 	note_export_columns_for_duplicate_checking: [0, 1],
 	preset_fields_for_duplicate_checking: [3, 4],
 	duplicate_checking_removed_needles: [/^(de)\s/, /^(het)\s/, /^.$/, /^de\/het\s/, /^the\s/],

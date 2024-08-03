@@ -24,6 +24,7 @@ pub async fn add_test_user(State(client): State<Client>) -> Html<&'static str> {
         failed_login_attempts: 0,
         notes: "".to_string(),
         presets: vec![],
+        unique_questions: vec![],
     };
 
     let collection: Collection<User> = client

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { LightSwitch } from '@skeletonlabs/skeleton';
 	import { data, transformTextForDuplicateCheck } from '../store';
+	import axios from 'axios';
 
 	const EXAMPLES_TO_SHOW = 10;
 
@@ -58,9 +59,51 @@
 		return Array.from(result);
 	}
 
+	function deleteAllUniquenessEntries() {
+		axios
+			.post($data.backend_url + '/delete_unique_questions', '', {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				$data.duplicate_checking_values_synced = [];
+				localStorage.setItem("duplicate_checking_values_synced", JSON.stringify([]));
+				$data.duplicate_checking_values_unsynced = [];
+				localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
+				// showSuccessToast('Local and cloud notes deleted!');
+			})
+			.catch((error) => {
+				console.error(error);
+				// showErrorToast('Notes deletion failed!');
+			});
+	}
+
 	function deleteLocalUniquenessEntries() {
 		$data.duplicate_checking_values_unsynced = [];
 		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
+	}
+
+	function sync_unique_questions() {
+		console.log(JSON.parse(JSON.stringify($data.duplicate_checking_values_unsynced)))
+		console.log("will sync")
+		axios
+			.post($data.backend_url + '/sync_unique_questions', JSON.stringify($data.duplicate_checking_values_unsynced ?? []), {
+				headers: {
+					Authorization: `Bearer ${$data.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				$data.duplicate_checking_values_synced = response.data;
+				localStorage.setItem('duplicate_checking_values_synced', JSON.stringify($data.duplicate_checking_values_synced));
+				$data.duplicate_checking_values_unsynced = [];
+				localStorage.setItem('duplicate_checking_values_unsynced', '[]');
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	}
 </script>
 
@@ -73,7 +116,7 @@
 	File for uniqueness checks:
 	<input bind:files={fileForUniqueness} on:change={()=>{tryUpdateUniquenessEntriesFromFile(false)}} type="file">
 	<div class="flex flex-row w-full justify-center gap-2">
-		<button class="btn variant-filled-error" on:click={deleteLocalUniquenessEntries}>delete unsynced</button>
+		<button class="btn variant-filled-primary" on:click={deleteLocalUniquenessEntries}>delete unsynced</button>
 		<button class="btn variant-filled-warning" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true, false)}}>overwrite</button>
 		<button class="btn variant-filled-success" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true)}}>append</button>
 	</div>
@@ -101,6 +144,12 @@
 			{/if}
 		</div>
 	{/each}
+	<div class="flex flex-row w-full justify-center gap-2">
+		<button class="btn variant-filled-primary" on:click={deleteAllUniquenessEntries}>delete all</button>
+		<button class="btn-icon variant-filled-success" on:click={sync_unique_questions}>
+			<i class="fa-solid fa-rotate" />
+		</button>
+	</div>
 </form>
 
 <style scoped>

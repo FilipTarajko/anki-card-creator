@@ -133,6 +133,64 @@ pub async fn sync_notes(
     Json(loaded_user.notes)
 }
 
+fn append_unique_elements_to_vector<T: std::cmp::PartialEq>(mut vec1: Vec<T>, vec2: Vec<T>) -> Vec<T> {
+    for elem in vec2 {
+        if !vec1.contains(&elem) {
+            vec1.push(elem);
+        }
+    }
+    vec1
+}
+
+pub async fn sync_unique_questions(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
+    Json(unique_questions_to_add): Json<Vec<String>>,
+) -> Json<Vec<String>> {
+    let authenticated_user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    user_collection
+        .update_one(
+            doc! {"_id": authenticated_user.id.unwrap()},
+            doc! {"$set": {"unique_questions": append_unique_elements_to_vector(authenticated_user.unique_questions, unique_questions_to_add)}},
+            None,
+        )
+        .await
+        .unwrap();
+    let loaded_user = user_collection
+        .find_one(doc! {"_id": authenticated_user.id.unwrap()}, None)
+        .await
+        .unwrap()
+        .unwrap();
+    Json(loaded_user.unique_questions)
+}
+
+pub async fn delete_unique_questions(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>
+) -> String {
+    let authenticated_user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    user_collection
+        .update_one(
+            doc! {"_id": authenticated_user.id.unwrap()},
+            doc! {"$set": {"unique_questions": Vec::<String>::new()}},
+            None,
+        )
+        .await
+        .unwrap();
+
+    "Unique questions deleted!".to_string()
+}
+
 pub async fn delete_notes(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,
