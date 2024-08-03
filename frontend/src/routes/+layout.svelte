@@ -6,7 +6,6 @@
 		LightSwitch,
 		AppRail,
 		AppRailTile,
-		AppRailAnchor,
 		Toast
 	} from '@skeletonlabs/skeleton';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -30,52 +29,83 @@
 	import { getToastStore } from '@skeletonlabs/skeleton';
 
 	const toastStore = getToastStore();
+
+	function toggleSidebarOnNarrow() {
+		$data.isSidebarShownOnNarrow = !$data.isSidebarShownOnNarrow;
+		localStorage.setItem('isSidebarShownOnNarrow', $data.isSidebarShownOnNarrow);
+	}
+
+	let innerWidth = 0;
 </script>
+
+<svelte:head>
+{@html `<style>
+
+@media (max-width: 914px) {
+	:root {
+		font-size: 1.75vw;
+	}
+}
+
+@media (max-width: 767px) {
+	:root {
+		font-size: ${$data.isSidebarShownOnNarrow ? '2.5vw' : '2.85vw'};
+	}
+}
+
+</style>`
+}
+</svelte:head>
 
 <Toast />
 <!-- App Shell -->
+<svelte:window bind:innerWidth={innerWidth} />
 <AppShell>
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
 		<AppBar>
 			<svelte:fragment slot="lead">
-				<strong class="text-xl uppercase">Anki Card Creator</strong>
+				<button class="w-20 left-0 h-16 cursor-pointer hover:bg-primary-500/10 absolute md:hidden" on:click={toggleSidebarOnNarrow}>
+					<i class="fa-solid fa-bars fa-xl" />
+				</button>
+				<strong class="text-l md:text-xl uppercase ml-20 md:ml-0">Anki Card Creator</strong>
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
 				<LightSwitch />
-				<a
-					class="btn btn-sm variant-ghost-surface"
-					href="https://apps.ankiweb.net"
-					target="_blank"
-					rel="noreferrer"
-				>
-					Anki website
-				</a>
-				<a
-					class="btn btn-sm variant-ghost-surface"
-					href="https://docs.ankiweb.net"
-					target="_blank"
-					rel="noreferrer"
-				>
-					Anki docs
-				</a>
+				<div>
+					<a
+						class="btn btn-sm variant-ghost-surface pr-1"
+						style="border-top-right-radius: 0px; border-bottom-right-radius: 0px;"
+						href="https://apps.ankiweb.net"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Anki
+					</a>
+					<a
+						class="btn btn-sm variant-ghost-surface pl-1"
+						style="border-top-left-radius: 0px; border-bottom-left-radius: 0px;"
+						href="https://docs.ankiweb.net"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Docs
+					</a>
+				</div>
 				<a
 					class="btn btn-sm variant-ghost-surface"
 					href="https://github.com/FilipTarajko/anki-card-creator"
 					target="_blank"
 					rel="noreferrer"
 				>
-					This project's github
+					Github
 				</a>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
+		{#if $data.isSidebarShownOnNarrow || innerWidth>=768}
 		<AppRail>
-			<!-- <svelte:fragment slot="lead">
-				<AppRailAnchor href="/">(icon)</AppRailAnchor>
-			</svelte:fragment> -->
-			<!-- --- -->
 			<AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
@@ -177,13 +207,9 @@
 				<svelte:fragment slot="lead"><i class="fa-solid fa-laptop-code fa-xl" /></svelte:fragment>
 				<span>developed</span>
 			</AppRailTile>
-			<!-- --- -->
-			<!-- <svelte:fragment slot="trail">
-				<AppRailAnchor href="/" target="_blank" title="Account">(icon)</AppRailAnchor>
-			</svelte:fragment> -->
 		</AppRail>
+		{/if}
 	</svelte:fragment>
 
-	<!-- Page Route Content -->
 	<slot />
 </AppShell>
