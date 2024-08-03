@@ -29,6 +29,8 @@ export const data = writable({
 	toastStore: null,
 	noteAddingMode: (browser && window.localStorage.getItem('noteAddingMode')) ?? NoteAddingMode.FROM_SCRATCH,
 	currentlyWrittenPrompt: (browser && window.localStorage.getItem('currentlyWrittenPrompt')) ?? '',
+	currentlyWrittenPromptList: (browser && window.localStorage.getItem('currentlyWrittenPromptList')) ?? '',
+	currentPromptListSeparator: (browser && window.localStorage.getItem('currentPromptListSeparator')) ?? '',
 	prompts_unsynced: (browser && JSON.parse(window.localStorage.getItem('prompts_unsynced') ?? '[]')) ?? [],
 	shouldKeepPrompt: (browser && JSON.parse(window.localStorage.getItem('shouldKeepPrompt') ?? 'true')),
 	promptedFieldIndex: 3,

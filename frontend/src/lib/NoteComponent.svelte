@@ -123,16 +123,37 @@
 		localStorage.setItem('currentlyWrittenPrompt', $data.currentlyWrittenPrompt || '')
 	}
 
-	function addPrompt() {
-		if (!$data.currentlyWrittenPrompt) {
+	function rememberCurrentlyWrittenPromptList() {
+		localStorage.setItem('currentlyWrittenPromptList', $data.currentlyWrittenPromptList || '')
+	}
+
+	function rememberCurrentPromptListSeparator() {
+		localStorage.setItem('currentPromptListSeparator', $data.currentPromptListSeparator || '')
+	}
+
+	function addOnePrompt() {
+		addPrompt($data.currentlyWrittenPrompt || '');
+		$data.currentlyWrittenPrompt = '';
+		rememberCurrentlyWrittenPrompt();
+	}
+
+	function addPrompt(prompt: string) {
+		if (!prompt) {
 			showErrorToast($data.toastStore, 'Cannot add empty prompt!');
 			return;
 		}
 		showSuccessToast($data.toastStore, 'Prompt added!');
-		$data.prompts_unsynced.push($data.currentlyWrittenPrompt);
+		$data.prompts_unsynced.push(prompt);
 		rememberPromptsUnsynced();
-		$data.currentlyWrittenPrompt = '';
-		rememberCurrentlyWrittenPrompt();
+	}
+
+	function addPromptsFromList() {
+		const promptList = ($data.currentlyWrittenPromptList || '').split($data.currentPromptListSeparator || ' ');
+		for (let i=0; i<promptList.length; i++) {
+			addPrompt(promptList[i]);
+		}
+		$data.currentlyWrittenPromptList = '';
+		localStorage.setItem('currentlyWrittenPromptList', '');
 	}
 
 	function rememberPromptsUnsynced() {
@@ -489,12 +510,12 @@
 				</div>
 			{/if}
 			{#if $data.noteAddingMode === NoteAddingMode.NEW_PROMPT}
-				<form on:submit={addPrompt}>
+				<form on:submit={()=>addOnePrompt()}>
 					<label>new prompt
 						<input
 							type="text"
 							bind:value={$data.currentlyWrittenPrompt}
-							on:keydown={rememberCurrentlyWrittenPrompt}
+							on:input={rememberCurrentlyWrittenPrompt}
 						>
 					</label>
 					<button
@@ -505,7 +526,41 @@
 						add prompt
 					</button>
 				</form>
-				saved prompts: { $data.prompts_unsynced.join(', ') }
+
+				<div>
+					{#if $data.prompts_unsynced.length }
+						saved prompts: "{ $data.prompts_unsynced.join('", "') }"
+					{:else}
+						no saved prompts
+					{/if}
+				</div>
+
+				<h2 class='h2'>Add multiple prompts</h2>
+				<form on:submit={addPromptsFromList}>
+					<label class="flex items-center justify-between w-full">
+						<div>new prompts</div>
+						<textarea
+							style="color: black;"
+							bind:value={$data.currentlyWrittenPromptList}
+							on:input={rememberCurrentlyWrittenPromptList}
+						></textarea>
+					</label>
+					<label>prompt separator
+						<input
+							type="text"
+							placeholder="space (default)"
+							bind:value={$data.currentPromptListSeparator}
+							on:input={rememberCurrentPromptListSeparator}
+						>
+					</label>
+					<button
+						type="submit"
+						style="margin-top: 0.858rem;"
+						class="btn btn-large variant-filled-success"
+					>
+						add prompt
+					</button>
+				</form>
 			{/if}
 		{:else}
 			<div class="card mt-12 variant-ghost-warning p-4">
