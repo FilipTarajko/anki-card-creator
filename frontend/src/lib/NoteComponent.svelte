@@ -149,10 +149,8 @@
 
 	let debounceTimeout: ReturnType<typeof setTimeout>;
 	function debounce(callback: Function, delay: number = 200) {
-		// console.log("clearing previous timeout")
 		clearTimeout(debounceTimeout);
 		debounceTimeout = setTimeout(()=>{
-			console.log("debounced")
 			callback()
 		}, delay);
 	}
@@ -185,15 +183,41 @@
 	}
 
 	function handleNoteFieldInputKeydown(event: any, fieldIndex: number) {
-		console.log(event);
 		if (event.altKey && !event.ctrlKey && !event.shiftKey) {
 			event.preventDefault();
-			if (event.key == "f") {
+			if (event.key == "f" || event.key == "l") {
 				changeFieldCurrentlyFrozen(fieldIndex);
 			} else if (event.key == "r") {
 				resetFieldValueToDefault(fieldIndex);
 			} else if (event.key == "v") {
 				changeFieldCurrentlyVisible(fieldIndex);
+			}
+		}
+		else if (event.key == "ArrowUp" && event.target.type == "text") {
+			let index = event.target.id.replace('field','')
+			let newFocusElem;
+			for (let i=index-1; i>=0; i--) {
+				newFocusElem = document.getElementById(`field${i}`);
+				if (newFocusElem && newFocusElem.getAttribute('type') == "text") {
+					console.log(index);
+					console.log(newFocusElem);
+					newFocusElem!.setAttribute('tabindex', '0')
+					newFocusElem!.focus();
+					break;
+				}
+			}
+		} else if (event.key == "ArrowDown" && event.target.type == "text") {
+			let index = event.target.id.replace('field','')
+			let newFocusElem
+			for (let i=index-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
+				newFocusElem = document.getElementById(`field${i}`);
+				if (newFocusElem && newFocusElem.getAttribute('type') == "text") {
+					console.log(index);
+					console.log(newFocusElem);
+					newFocusElem!.setAttribute('tabindex', '0')
+					newFocusElem!.focus();
+					break;
+				};
 			}
 		}
 	}
@@ -286,6 +310,7 @@
 									</div>
 									{#if field.type === 'text'}
 										<input
+											id={`field${i}`}
 											on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}
 											type="text"
 											style={field.current_inputs[0] && 
@@ -298,16 +323,16 @@
 									{:else if field.type === 'selectOne'}
 										<RadioGroup on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}>
 											{#each field.options as option}
-												<RadioItem bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
+												<RadioItem on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)} id={`field${i}`} bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
 													>{option || '(empty)'}</RadioItem
 												>
 											{/each}
 										</RadioGroup>
 									{:else if field.type === 'selectMany'}
-										<ListBox multiple on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}>
+										<ListBox multiple>
 											<div class="card" style="display: flex; flex-direction: row;">
 												{#each field.options as option}
-													<ListBoxItem bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
+													<ListBoxItem on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)} id={`field${i}`} bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
 														>{option || '(empty)'}</ListBoxItem
 													>
 												{/each}
@@ -347,6 +372,7 @@
 										</abbr>
 									</button>
 									{#if $data.currently_all_forced_visible}
+										<!-- svelte-ignore a11y-positive-tabindex -->
 										<button
 											tabindex="1"
 											style="width: 2.574rem;"
