@@ -182,6 +182,11 @@
 		rememberCurrentPreset();
 	}
 
+	function toggleAllFieldsVisible() {
+		$data.currently_all_forced_visible = !$data.currently_all_forced_visible;
+		localStorage.setItem('currently_all_forced_visible', $data.currently_all_forced_visible);
+	}
+
 	function handleNoteFieldInputKeydown(event: any, fieldIndex: number) {
 		if (event.altKey && !event.ctrlKey && !event.shiftKey) {
 			event.preventDefault();
@@ -191,6 +196,8 @@
 				resetFieldValueToDefault(fieldIndex);
 			} else if (event.key == "v") {
 				changeFieldCurrentlyVisible(fieldIndex);
+			} else if (event.key == "a") {
+				toggleAllFieldsVisible();
 			}
 		}
 		else if (event.key == "ArrowUp" && event.target.type == "text") {
@@ -289,16 +296,15 @@
 							type="button"
 							class={`btn-icon variant-filled${$data.currently_all_forced_visible ? '-warning' : ''}`}
 							style="font-weight: bold;"
-							on:click={() => {
-								$data.currently_all_forced_visible = !$data.currently_all_forced_visible;
-								localStorage.setItem('currently_all_forced_visible', $data.currently_all_forced_visible);
-							}}
+							on:click={toggleAllFieldsVisible}
 						>
+						<abbr title={`temporarily force all field visible - (alt+a while typing)`}>
 							{#if $data.currently_all_forced_visible}
 								<i class="fa-solid fa-eye" />
 							{:else}
 								<i class="fa-solid fa-eye-slash" />
 							{/if}
+						</abbr>
 						</button>
 					</div>
 					<form bind:clientWidth={cardFormWidth} on:submit={addNote}>
@@ -351,7 +357,7 @@
 										type="button"
 										on:click={() => resetFieldValueToDefault(i)}
 									>
-										<abbr title={`reset to '${field.default}'`}
+										<abbr title={`reset to "${field.default}" (alt+r while typing)`}
 											><i class="fa-solid fa-rotate-left" /></abbr
 										>
 									</button>
@@ -363,7 +369,7 @@
 										type="button"
 										on:click={() => {changeFieldCurrentlyFrozen(i)}}
 									>
-										<abbr title={`reset to '${field.default}'`}>
+										<abbr title={`toggle resetting to "${field.default}" on submit - (alt+f or alt+l while typing)`}>
 											{#if field.currently_frozen}
 												<i class="fa-solid fa-lock" />
 											{:else}
@@ -382,13 +388,13 @@
 												type="button"
 											on:click={() => changeFieldCurrentlyVisible(i)}
 										>
-											<div>
+											<abbr title={`toggle visibility - (alt+v while typing)`}>
 												{#if field.currently_visible}
 													<i class="fa-solid fa-eye" />
 												{:else}
 													<i class="fa-solid fa-eye-slash" />
 												{/if}
-											</div>
+											</abbr>
 										</button>
 									{/if}
 								{/if}
