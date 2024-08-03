@@ -168,6 +168,35 @@
 	$: twoColumnsCondition = layoutWidth - cardFormWidth > 330;
 
 	let is_iframe_moved_to_top = false;
+
+	function resetFieldValueToDefault(i: number) {
+		$data.current_preset_for_notes.fields[i].current_inputs = JSON.parse(JSON.stringify($data.current_preset_for_notes.fields[i].default));
+		rememberCurrentPreset();
+	}
+
+	function changeFieldCurrentlyFrozen(i: number) {
+		$data.current_preset_for_notes.fields[i].currently_frozen = !($data.current_preset_for_notes.fields[i].currently_frozen);
+		rememberCurrentPreset();
+	}
+
+	function changeFieldCurrentlyVisible(i: number) {
+		$data.current_preset_for_notes.fields[i].currently_visible = !($data.current_preset_for_notes.fields[i].currently_visible);
+		rememberCurrentPreset();
+	}
+
+	function handleNoteFieldInputKeydown(event: any, fieldIndex: number) {
+		console.log(event);
+		if (event.altKey && !event.ctrlKey && !event.shiftKey) {
+			event.preventDefault();
+			if (event.key == "f") {
+				changeFieldCurrentlyFrozen(fieldIndex);
+			} else if (event.key == "r") {
+				resetFieldValueToDefault(fieldIndex);
+			} else if (event.key == "v") {
+				changeFieldCurrentlyVisible(fieldIndex);
+			}
+		}
+	}
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth />
@@ -257,6 +286,7 @@
 									</div>
 									{#if field.type === 'text'}
 										<input
+											on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}
 											type="text"
 											style={field.current_inputs[0] && 
 												($data.duplicate_checking_values_synced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)) ||
@@ -266,7 +296,7 @@
 											on:input={rememberCurrentPreset}
 										/>
 									{:else if field.type === 'selectOne'}
-										<RadioGroup>
+										<RadioGroup on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}>
 											{#each field.options as option}
 												<RadioItem bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
 													>{option || '(empty)'}</RadioItem
@@ -274,7 +304,7 @@
 											{/each}
 										</RadioGroup>
 									{:else if field.type === 'selectMany'}
-										<ListBox multiple>
+										<ListBox multiple on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}>
 											<div class="card" style="display: flex; flex-direction: row;">
 												{#each field.options as option}
 													<ListBoxItem bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
@@ -288,27 +318,25 @@
 											{calculate_result_of_bound_field(field)} (default: {field.default[0] || '(empty)'})
 										</div>
 									{/if}
+									<!-- svelte-ignore a11y-positive-tabindex -->
 									<button
+										tabindex="1"
 										style="width: 2.574rem;"
 										class="btn btn-large variant-filled"
 										type="button"
-										on:click={() => {
-											field.current_inputs = JSON.parse(JSON.stringify(field.default));
-											rememberCurrentPreset();
-										}}
+										on:click={() => resetFieldValueToDefault(i)}
 									>
 										<abbr title={`reset to '${field.default}'`}
 											><i class="fa-solid fa-rotate-left" /></abbr
 										>
 									</button>
+									<!-- svelte-ignore a11y-positive-tabindex -->
 									<button
+										tabindex="1"
 										style="width: 2.574rem;"
 										class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
 										type="button"
-										on:click={() => {
-											field.currently_frozen = !field.currently_frozen;
-											rememberCurrentPreset();
-										}}
+										on:click={() => {changeFieldCurrentlyFrozen(i)}}
 									>
 										<abbr title={`reset to '${field.default}'`}>
 											{#if field.currently_frozen}
@@ -320,14 +348,13 @@
 									</button>
 									{#if $data.currently_all_forced_visible}
 										<button
+											tabindex="1"
 											style="width: 2.574rem;"
-											on:click={() => {
-												field.currently_visible = !field.currently_visible;
-												rememberCurrentPreset();
-											}}
 											class="btn btn-large {field.currently_visible
 												? `variant-filled${field.visible_by_default ? '' : '-warning'}`
 												: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
+												type="button"
+											on:click={() => changeFieldCurrentlyVisible(i)}
 										>
 											<div>
 												{#if field.currently_visible}
