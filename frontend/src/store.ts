@@ -39,7 +39,7 @@ export function transformTextForDuplicateCheck(text: string, duplicate_checking_
 export function appendToDuplicateCheckingValuesUnsynced(data: {duplicate_checking_values_unsynced: string[], duplicate_checking_removed_needles: (string|RegExp)[]}, values: string[]) {
 	for (let i=0; i<values.length; i++) {
 		const val = transformTextForDuplicateCheck(values[i], data.duplicate_checking_removed_needles);
-		if (data.duplicate_checking_values_unsynced.includes(val)) {
+		if (!val || data.duplicate_checking_values_unsynced.includes(val)) {
 			continue;
 		}
 		data.duplicate_checking_values_unsynced.push(val);
