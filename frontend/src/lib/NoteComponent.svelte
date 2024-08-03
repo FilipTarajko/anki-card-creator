@@ -251,6 +251,12 @@
 				changeFieldCurrentlyVisible(fieldIndex);
 			} else if (event.key == "a") {
 				toggleAllFieldsVisible();
+			} else if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "d") {
+				$data.shouldKeepPrompt = false;
+				rememberShouldKeepPrompt();
+			} else if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "k") {
+				$data.shouldKeepPrompt = true;
+				rememberShouldKeepPrompt();
 			}
 		}
 		else if (event.key == "ArrowUp" && event.target.type == "text") {
