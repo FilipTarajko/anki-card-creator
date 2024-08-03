@@ -1,29 +1,9 @@
 <script lang="ts">
 	import { SlideToggle, getToastStore } from '@skeletonlabs/skeleton';
-	import { data } from '../store';
+	import { data, showErrorToast, showSuccessToast } from '../store';
 	import axios from 'axios';
 
 	const toastStore = getToastStore();
-
-	function showErrorToast(message: string) {
-		toastStore.trigger({
-			message,
-			timeout: 5000,
-			background: 'variant-filled-primary',
-			autohide: true,
-			hideDismiss: false
-		});
-	}
-
-	function showSuccessToast(message: string) {
-		toastStore.trigger({
-			message,
-			timeout: 5000,
-			background: 'variant-filled-success',
-			autohide: true,
-			hideDismiss: false
-		});
-	}
 
 	function download(filename: string, text: string) {
 		const element = document.createElement('a');
@@ -33,7 +13,7 @@
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
-		showSuccessToast('Notes downloaded!');
+		showSuccessToast($data.toastStore, 'Notes downloaded!');
 	}
 
 	function upload_notes() {
@@ -50,11 +30,11 @@
 				$data.notes_unsynced = '';
 				localStorage.setItem('notes_unsynced', '');
 				console.log(response);
-				showSuccessToast('Notes uploaded!');
+				showSuccessToast($data.toastStore, 'Notes uploaded!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast('Notes upload failed!');
+				showErrorToast($data.toastStore, 'Notes upload failed!');
 			});
 	}
 
@@ -71,11 +51,11 @@
 				localStorage.setItem('notes_synced', '');
 				$data.notes_unsynced = '';
 				localStorage.setItem('notes_unsynced', '');
-				showSuccessToast('Local and cloud notes deleted!');
+				showSuccessToast($data.toastStore, 'Local and cloud notes deleted!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast('Notes deletion failed!');
+				showErrorToast($data.toastStore, 'Notes deletion failed!');
 			});
 	}
 
@@ -92,11 +72,11 @@
 				localStorage.setItem('notes_synced', $data.notes_synced);
 				$data.notes_unsynced = '';
 				localStorage.setItem('notes_unsynced', '');
-				showSuccessToast('Notes synced!');
+				showSuccessToast($data.toastStore, 'Notes synced!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast('Notes sync failed!');
+				showErrorToast($data.toastStore, 'Notes sync failed!');
 			});
 	}
 </script>
@@ -163,7 +143,7 @@
 			localStorage.setItem('notes_synced', $data.notes_synced);
 			$data.notes_unsynced = '';
 			localStorage.setItem('notes_unsynced', $data.notes_unsynced);
-			showSuccessToast('Local notes deleted!');
+			showSuccessToast($data.toastStore, 'Local notes deleted!');
 		}}
 	>
 		<!-- <i class="fa-solid fa-remove" /> -->

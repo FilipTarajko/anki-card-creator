@@ -25,6 +25,7 @@ export const data = writable({
 	current_preset_for_notes: (browser && JSON.parse(window.localStorage.getItem('current_preset_for_notes') ?? 'false')),
 	currently_all_forced_visible: (browser && JSON.parse(window.localStorage.getItem('currently_all_forced_visible') ?? 'false')),
 	isSidebarShownOnNarrow: (browser && JSON.parse(window.localStorage.getItem('isSidebarShownOnNarrow') ?? 'true' )),
+	toastStore: null,
 });
 
 export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
@@ -48,4 +49,26 @@ export function appendToDuplicateCheckingValuesUnsynced(data: {duplicate_checkin
 		data.duplicate_checking_values_unsynced.push(val);
 	}
 	localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(data.duplicate_checking_values_unsynced));
+}
+
+export function showToast(toastStore: any, message: string, background: string) {
+	toastStore.trigger({
+		message,
+		background,
+		timeout: 5000,
+		autohide: true,
+		hideDismiss: false,
+	})
+}
+
+export function showSuccessToast(toastStore: any, message: string) {
+	showToast(toastStore, message, 'variant-filled-success');
+}
+
+export function showErrorToast(toastStore: any, message: string) {
+	showToast(toastStore, message, 'variant-filled-primary');
+}
+
+export function showWarningToast(toastStore: any, message: string) {
+	showToast(toastStore, message, 'variant-filled-warning');
 }

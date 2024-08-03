@@ -29,6 +29,8 @@
 	import { getToastStore } from '@skeletonlabs/skeleton';
 
 	const toastStore = getToastStore();
+	// @ts-ignore
+	$data.toastStore = toastStore;
 
 	function toggleSidebarOnNarrow() {
 		$data.isSidebarShownOnNarrow = !$data.isSidebarShownOnNarrow;

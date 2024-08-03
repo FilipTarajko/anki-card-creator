@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LightSwitch } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck } from '../store';
+	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck } from '../store';
 	import axios from 'axios';
 
 	const EXAMPLES_TO_SHOW = 10;
@@ -72,11 +72,11 @@
 				localStorage.setItem("duplicate_checking_values_synced", JSON.stringify([]));
 				$data.duplicate_checking_values_unsynced = [];
 				localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
-				// showSuccessToast('Local and cloud notes deleted!');
+				showSuccessToast($data.toastStore, 'Unique question list deleted!');
 			})
 			.catch((error) => {
 				console.error(error);
-				// showErrorToast('Notes deletion failed!');
+				showErrorToast($data.toastStore, 'Deleting unique question list failed!');
 			});
 	}
 

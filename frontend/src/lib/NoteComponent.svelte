@@ -1,21 +1,8 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced } from '../store';
-	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast } from '../store';
 	import { BindingType, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
-
-	const toastStore = getToastStore();
-
-	function showSuccessToast(message: string) {
-		toastStore.trigger({
-			message,
-			timeout: 5000,
-			background: 'variant-filled-success',
-			autohide: true,
-			hideDismiss: false
-		});
-	}
 
 	let current_output: string = '';
 
@@ -133,7 +120,7 @@
 	}
 
 	function addNote() {
-		showSuccessToast('Note added!');
+		showSuccessToast($data.toastStore, 'Note added!');
 		$data.notes_unsynced +=
 			current_output +
 			`
