@@ -465,7 +465,7 @@
 						</abbr>
 						</button>
 					</div>
-					<form bind:clientWidth={cardFormWidth} on:submit={addNote}>
+					<form bind:clientWidth={cardFormWidth} on:submit|preventDefault={addNote}>
 						{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
 							<span style={($data.prompts_synced.length || $data.prompts_unsynced.length) ? 'color: rgb(100, 200, 200)' : 'color: rgb(255, 100, 100);'}>{ $data.prompts_synced[0] ?? $data.prompts_unsynced[0] ?? 'no prompts left!' }</span>
 						{/if}
@@ -594,7 +594,7 @@
 				</div>
 			{/if}
 			{#if $data.noteAddingMode === NoteAddingMode.NEW_PROMPT}
-				<form on:submit={()=>addOnePrompt()}>
+				<form on:submit|preventDefault={()=>addOnePrompt()}>
 					<label>new prompt
 						<input
 							type="text"
@@ -612,7 +612,7 @@
 				</form>
 
 				<h2 class='h2'>Add multiple prompts</h2>
-				<form on:submit={addPromptsFromList}>
+				<form on:submit|preventDefault={addPromptsFromList}>
 					<label class="flex items-center justify-between w-full">
 						<div>new prompts</div>
 						<textarea
