@@ -202,22 +202,26 @@
 
 		if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
 			if (!$data.shouldKeepPrompt) {
-				deleteFirstPrompt()
+				deleteCurrentPrompt()
 			}
 			selectNoteAddingMode(NoteAddingMode.FROM_PROMPT);
 		}
 	}
 
-	function deleteFirstPrompt() {
-		if ($data.prompts_synced.length) {
-			let prompt = $data.prompts_synced.shift();
+	function deleteCurrentPrompt() {
+		const current_prompt = $data.current_prompt;
+		if ($data.prompts_synced.includes(current_prompt)) {
+			console.log("deleting current prompt from synced")
+			$data.prompts_synced = $data.prompts_synced.filter((e: string) => e!=current_prompt);
 			rememberPromptsSynced();
-			$data.prompts_deleted.push(prompt);
+			$data.prompts_deleted.push(current_prompt);
 			rememberPromptsDeleted();
-		} else {
-			$data.prompts_unsynced.shift();
-			rememberPromptsUnsynced();
 		}
+		console.log(`deleting current "${$data.current_prompt}" from unsynced`)
+		$data.prompts_unsynced = $data.prompts_unsynced.filter((e: string) => e!=current_prompt);
+		console.log("$data.prompts_synced.includes(current_prompt)")
+		console.log($data.prompts_synced.includes(current_prompt))
+		rememberPromptsUnsynced();
 		selectNoteAddingMode(NoteAddingMode.FROM_PROMPT);
 	}
 
@@ -321,7 +325,7 @@
 		}
 		if (event.altKey && !event.ctrlKey && event.shiftKey) {
 			if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "D") {
-				deleteFirstPrompt();
+				deleteCurrentPrompt();
 			}
 		}
 		if (event.key == "ArrowUp" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
@@ -350,11 +354,21 @@
 		}
 	}
 
+	function getFirstPrompt(){
+		return $data.prompts_synced[0] ?? $data.prompts_unsynced[0] ?? '';
+	}
+
 	function selectNoteAddingMode(mode: NoteAddingMode) {
 		$data.noteAddingMode = mode;
 		localStorage.setItem('noteAddingMode', mode);
 		if (mode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
-			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.prompts_synced[0] ?? $data.prompts_unsynced[0] ?? '';
+			console.log("$data.prompts_unsynced.includes(getFirstPrompt())")
+			console.log($data.prompts_unsynced.includes(getFirstPrompt()))
+			$data.current_prompt = getFirstPrompt();
+			console.log(`current_prompt = ${$data.current_prompt}`)
+			localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
+			console.log("setting an input to current_prompt")
+			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.current_prompt;
 			rememberCurrentPreset();
 		}
 	}
@@ -364,12 +378,18 @@
 		localStorage.setItem('prompts_unsynced', '[]');
 		$data.prompts_deleted = $data.prompts_synced;
 		localStorage.setItem('prompts_deleted', $data.prompts_synced);
+		$data.current_prompt = '';
+		localStorage.setItem('current_prompt', $data.current_prompt);
 		sync_prompts();
 	}
 
 	function delete_local_prompts() {
 		$data.prompts_unsynced = [];
 		localStorage.setItem('prompts_unsynced', '[]');
+		if (!$data.prompts_synced.includes($data.current_prompt)) {
+			$data.current_prompt = '';
+			localStorage.setItem('current_prompt', $data.current_prompt);
+		}
 	}
 
 	function sync_prompts() {
@@ -391,6 +411,12 @@
 				localStorage.setItem('prompts_unsynced', '[]');
 				$data.prompts_deleted = [];
 				localStorage.setItem('prompts_deleted', '[]');
+				$data.current_prompt = getFirstPrompt();
+				localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
+				if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
+					console.log("setting an input to current_prompt")
+					$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.current_prompt;
+				}
 				showSuccessToast($data.toastStore, "Synced prompts");
 			})
 			.catch((error) => {
@@ -502,7 +528,7 @@
 					</div>
 					<form bind:clientWidth={cardFormWidth} on:submit|preventDefault={addNote}>
 						{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
-							<span style={($data.prompts_synced.length || $data.prompts_unsynced.length) ? 'color: rgb(100, 200, 200)' : 'color: rgb(255, 100, 100);'}>{ $data.prompts_synced[0] ?? $data.prompts_unsynced[0] ?? 'no prompts left!' }</span>
+							<span style={($data.prompts_synced.length || $data.prompts_unsynced.length) ? 'color: rgb(100, 200, 200)' : 'color: rgb(255, 100, 100);'}>{ $data.current_prompt || 'no current prompt' }</span>
 						{/if}
 						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${$data.currently_all_forced_visible ? ' 2.86rem' : ''};`}>
 							{#each $data.current_preset_for_notes.fields as field, i}
@@ -612,7 +638,7 @@
 						{#if $data.noteAddingMode == NoteAddingMode.FROM_PROMPT}
 							<button
 								type="button"
-								on:click={deleteFirstPrompt}
+								on:click={deleteCurrentPrompt}
 								class="btn btn-large variant-filled-primary"
 							>
 								delete prompt
@@ -627,6 +653,9 @@
 					<div style="max-width: 30rem; line-break: anywhere;">
 						current result: <br><span>{current_output}</span>
 					</div>
+					<button class="btn-icon variant-filled-success" on:click={sync_prompts}>
+						<i class="fa-solid fa-rotate" />
+					</button>
 				</div>
 			{/if}
 			{#if $data.noteAddingMode === NoteAddingMode.NEW_PROMPT}
