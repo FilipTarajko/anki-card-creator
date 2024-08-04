@@ -265,6 +265,42 @@
 	}
 
 	function handleNoteFieldInputKeydown(event: any, fieldIndex: number) {
+		if (event.altKey && !event.ctrlKey) {
+			if (event.key == "m" || event.key == "M") {
+				// @ts-ignore
+				let index = Object.values(NoteAddingMode).indexOf($data.noteAddingMode);
+				const length = Object.values(NoteAddingMode).length;
+				if (event.shiftKey) {
+					index = ((index - 1) + length) % length;
+				} else {
+					index = (index + 1) % length;
+				}
+				selectNoteAddingMode(Object.values(NoteAddingMode)[index]);
+			}
+			if (event.key == "p" || event.key == "P") {
+				let preset = $data.presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
+				// let index = $data.presets.indexOf($data.current_preset_for_notes);
+				let index = $data.presets.indexOf(preset);
+				const length = $data.presets.length;
+				if (event.shiftKey) {
+					index = ((index - 1) + length) % length;
+				} else {
+					index = (index + 1) % length;
+				}
+				selectPreset($data.presets[index]);
+			}
+			if (event.key == "i" || event.key == "I") {
+				let iframe = $data.current_preset_for_notes.iframes.find((i: [string, string])=>i[1] == iframe_source_template)
+				let index = $data.current_preset_for_notes.iframes.indexOf(iframe);
+				const length = $data.current_preset_for_notes.iframes.length;
+				if (event.shiftKey) {
+					index = ((index - 1) + length) % length;
+				} else {
+					index = (index + 1) % length;
+				}
+				iframe_source_template = $data.current_preset_for_notes.iframes[index][1];
+			}
+		}
 		if (event.altKey && !event.ctrlKey && !event.shiftKey) {
 			event.preventDefault();
 			if (event.key == "f" || event.key == "l") {
@@ -283,12 +319,12 @@
 				rememberShouldKeepPrompt();
 			}
 		}
-		else if (event.altKey && !event.ctrlKey && event.shiftKey) {
+		if (event.altKey && !event.ctrlKey && event.shiftKey) {
 			if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "D") {
 				deleteFirstPrompt();
 			}
 		}
-		else if (event.key == "ArrowUp" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
+		if (event.key == "ArrowUp" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
 			let index = event.target.id.replace('field','')
 			let newFocusElem;
 			for (let i=index-1; i>=0; i--) {
@@ -299,7 +335,8 @@
 					break;
 				}
 			}
-		} else if (event.key == "ArrowDown" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
+		}
+		if (event.key == "ArrowDown" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
 			let index = event.target.id.replace('field','')
 			let newFocusElem
 			for (let i=index-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
