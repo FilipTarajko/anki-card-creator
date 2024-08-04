@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LightSwitch } from '@skeletonlabs/skeleton';
+	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
 	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck } from '../store';
 	import axios from 'axios';
 
@@ -137,7 +137,7 @@
 <LightSwitch />
 <h3 class="h3">Note field duplication warning</h3>
 <img alt="export options" src="/ankiToCC.png">
-<form class="flex flex-col gap-4 card p-4 w-3/4 max-w-2xl items-center">
+<form class="flex flex-col gap-4 card p-4 w-11/12 max-w-2xl items-center">
 	File for uniqueness checks:
 	<input bind:files={fileForUniqueness} on:change={()=>{tryUpdateUniquenessEntriesFromFile(false)}} type="file">
 	<div class="flex flex-row w-full justify-center gap-2">
@@ -149,12 +149,13 @@
 		{#if note_export_uniqueness_selectable_columns}
 			<tr>
 				{#each firstFields[0] as _, i}
-					<td style={"padding: 0 0.6rem; " + ($data.note_export_columns_for_duplicate_checking.includes(i) ? 'background: rgba(127, 255, 127, 0.2);' : '')}>
-						<input
+					<td style={"padding: 0.4rem 0.2rem 0; " + ($data.note_export_columns_for_duplicate_checking.includes(i) ? 'background: rgba(127, 255, 127, 0.2);' : '')}>
+						<SlideToggle
 							type="checkbox"
 							name="slide"
+							size="sm"
 							value={i}
-							on:change={()=>{toggleNoteExportColumnForDuplicateChecking(i)}}
+							on:click={()=>{toggleNoteExportColumnForDuplicateChecking(i)}}
 							bind:checked={note_export_uniqueness_selected_columns[i]}
 						/>
 					</td>
