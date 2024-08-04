@@ -355,6 +355,9 @@
 	}
 
 	function getFirstPrompt(){
+		if ($data.current_prompt && ($data.prompts_synced.includes($data.current_prompt) || $data.prompts_unsynced.includes($data.current_prompt))) {
+			return $data.current_prompt;
+		}
 		return $data.prompts_synced[0] ?? $data.prompts_unsynced[0] ?? '';
 	}
 
