@@ -443,8 +443,8 @@
 			creating preset from scratch
 		{/if}
 	</div>
-	<span style="font-weight: bold"> preset name: </span>
-	<input type="text" bind:value={preset_name} />
+	<label for="fieldPresetName" style="font-weight: bold; display: inline;"> preset name: </label>
+	<input id="fieldPresetName" type="text" bind:value={preset_name} />
 	<br />
 	<div>
 		<span style="font-weight: bold">
@@ -693,14 +693,14 @@
 			</button>
 			{#if field.expanded_in_editor}
 				{#if field.type === 'text'}
-					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-3">
+					<label class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-3">
 						default: <input
 							class="mt-2"
 							style="width: calc(100% - 7ch);"
 							type="text"
 							bind:value={field.default[0]}
 						/>
-					</div>
+					</label>
 				{:else if field.type === 'selectOne'}
 					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-4">
 						<!-- <div>
@@ -806,14 +806,14 @@
 						</ListBox>
 					</div>
 				{:else if field.type === 'bound'}
-					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
+					<label class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
 						default: <input
 							class="mt-2"
 							style="width: calc(100% - 3.85rem);"
 							type="text"
 							bind:value={field.default[0]}
 						/>
-					</div>
+					</label>
 					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
 						bound to:
 						<div class="card p-2 pr-2">

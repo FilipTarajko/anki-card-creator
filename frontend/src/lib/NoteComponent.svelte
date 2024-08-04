@@ -505,9 +505,9 @@
 						<div style={`display: grid; grid-template-columns: 8.58rem 1fr 2.86rem 2.86rem${$data.currently_all_forced_visible ? ' 2.86rem' : ''};`}>
 							{#each $data.current_preset_for_notes.fields as field, i}
 								{#if field.currently_visible || $data.currently_all_forced_visible}
-									<div style="display: flex; justify-content: center; align-items: center;">
+									<label for={`field${i}`} style="display: flex; justify-content: center; align-items: center;">
 										{field.name}
-									</div>
+									</label>
 									{#if field.type === 'text'}
 										<input
 											id={`field${i}`}
@@ -594,12 +594,12 @@
 								{/if}
 							{/each}
 							{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
-								<div class="mt-2" style="display: flex; justify-content: center; align-items: center;">
+								<label for='fieldKeepPrompt' class="mt-2" style="display: flex; justify-content: center; align-items: center;">
 									{"prompt"}
-								</div>
+								</label>
 								<RadioGroup class="mt-2">
 									{#each [{label: "keep", value: true}, {label: "destroy", value: false}] as option}
-										<RadioItem bind:group={$data.shouldKeepPrompt} on:change={rememberShouldKeepPrompt} name="shouldKeepPrompt" value={option.value}
+										<RadioItem id='fieldKeepPrompt' bind:group={$data.shouldKeepPrompt} on:change={rememberShouldKeepPrompt} name="shouldKeepPrompt" value={option.value}
 											>{option.label}</RadioItem
 										>
 									{/each}
