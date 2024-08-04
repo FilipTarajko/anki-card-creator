@@ -288,27 +288,23 @@
 				deleteFirstPrompt();
 			}
 		}
-		else if (event.key == "ArrowUp" && event.target.type == "text") {
+		else if (event.key == "ArrowUp" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
 			let index = event.target.id.replace('field','')
 			let newFocusElem;
 			for (let i=index-1; i>=0; i--) {
 				newFocusElem = document.getElementById(`field${i}`);
-				if (newFocusElem && newFocusElem.getAttribute('type') == "text") {
-					console.log(index);
-					console.log(newFocusElem);
+				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
 					newFocusElem!.setAttribute('tabindex', '0')
 					newFocusElem!.focus();
 					break;
 				}
 			}
-		} else if (event.key == "ArrowDown" && event.target.type == "text") {
+		} else if (event.key == "ArrowDown" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
 			let index = event.target.id.replace('field','')
 			let newFocusElem
 			for (let i=index-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
 				newFocusElem = document.getElementById(`field${i}`);
-				if (newFocusElem && newFocusElem.getAttribute('type') == "text") {
-					console.log(index);
-					console.log(newFocusElem);
+				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
 					newFocusElem!.setAttribute('tabindex', '0')
 					newFocusElem!.focus();
 					break;
@@ -597,9 +593,11 @@
 				<form on:submit|preventDefault={()=>addOnePrompt()}>
 					<label>new prompt
 						<input
+							id="field1"
 							type="text"
 							bind:value={$data.currentlyWrittenPrompt}
 							on:input={rememberCurrentlyWrittenPrompt}
+							on:keydown={(e)=>handleNoteFieldInputKeydown(e, 1)}
 						>
 					</label>
 					<button
@@ -616,17 +614,21 @@
 					<label class="flex items-center justify-between w-full">
 						<div>new prompts</div>
 						<textarea
+							id="field2"
 							style="color: black;"
 							bind:value={$data.currentlyWrittenPromptList}
 							on:input={rememberCurrentlyWrittenPromptList}
+							on:keydown={(e)=>handleNoteFieldInputKeydown(e, 2)}
 						></textarea>
 					</label>
 					<label>prompt separator
 						<input
+							id="field3"
 							type="text"
 							placeholder="space (default)"
 							bind:value={$data.currentPromptListSeparator}
 							on:input={rememberCurrentPromptListSeparator}
+							on:keydown={(e)=>handleNoteFieldInputKeydown(e, 3)}
 						>
 					</label>
 					<button
