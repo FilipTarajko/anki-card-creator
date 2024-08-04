@@ -268,29 +268,61 @@
 		localStorage.setItem('currently_all_forced_visible', $data.currently_all_forced_visible);
 	}
 
+	function getAdjustedNewFocusElem(newFocusElem: any) {
+		if (newFocusElem.getAttribute('type') == 'radio') {
+			return newFocusElem.parentElement?.parentElement;
+		}
+		if (newFocusElem.classList.contains('card')) {
+			return newFocusElem.children[0].children[0]
+		}
+		return newFocusElem;
+	}
+
 	function handleKeyboardShortcuts(event: any) {
-		const {target, key} = event;
+
+		let {target, key} = event;
 		let fieldIndex = target?.id.replace('field','');
-		if (event.key == "ArrowUp" && fieldIndex != '') {
+
+		if (key == "Enter" && ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT || $data.noteAddingMode === NoteAddingMode.FROM_SCRATCH)) {
+			addNote();
+		}
+
+		// also handle single- and multi-selects
+		if (target.classList.contains('radio-item')) {
+			target = target.children[0].children[0];
+			fieldIndex = target?.id.replace('field','');
+		} else if (!target?.id?.includes('field') && target.getAttribute('type') == "checkbox") {
+			target = target.parentElement.parentElement.parentElement.parentElement;
+			fieldIndex = target?.id.replace('field','');
+		} else if (!target?.id?.includes('field') && target.classList.contains('listbox-item')) {
+			target = target.parentElement.parentElement;
+			fieldIndex = target?.id.replace('field','');
+		}
+		// handle moving up/down the fields with arrows
+		if (event.key == "ArrowUp" || event.key == "ArrowDown") {
+			event.preventDefault();
 			let newFocusElem;
-			for (let i=(fieldIndex ?? 1)-1; i>=0; i--) {
-				newFocusElem = document.getElementById(`field${i}`);
-				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
-					newFocusElem!.setAttribute('tabindex', '0')
-					newFocusElem!.focus();
-					break;
+			if (event.key == "ArrowUp" && fieldIndex != '') {
+				for (let i=(fieldIndex ?? 1)-1; i>=0; i--) {
+					const potentialMatch = document.getElementById(`field${i}`)
+					if (potentialMatch && (!event.shiftKey || potentialMatch.getAttribute('type') == "text" || potentialMatch.tagName == "TEXTAREA")) {
+						newFocusElem = potentialMatch;
+						break;
+					}
+				}
+			} else {
+				for (let i=fieldIndex-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
+					const potentialMatch = document.getElementById(`field${i}`)
+					if (potentialMatch && (!event.shiftKey || potentialMatch.getAttribute('type') == "text" || potentialMatch.tagName == "TEXTAREA")) {
+						newFocusElem = potentialMatch;
+						break;
+					}
 				}
 			}
-		}
-		if (event.key == "ArrowDown" || (event.key == "ArrowUp" && fieldIndex == '')) {
-			let newFocusElem
-			for (let i=fieldIndex-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
-				newFocusElem = document.getElementById(`field${i}`);
-				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
-					newFocusElem!.setAttribute('tabindex', '0')
-					newFocusElem!.focus();
-					break;
-				};
+			if (newFocusElem) {
+				newFocusElem = getAdjustedNewFocusElem(newFocusElem);
+				newFocusElem!.setAttribute('tabindex', '0')
+				newFocusElem!.focus();
 			}
 		}
 		if (event.altKey && !event.ctrlKey) {
@@ -331,18 +363,7 @@
 				iframe_source_template = $data.current_preset_for_notes.iframes[index][1];
 			}
 			// field freeze/reset/visibility TODO
-			let fieldTarget = target;
-			if (target.classList.contains('radio-item')) {
-				fieldTarget = target.children[0].children[0];
-				fieldIndex = fieldTarget?.id.replace('field','');
-			} else if (!fieldTarget?.id?.includes('field') && target.getAttribute('type') == "checkbox") {
-				fieldTarget = target.parentElement.parentElement.parentElement.parentElement;
-				fieldIndex = fieldTarget?.id.replace('field','');
-			} else if (!fieldTarget?.id?.includes('field') && target.classList.contains('listbox-item')) {
-				fieldTarget = target.parentElement.parentElement;
-				fieldIndex = fieldTarget?.id.replace('field','');
-			}
-			if (fieldTarget?.id?.includes('field')) {
+			if (target?.id?.includes('field')) {
 				if (key == "f" || key == "l") {
 					changeFieldCurrentlyFrozen(fieldIndex);
 				} else if (key == "r") {
@@ -536,7 +557,7 @@
 							style="font-weight: bold;"
 							on:click={toggleAllFieldsVisible}
 						>
-						<abbr title={`temporarily force all field visible - (alt+a while typing)`}>
+						<abbr title={`temporarily force all field visible - (alt+a)`}>
 							{#if $data.currently_all_forced_visible}
 								<i class="fa-solid fa-eye" />
 							{:else}
@@ -545,7 +566,7 @@
 						</abbr>
 						</button>
 					</div>
-					<form bind:clientWidth={cardFormWidth} on:submit|preventDefault={addNote}>
+					<form bind:clientWidth={cardFormWidth}>
 						{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
 							<span style={($data.prompts_synced.length || $data.prompts_unsynced.length) ? 'color: rgb(100, 200, 200)' : 'color: rgb(255, 100, 100);'}>{ $data.current_prompt || 'no current prompt' }</span>
 						{/if}
@@ -663,7 +684,7 @@
 							</button>
 						{/if}
 						<button
-							type="submit"
+							type="button"
 							style="margin-top: 0.858rem;"
 							class="btn btn-large variant-filled-success">add card</button
 						>
@@ -716,7 +737,7 @@
 						>
 					</label>
 					<button
-						type="submit"
+						type="button"
 						style="margin-top: 0.858rem;"
 						class="btn btn-large variant-filled-success"
 					>
