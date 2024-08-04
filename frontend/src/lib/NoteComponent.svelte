@@ -184,7 +184,7 @@
 `;
 		const values_to_append = [];
 		for (let i = 0; i < current_output.split(';').length; i++) {
-			if ($data.preset_fields_for_duplicate_checking.includes(i)) {
+			if (preset_fields_for_duplicate_checking.includes(i)) {
 				values_to_append.push(current_output.split(';')[i]);
 			}
 		}
@@ -398,6 +398,8 @@
 				showErrorToast($data.toastStore, "Prompts sync failed!");
 			});
 	}
+
+	$: preset_fields_for_duplicate_checking = $data.note_export_columns_for_duplicate_checking.map((e: number)=>e+$data.preset_fields_for_duplicate_checking_offset);
 </script>
 
 <svelte:window bind:innerHeight bind:innerWidth />
@@ -514,7 +516,7 @@
 											on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}
 											type="text"
 											style={field.current_inputs[0] && 
-												($data.preset_fields_for_duplicate_checking.includes(i)
+												(preset_fields_for_duplicate_checking.includes(i)
 												&& ($data.duplicate_checking_values_synced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles))
 												|| $data.duplicate_checking_values_unsynced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles))))
 												? "color: rgb(200, 0, 0);" : ""}
