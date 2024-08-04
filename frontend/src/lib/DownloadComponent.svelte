@@ -83,12 +83,14 @@
 
 <h2 class="h2 mt-12">Data to download</h2>
 {#if $data.notes_synced || $data.notes_unsynced}
-	<div class="card text-left p-4 variant-ghost">
-		{#if $data.display_csv_headers}
+	<div class="max-w-full">
+		<div class="card text-left p-4 variant-ghost max-w-full mx-4 overflow-x-auto">
+			{#if $data.display_csv_headers}
 			<pre style="color: gray;">{$data.prefix_for_exports.slice(0, -1)}</pre>
-		{/if}
-		<pre style="color: green;">{$data.notes_synced.slice(0, -1)}</pre>
-		<pre style="color: yellow;">{$data.notes_unsynced.slice(0, -1)}</pre>
+			{/if}
+			<pre style="color: green;">{$data.notes_synced.slice(0, -1)}</pre>
+			<pre style="color: yellow;">{$data.notes_unsynced.slice(0, -1)}</pre>
+		</div>
 	</div>
 {:else}
 	<div class="card p-4 variant-ghost-warning">
