@@ -493,6 +493,86 @@
 			{/each}
 		</div>
 
+		{#if $data.noteAddingMode === NoteAddingMode.NEW_PROMPT}
+		<form on:submit|preventDefault={()=>addOnePrompt()}>
+			<label>new prompt
+				<input
+					id="field1"
+					type="text"
+					bind:value={$data.currentlyWrittenPrompt}
+					on:input={rememberCurrentlyWrittenPrompt}
+				>
+			</label>
+			<button
+				type="submit"
+				style="margin-top: 0.858rem;"
+				class="btn btn-large variant-filled-success"
+			>
+				add prompt
+			</button>
+		</form>
+
+		<h2 class='h2'>Add multiple prompts</h2>
+		<form on:submit|preventDefault={addPromptsFromList}>
+			<label class="flex items-center justify-between w-full">
+				<div>new prompts</div>
+				<textarea
+					id="field2"
+					style="color: black;"
+					bind:value={$data.currentlyWrittenPromptList}
+					on:input={rememberCurrentlyWrittenPromptList}
+				></textarea>
+			</label>
+			<label>prompt separator
+				<input
+					id="field3"
+					type="text"
+					placeholder="space (default)"
+					bind:value={$data.currentPromptListSeparator}
+					on:input={rememberCurrentPromptListSeparator}
+				>
+			</label>
+			<button
+				type="button"
+				style="margin-top: 0.858rem;"
+				class="btn btn-large variant-filled-success"
+			>
+				add prompt
+			</button>
+		</form>
+
+		<div style="color: yellow">
+			{#if $data.prompts_unsynced.length }
+				unsynced prompts: "{ $data.prompts_unsynced.join('", "') }"
+			{:else}
+				no unsynced prompts
+			{/if}
+		</div>
+
+		<div style="color: green">
+			{#if $data.prompts_synced.length }
+				synced prompts: "{ $data.prompts_synced.join('", "') }"
+			{:else}
+				no synced prompts
+			{/if}
+		</div>
+
+		<div style="color: red">
+			{#if $data.prompts_deleted.length }
+				prompts for sync deleting: "{ $data.prompts_deleted.join('", "') }"
+			{:else}
+				no promps for sync deleting
+			{/if}
+		</div>
+		<div class="flex flex-row w-full justify-center gap-2">
+			<button class="btn variant-filled-primary" on:click={delete_all_prompts}>delete all</button>
+			<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
+			<button class="btn-icon variant-filled-success" on:click={sync_prompts}>
+				<i class="fa-solid fa-rotate" />
+			</button>
+		</div>
+
+	{:else}
 		{#if $data.presets.length}
 			<!-- TODO -->
 			<!-- <RadioGroup class="card">
@@ -697,86 +777,6 @@
 					</button>
 				</div>
 			{/if}
-			{#if $data.noteAddingMode === NoteAddingMode.NEW_PROMPT}
-				<form on:submit|preventDefault={()=>addOnePrompt()}>
-					<label>new prompt
-						<input
-							id="field1"
-							type="text"
-							bind:value={$data.currentlyWrittenPrompt}
-							on:input={rememberCurrentlyWrittenPrompt}
-						>
-					</label>
-					<button
-						type="submit"
-						style="margin-top: 0.858rem;"
-						class="btn btn-large variant-filled-success"
-					>
-						add prompt
-					</button>
-				</form>
-
-				<h2 class='h2'>Add multiple prompts</h2>
-				<form on:submit|preventDefault={addPromptsFromList}>
-					<label class="flex items-center justify-between w-full">
-						<div>new prompts</div>
-						<textarea
-							id="field2"
-							style="color: black;"
-							bind:value={$data.currentlyWrittenPromptList}
-							on:input={rememberCurrentlyWrittenPromptList}
-						></textarea>
-					</label>
-					<label>prompt separator
-						<input
-							id="field3"
-							type="text"
-							placeholder="space (default)"
-							bind:value={$data.currentPromptListSeparator}
-							on:input={rememberCurrentPromptListSeparator}
-						>
-					</label>
-					<button
-						type="button"
-						style="margin-top: 0.858rem;"
-						class="btn btn-large variant-filled-success"
-					>
-						add prompt
-					</button>
-				</form>
-
-				<div style="color: yellow">
-					{#if $data.prompts_unsynced.length }
-						unsynced prompts: "{ $data.prompts_unsynced.join('", "') }"
-					{:else}
-						no unsynced prompts
-					{/if}
-				</div>
-
-				<div style="color: green">
-					{#if $data.prompts_synced.length }
-						synced prompts: "{ $data.prompts_synced.join('", "') }"
-					{:else}
-						no synced prompts
-					{/if}
-				</div>
-
-				<div style="color: red">
-					{#if $data.prompts_deleted.length }
-						prompts for sync deleting: "{ $data.prompts_deleted.join('", "') }"
-					{:else}
-						no promps for sync deleting
-					{/if}
-				</div>
-				<div class="flex flex-row w-full justify-center gap-2">
-					<button class="btn variant-filled-primary" on:click={delete_all_prompts}>delete all</button>
-					<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
-					<button class="btn-icon variant-filled-success" on:click={sync_prompts}>
-						<i class="fa-solid fa-rotate" />
-					</button>
-				</div>
-
-			{/if}
 		{:else}
 			<div class="card mt-12 variant-ghost-warning p-4">
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -791,8 +791,9 @@
 				> tab.
 			</div>
 		{/if}
+	{/if}
 	</div>
-	{#if $data.current_preset_for_notes?.iframes?.length && (!is_iframe_moved_to_top || twoColumnsCondition)}
+	{#if ($data.noteAddingMode == NoteAddingMode.FROM_PROMPT || $data.noteAddingMode == NoteAddingMode.FROM_SCRATCH) && $data.current_preset_for_notes?.iframes?.length && (!is_iframe_moved_to_top || twoColumnsCondition)}
 		<IframesComponent
 			class="mt-10"
 			style="height: calc(100vh - 7rem);"
