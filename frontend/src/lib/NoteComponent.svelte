@@ -268,9 +268,35 @@
 		localStorage.setItem('currently_all_forced_visible', $data.currently_all_forced_visible);
 	}
 
-	function handleNoteFieldInputKeydown(event: any, fieldIndex: number) {
+	function handleKeyboardShortcuts(event: any) {
+		const {target, key} = event;
+		let fieldIndex = target?.id.replace('field','');
+		if (event.key == "ArrowUp" && fieldIndex != '') {
+			let newFocusElem;
+			for (let i=(fieldIndex ?? 1)-1; i>=0; i--) {
+				newFocusElem = document.getElementById(`field${i}`);
+				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
+					newFocusElem!.setAttribute('tabindex', '0')
+					newFocusElem!.focus();
+					break;
+				}
+			}
+		}
+		if (event.key == "ArrowDown" || (event.key == "ArrowUp" && fieldIndex == '')) {
+			let newFocusElem
+			for (let i=fieldIndex-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
+				newFocusElem = document.getElementById(`field${i}`);
+				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
+					newFocusElem!.setAttribute('tabindex', '0')
+					newFocusElem!.focus();
+					break;
+				};
+			}
+		}
 		if (event.altKey && !event.ctrlKey) {
-			if (event.key == "m" || event.key == "M") {
+			event.preventDefault();
+			// cycle mode/preset/iframe
+			if (key == "m" || key == "M") {
 				// @ts-ignore
 				let index = Object.values(NoteAddingMode).indexOf($data.noteAddingMode);
 				const length = Object.values(NoteAddingMode).length;
@@ -281,7 +307,7 @@
 				}
 				selectNoteAddingMode(Object.values(NoteAddingMode)[index]);
 			}
-			if (event.key == "p" || event.key == "P") {
+			if (key == "p" || key == "P") {
 				let preset = $data.presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
 				// let index = $data.presets.indexOf($data.current_preset_for_notes);
 				let index = $data.presets.indexOf(preset);
@@ -293,7 +319,7 @@
 				}
 				selectPreset($data.presets[index]);
 			}
-			if (event.key == "i" || event.key == "I") {
+			if (key == "i" || key == "I") {
 				let iframe = $data.current_preset_for_notes.iframes.find((i: [string, string])=>i[1] == iframe_source_template)
 				let index = $data.current_preset_for_notes.iframes.indexOf(iframe);
 				const length = $data.current_preset_for_notes.iframes.length;
@@ -304,52 +330,42 @@
 				}
 				iframe_source_template = $data.current_preset_for_notes.iframes[index][1];
 			}
-		}
-		if (event.altKey && !event.ctrlKey && !event.shiftKey) {
-			event.preventDefault();
-			if (event.key == "f" || event.key == "l") {
-				changeFieldCurrentlyFrozen(fieldIndex);
-			} else if (event.key == "r") {
-				resetFieldValueToDefault(fieldIndex);
-			} else if (event.key == "v") {
-				changeFieldCurrentlyVisible(fieldIndex);
-			} else if (event.key == "a") {
+			// field freeze/reset/visibility TODO
+			let fieldTarget = target;
+			if (target.classList.contains('radio-item')) {
+				fieldTarget = target.children[0].children[0];
+				fieldIndex = fieldTarget?.id.replace('field','');
+			} else if (!fieldTarget?.id?.includes('field') && target.getAttribute('type') == "checkbox") {
+				fieldTarget = target.parentElement.parentElement.parentElement.parentElement;
+				fieldIndex = fieldTarget?.id.replace('field','');
+			} else if (!fieldTarget?.id?.includes('field') && target.classList.contains('listbox-item')) {
+				fieldTarget = target.parentElement.parentElement;
+				fieldIndex = fieldTarget?.id.replace('field','');
+			}
+			if (fieldTarget?.id?.includes('field')) {
+				if (key == "f" || key == "l") {
+					changeFieldCurrentlyFrozen(fieldIndex);
+				} else if (key == "r") {
+					resetFieldValueToDefault(fieldIndex);
+				} else if (key == "v") {
+					changeFieldCurrentlyVisible(fieldIndex);
+				}
+			}
+			// all fields visible
+			if (key == "a") {
 				toggleAllFieldsVisible();
-			} else if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "d") {
+			}
+			// from-prompt-mode-related
+			if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "d") {
 				$data.shouldKeepPrompt = false;
 				rememberShouldKeepPrompt();
-			} else if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "k") {
+			}
+			if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "k") {
 				$data.shouldKeepPrompt = true;
 				rememberShouldKeepPrompt();
 			}
-		}
-		if (event.altKey && !event.ctrlKey && event.shiftKey) {
 			if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT && event.key == "D") {
 				deleteCurrentPrompt();
-			}
-		}
-		if (event.key == "ArrowUp" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
-			let index = event.target.id.replace('field','')
-			let newFocusElem;
-			for (let i=index-1; i>=0; i--) {
-				newFocusElem = document.getElementById(`field${i}`);
-				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
-					newFocusElem!.setAttribute('tabindex', '0')
-					newFocusElem!.focus();
-					break;
-				}
-			}
-		}
-		if (event.key == "ArrowDown" && (event.target.type == "text" || event.target.tagName == "TEXTAREA")) {
-			let index = event.target.id.replace('field','')
-			let newFocusElem
-			for (let i=index-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
-				newFocusElem = document.getElementById(`field${i}`);
-				if (newFocusElem && (newFocusElem.getAttribute('type') == "text" || newFocusElem.tagName == "TEXTAREA")) {
-					newFocusElem!.setAttribute('tabindex', '0')
-					newFocusElem!.focus();
-					break;
-				};
 			}
 		}
 	}
@@ -431,7 +447,7 @@
 	$: preset_fields_for_duplicate_checking = $data.note_export_columns_for_duplicate_checking.map((e: number)=>e+$data.preset_fields_for_duplicate_checking_offset);
 </script>
 
-<svelte:window bind:innerHeight bind:innerWidth />
+<svelte:window bind:innerHeight bind:innerWidth on:keydown={handleKeyboardShortcuts} />
 <div class="w-full" bind:clientWidth={layoutWidth} />
 
 <div class={`flex w-full ${$data.current_preset_for_notes?.iframes?.length ? 'w-full' : ''} ${twoColumnsCondition ? 'space-x-0 flex-row' : 'flex-col space-y-10'}`}>
@@ -542,7 +558,6 @@
 									{#if field.type === 'text'}
 										<input
 											id={`field${i}`}
-											on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}
 											type="text"
 											style={field.current_inputs[0] && 
 												(preset_fields_for_duplicate_checking.includes(i)
@@ -553,18 +568,18 @@
 											on:input={rememberCurrentPreset}
 										/>
 									{:else if field.type === 'selectOne'}
-										<RadioGroup on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}>
+										<RadioGroup>
 											{#each field.options as option}
-												<RadioItem on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)} id={`field${i}`} bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
+												<RadioItem id={`field${i}`} bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
 													>{option || '(empty)'}</RadioItem
 												>
 											{/each}
 										</RadioGroup>
 									{:else if field.type === 'selectMany'}
-										<ListBox multiple>
-											<div class="card" style="display: flex; flex-direction: row;">
+										<ListBox multiple id={`field${i}`}>
+											<div id={`field${i}`} class="card" style="display: flex; flex-direction: row;">
 												{#each field.options as option}
-													<ListBoxItem on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)} id={`field${i}`} bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
+													<ListBoxItem id={`field${i}`} bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
 														>{option || '(empty)'}</ListBoxItem
 													>
 												{/each}
@@ -669,7 +684,6 @@
 							type="text"
 							bind:value={$data.currentlyWrittenPrompt}
 							on:input={rememberCurrentlyWrittenPrompt}
-							on:keydown={(e)=>handleNoteFieldInputKeydown(e, 1)}
 						>
 					</label>
 					<button
@@ -690,7 +704,6 @@
 							style="color: black;"
 							bind:value={$data.currentlyWrittenPromptList}
 							on:input={rememberCurrentlyWrittenPromptList}
-							on:keydown={(e)=>handleNoteFieldInputKeydown(e, 2)}
 						></textarea>
 					</label>
 					<label>prompt separator
@@ -700,7 +713,6 @@
 							placeholder="space (default)"
 							bind:value={$data.currentPromptListSeparator}
 							on:input={rememberCurrentPromptListSeparator}
-							on:keydown={(e)=>handleNoteFieldInputKeydown(e, 3)}
 						>
 					</label>
 					<button
