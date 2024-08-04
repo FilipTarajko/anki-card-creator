@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { SlideToggle, getToastStore } from '@skeletonlabs/skeleton';
-	import { data, showErrorToast, showSuccessToast } from '../store';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import { data, showErrorToast, showSuccessToast, sync_notes } from '../store';
 	import axios from 'axios';
-
-	const toastStore = getToastStore();
 
 	function download(filename: string, text: string) {
 		const element = document.createElement('a');
@@ -56,27 +54,6 @@
 			.catch((error) => {
 				console.error(error);
 				showErrorToast($data.toastStore, 'Notes deletion failed!');
-			});
-	}
-
-	function sync_notes() {
-		axios
-			.post($data.backend_url + '/sync_notes', JSON.stringify($data.notes_unsynced), {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.notes_synced = response.data;
-				localStorage.setItem('notes_synced', $data.notes_synced);
-				$data.notes_unsynced = '';
-				localStorage.setItem('notes_unsynced', '');
-				showSuccessToast($data.toastStore, 'Notes synced!');
-			})
-			.catch((error) => {
-				console.error(error);
-				showErrorToast($data.toastStore, 'Notes sync failed!');
 			});
 	}
 </script>
@@ -134,7 +111,7 @@
 		<button class="btn-icon variant-filled-success" on:click={upload_notes}>
 			<i class="fa-solid fa-cloud-arrow-up" /></button
 		>
-		<button class="btn-icon variant-filled-success" on:click={sync_notes}>
+		<button class="btn-icon variant-filled-success" on:click={()=>{sync_notes($data)}}>
 			<i class="fa-solid fa-rotate" /></button
 		>
 	</div>

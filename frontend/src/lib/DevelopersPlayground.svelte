@@ -5,8 +5,7 @@
 	let mongo_status = 'loading...';
 	let user_count = 'loading...';
 
-	import { data } from '../store';
-	import type { ToastSettings } from '@skeletonlabs/skeleton';
+	import { data, presets, sync_notes, sync_presets } from '../store';
 
 	function check_connection_to_backend() {
 		backend_status = 'loading...';
@@ -103,25 +102,6 @@
 			});
 	}
 
-	function sync_notes() {
-		axios
-			.post($data.backend_url + '/sync_notes', JSON.stringify($data.notes_unsynced), {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.notes_synced = response.data;
-				localStorage.setItem('notes_synced', $data.notes_synced);
-				$data.notes_unsynced = '';
-				localStorage.setItem('notes_unsynced', '');
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	}
-
 	function delete_notes() {
 		axios
 			.post($data.backend_url + '/delete_notes', '', {
@@ -141,124 +121,7 @@
 			});
 	}
 
-	// function upload_presets() {
-	// 	axios
-	// 		.post($data.backend_url+'/upload_presets', JSON.stringify($data.presets), {
-	// 			headers: {
-	// 				Authorization: `Bearer ${$data.jwt}`,
-	// 				'Content-Type': 'application/json'
-	// 			}
-	// 		})
-	// 		.then((response) => {
-	// 			console.log(response);
-	// 			if (response.status === 200) {
-	// 				$data.presets.forEach((preset: Preset) => {
-	// 					preset.status = 'synced';
-	// 				});
-	// 				$data.presets = $data.presets;
-	// 				localStorage.setItem('presets', JSON.stringify($data.presets));
-	// 			}
-	// 		})
-	// 		.catch((error) => {
-	// 			console.error(error);
-	// 		});
-	// }
-
-	function sync_presets() {
-		axios
-			.post(
-				$data.backend_url + '/sync_presets',
-				JSON.stringify([
-					$data.presets.filter((e: Preset) => e.status == 'unsynced'),
-					$data.presets.filter((e: Preset) => e.status == 'to_update'),
-					$data.ids_of_presets_to_remove || []
-				]),
-				{
-					headers: {
-						Authorization: `Bearer ${$data.jwt}`,
-						'Content-Type': 'application/json'
-					}
-				}
-			)
-			.then((response) => {
-				console.log(response);
-				if (response.status === 200) {
-					console.log(response.data[0]);
-					let sync_report = response.data[0];
-					if (sync_report.ignored_presets.length > 0) {
-						show_toast(
-							`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
-								'<br/>'
-							)}`,
-							'variant-filled-warning',
-							0,
-							false
-						);
-					}
-					if (sync_report.unfound_presets.length > 0) {
-						show_toast(
-							`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
-								'<br/>'
-							)}`,
-							'variant-filled-warning',
-							0,
-							false
-						);
-					}
-					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
-						show_toast('Presets synced!', 'variant-filled-success', 1000, true, true);
-					}
-					$data.presets = response.data[1];
-					localStorage.setItem('presets', JSON.stringify($data.presets));
-					$data.ids_of_presets_to_remove = [];
-					localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-	}
-
-	// function load_presets() {
-	// 	axios
-	// 		.post($data.backend_url+'/load_presets', '', {
-	// 			headers: {
-	// 				Authorization: `Bearer ${$data.jwt}`,
-	// 				'Content-Type': 'application/json'
-	// 			}
-	// 		})
-	// 		.then((response) => {
-	// 			$data.presets = response.data;
-	// 			localStorage.setItem('presets', JSON.stringify($data.presets));
-	// 			console.log(response.data);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.error(error);
-	// 		});
-	// }
-
-	import { getToastStore } from '@skeletonlabs/skeleton';
 	import LoginRegisterComponent from './LoginRegisterComponent.svelte';
-	import { type Preset } from '../types';
-
-	const toastStore = getToastStore();
-
-	function show_toast(
-		message: string,
-		background = 'variant-filled-primary',
-		timeout = 10000,
-		autohide = true,
-		hideDismiss = false
-	) {
-		const t: ToastSettings = {
-			message,
-			timeout,
-			background,
-			autohide,
-			hideDismiss
-		};
-		toastStore.trigger(t);
-	}
 
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
@@ -299,7 +162,7 @@
 	</div>
 	<div>
 		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
-		<button class="btn variant-filled-warning" on:click={sync_notes}>sync notes</button>
+		<button class="btn variant-filled-warning" on:click={()=>{sync_notes($data)}}>sync notes</button>
 		<button
 			class="btn-icon variant-filled-primary"
 			on:click={() => {
@@ -313,9 +176,9 @@
 		</button>
 		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button>
 	</div>
-	{#if $data.presets.length}
+	{#if $presets.length}
 		<div class="card p-4 variant-ghost">
-			{#each $data.presets as preset}
+			{#each $presets as preset}
 				<div>
 					{preset.name}
 					{preset.last_edited}
@@ -338,12 +201,12 @@
 		</div>
 	{/if}
 	<div>
-		<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
+		<button class="btn variant-filled-success" on:click={()=>{sync_presets($data, $presets)}}>sync presets</button>
 		<button
 			class="btn-icon variant-filled-primary"
 			on:click={() => {
-				$data.presets = [];
-				localStorage.setItem('presets', $data.presets);
+				$presets = [];
+				localStorage.setItem('presets', $presets);
 			}}
 		>
 			<i class="fa-solid fa-remove" />

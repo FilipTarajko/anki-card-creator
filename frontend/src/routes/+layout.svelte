@@ -6,7 +6,8 @@
 		LightSwitch,
 		AppRail,
 		AppRailTile,
-		Toast
+		Toast,
+		AppRailAnchor
 	} from '@skeletonlabs/skeleton';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -21,7 +22,7 @@
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
-	import { data } from '../store';
+	import { data, presets, sync_all } from '../store';
 
 	// For toasts, modals etc.
 	import { initializeStores } from '@skeletonlabs/skeleton';
@@ -197,7 +198,7 @@
 				<svelte:fragment slot="lead"><i class="fa-solid fa-spell-check fa-xl" /></svelte:fragment>
 				<span>wiktionary</span>
 			</AppRailTile>
-			<AppRailTile
+			<!-- <AppRailTile
 				bind:group={$data.current_page}
 				on:click={() => {
 					localStorage.setItem('current_page', 'developed');
@@ -208,7 +209,14 @@
 			>
 				<svelte:fragment slot="lead"><i class="fa-solid fa-laptop-code fa-xl" /></svelte:fragment>
 				<span>developed</span>
-			</AppRailTile>
+			</AppRailTile> -->
+			<button
+				class="w-20 text-green-300 flex flex-col left-0 pt-7 pb-3 h-20 mt-8 items-center justify-between cursor-pointer hover:bg-primary-500/10"
+				on:click={()=>{sync_all($data, $presets)}}
+			>
+				<i class="fa-solid fa-rotate fa-xl" />
+				<span>sync all</span>
+			</button>
 		</AppRail>
 		{/if}
 	</svelte:fragment>

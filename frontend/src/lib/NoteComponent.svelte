@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast } from '../store';
+	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast, sync_prompts, getFirstPrompt, presets } from '../store';
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
-	import axios from 'axios';
 
 	let current_output: string = '';
 
@@ -19,7 +18,7 @@
 	}
 
 	// @ts-ignore
-	$: did_current_preset_change = $data.current_preset_for_notes && !$data.presets.some((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
+	$: did_current_preset_change = $data.current_preset_for_notes && !$presets.some((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
 
 	$: {
 		if ($data.current_preset_for_notes) {
@@ -340,16 +339,16 @@
 				selectNoteAddingMode(Object.values(NoteAddingMode)[index]);
 			}
 			if (key == "p" || key == "P") {
-				let preset = $data.presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
-				// let index = $data.presets.indexOf($data.current_preset_for_notes);
-				let index = $data.presets.indexOf(preset);
-				const length = $data.presets.length;
+				let preset = $presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
+				// let index = $presets.indexOf($data.current_preset_for_notes);
+				let index = $presets.indexOf(preset);
+				const length = $presets.length;
 				if (event.shiftKey) {
 					index = ((index - 1) + length) % length;
 				} else {
 					index = (index + 1) % length;
 				}
-				selectPreset($data.presets[index]);
+				selectPreset($presets[index]);
 			}
 			if (key == "i" || key == "I") {
 				let iframe = $data.current_preset_for_notes.iframes.find((i: [string, string])=>i[1] == iframe_source_template)
@@ -391,20 +390,11 @@
 		}
 	}
 
-	function getFirstPrompt(){
-		if ($data.current_prompt && ($data.prompts_synced.includes($data.current_prompt) || $data.prompts_unsynced.includes($data.current_prompt))) {
-			return $data.current_prompt;
-		}
-		return $data.prompts_synced[0] ?? $data.prompts_unsynced[0] ?? '';
-	}
-
 	function selectNoteAddingMode(mode: NoteAddingMode) {
 		$data.noteAddingMode = mode;
 		localStorage.setItem('noteAddingMode', mode);
 		if (mode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
-			console.log("$data.prompts_unsynced.includes(getFirstPrompt())")
-			console.log($data.prompts_unsynced.includes(getFirstPrompt()))
-			$data.current_prompt = getFirstPrompt();
+			$data.current_prompt = getFirstPrompt($data);
 			console.log(`current_prompt = ${$data.current_prompt}`)
 			localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
 			console.log("setting an input to current_prompt")
@@ -420,7 +410,7 @@
 		localStorage.setItem('prompts_deleted', $data.prompts_synced);
 		$data.current_prompt = '';
 		localStorage.setItem('current_prompt', $data.current_prompt);
-		sync_prompts();
+		sync_prompts($data);
 	}
 
 	function delete_local_prompts() {
@@ -430,39 +420,6 @@
 			$data.current_prompt = '';
 			localStorage.setItem('current_prompt', $data.current_prompt);
 		}
-	}
-
-	function sync_prompts() {
-		const data = JSON.stringify([
-			$data.prompts_unsynced,
-			$data.prompts_deleted,
-		]);
-		axios
-			.post($data.backend_url + '/sync_prompts', data, {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.prompts_synced = response.data;
-				localStorage.setItem('prompts_synced', JSON.stringify($data.prompts_synced));
-				$data.prompts_unsynced = [];
-				localStorage.setItem('prompts_unsynced', '[]');
-				$data.prompts_deleted = [];
-				localStorage.setItem('prompts_deleted', '[]');
-				$data.current_prompt = getFirstPrompt();
-				localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
-				if ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
-					console.log("setting an input to current_prompt")
-					$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.current_prompt;
-				}
-				showSuccessToast($data.toastStore, "Synced prompts");
-			})
-			.catch((error) => {
-				console.error(error);
-				showErrorToast($data.toastStore, "Prompts sync failed!");
-			});
 	}
 
 	$: preset_fields_for_duplicate_checking = $data.note_export_columns_for_duplicate_checking.map((e: number)=>e+$data.preset_fields_for_duplicate_checking_offset);
@@ -567,16 +524,16 @@
 		<div class="flex flex-row w-full justify-center gap-2">
 			<button class="btn variant-filled-primary" on:click={delete_all_prompts}>delete all</button>
 			<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
-			<button class="btn-icon variant-filled-success" on:click={sync_prompts}>
+			<button class="btn-icon variant-filled-success" on:click={()=>{sync_prompts($data)}}>
 				<i class="fa-solid fa-rotate" />
 			</button>
 		</div>
 
 	{:else}
-		{#if $data.presets.length}
+		{#if $presets.length}
 			<!-- TODO -->
 			<!-- <RadioGroup class="card">
-				{#each $data.presets as preset}
+				{#each $presets as preset}
 					<RadioItem
 						class={`${$data.current_preset_for_notes?.name !== preset.name ? 'variant-ghost' : ''}`}
 						bind:group={$data.current_preset_for_notes}
@@ -587,7 +544,7 @@
 			</RadioGroup> -->
 			{#if ($data.noteAddingMode === NoteAddingMode.FROM_SCRATCH || $data.noteAddingMode === NoteAddingMode.FROM_PROMPT)}
 			<div class="card p-2 ml-6 mr-6">
-				{#each $data.presets as preset}
+				{#each $presets as preset}
 					<button
 						style={`color: hsl(${preset.hue} ${
 							$data.current_preset_for_notes?.name == preset.name
@@ -772,7 +729,7 @@
 					<div style="max-width: 30rem; line-break: anywhere;">
 						current result: <br><span>{current_output}</span>
 					</div>
-					<button class="btn-icon variant-filled-success" on:click={sync_prompts}>
+					<button class="btn-icon variant-filled-success" on:click={()=>{sync_prompts($data)}}>
 						<i class="fa-solid fa-rotate" />
 					</button>
 				</div>

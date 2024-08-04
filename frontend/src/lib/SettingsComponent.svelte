@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
-	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck } from '../store';
+	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck, sync_unique_questions } from '../store';
 	import axios from 'axios';
 
 	const EXAMPLES_TO_SHOW = 10;
@@ -91,29 +91,6 @@
 		showSuccessToast($data.toastStore, "Deleted unsynced unique questions list");
 	}
 
-	function sync_unique_questions() {
-		console.log(JSON.parse(JSON.stringify($data.duplicate_checking_values_unsynced)))
-		console.log("will sync")
-		axios
-			.post($data.backend_url + '/sync_unique_questions', JSON.stringify($data.duplicate_checking_values_unsynced ?? []), {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.duplicate_checking_values_synced = response.data;
-				localStorage.setItem('duplicate_checking_values_synced', JSON.stringify($data.duplicate_checking_values_synced));
-				$data.duplicate_checking_values_unsynced = [];
-				localStorage.setItem('duplicate_checking_values_unsynced', '[]');
-				showSuccessToast($data.toastStore, "Synced unique question list");
-			})
-			.catch((error) => {
-				console.error(error);
-				showErrorToast($data.toastStore, "Unique question list sync failed!");
-			});
-	}
-
 	$: note_export_uniqueness_selectable_columns = firstFields[0];
 	$: note_export_uniqueness_selected_columns = (note_export_uniqueness_selectable_columns ?? []).map((elem, i) => {
 		if ($data.note_export_columns_for_duplicate_checking.includes(i)) {
@@ -187,7 +164,7 @@
 	{/each}
 	<div class="flex flex-row w-full justify-center gap-2">
 		<button class="btn variant-filled-primary" on:click={deleteAllUniquenessEntries}>delete all</button>
-		<button class="btn-icon variant-filled-success" on:click={sync_unique_questions}>
+		<button class="btn-icon variant-filled-success" on:click={()=>{sync_unique_questions($data)}}>
 			<i class="fa-solid fa-rotate" />
 		</button>
 	</div>

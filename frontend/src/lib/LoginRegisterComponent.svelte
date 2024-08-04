@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { data } from '../store';
+	import { data, showErrorToast, showSuccessToast } from '../store';
 	import jwt_decode from 'jwt-decode';
 	import axios from 'axios';
-	import type { ToastSettings } from '@skeletonlabs/skeleton';
-	import { getToastStore } from '@skeletonlabs/skeleton';
-
-	const toastStore = getToastStore();
 
 	let login_form_data = {
 		username_or_email: 'test',
@@ -21,38 +17,18 @@
 
 	function try_to_register() {
 		if (registration_form_data.password !== password_repeat) {
-			toastStore.trigger({
-				message: 'Passwords do not match!',
-				timeout: 5000,
-				background: 'variant-filled-primary',
-				autohide: true,
-				hideDismiss: false
-			});
+			showErrorToast($data.toastStore, 'Passwords do not match!');
 			return;
 		}
 		axios
 			.post($data.backend_url + '/register_user', registration_form_data)
 			.then((response) => {
 				if (response.data === 'Registered') {
-					const t: ToastSettings = {
-						message: 'Registered successfully! You can now log in.',
-						timeout: 5000,
-						background: 'variant-filled-success',
-						autohide: true,
-						hideDismiss: false
-					};
-					toastStore.trigger(t);
+					showSuccessToast($data.toastStore, 'Registered successfully! You can now log in.');
 				}
 			})
 			.catch((error) => {
-				const t: ToastSettings = {
-					message: `Registration failed: ${error?.response?.data || 'no connection'}`,
-					timeout: 10000,
-					background: 'variant-filled-primary',
-					autohide: true,
-					hideDismiss: false
-				};
-				toastStore.trigger(t);
+				showErrorToast($data.toastStore, `Registration failed: ${error?.response?.data || 'no connection'}`);
 			});
 	}
 
@@ -70,24 +46,10 @@
 				localStorage.setItem('email', $data.email);
 				localStorage.setItem('id', $data.id);
 
-				const t: ToastSettings = {
-					message: 'Logged in successfully!',
-					timeout: 5000,
-					background: 'variant-filled-success',
-					autohide: true,
-					hideDismiss: false
-				};
-				toastStore.trigger(t);
+				showSuccessToast($data.toastStore, 'Logged in successfully!');
 			})
 			.catch((error) => {
-				const t: ToastSettings = {
-					message: `Log-in failed: ${error?.response?.data || 'no connection'}`,
-					timeout: 10000,
-					background: 'variant-filled-primary',
-					autohide: true,
-					hideDismiss: false
-				};
-				toastStore.trigger(t);
+				showErrorToast($data.toastStore, `Log-in failed: ${error?.response?.data || 'no connection'}`);
 			});
 	}
 
@@ -101,14 +63,7 @@
 		localStorage.removeItem('email');
 		localStorage.removeItem('id');
 
-		const t: ToastSettings = {
-			message: 'Logged out successfully!',
-			timeout: 5000,
-			background: 'variant-filled-success',
-			autohide: true,
-			hideDismiss: false
-		};
-		toastStore.trigger(t);
+		showSuccessToast($data.toastStore, 'Logged out successfully!');
 	}
 </script>
 

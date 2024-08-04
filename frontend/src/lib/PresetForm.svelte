@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, showErrorToast, showSuccessToast, showWarningToast } from '../store';
-	import axios from 'axios';
+	import { data, showErrorToast, showSuccessToast, default_fields, sync_presets, fields, selected_preset, presets } from '../store';
 	import { BindingType, type Field, type Preset } from '../types';
 
 	let is_iframe_list_visible = false;
@@ -10,112 +9,12 @@
 	let selected_hue: string = '';
 	let new_field_name = '';
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
-	let selected_preset: Preset | null = null;
-	let default_fields = [
-		{
-			id: 0,
-			name: 'deck',
-			type: 'bound',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: true,
-			current_inputs: [],
-			bound_to: 5,
-			bindings: [
-				['nl', 'Dutch'],
-				['en', 'English']
-			],
-			binding_type: 'equals'
-		},
-		{
-			id: 1,
-			name: 'notetype',
-			type: 'selectOne',
-			options: ['2X26', '3X26'],
-			default: ['2X26'],
-			visible_by_default: false,
-			frozen_by_default: true,
-			current_inputs: []
-		},
-		{
-			id: 2,
-			name: 'tags',
-			type: 'selectMany',
-			options: ['AnkiCC', 'test', 'test::AnkiCC', 'test::foo::baz::baz'],
-			default: ['AnkiCC', 'test'],
-			visible_by_default: false,
-			frozen_by_default: true,
-			current_inputs: []
-		},
-		{
-			id: 3,
-			name: 'front',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 4,
-			name: 'back',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 5,
-			name: 'rev',
-			type: 'selectOne',
-			options: ['', 'y'],
-			default: [''],
-			visible_by_default: true,
-			frozen_by_default: true,
-			current_inputs: []
-		},
-		{
-			id: 6,
-			name: 'info',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 7,
-			name: 'source',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 8,
-			name: 'theme',
-			type: 'selectOne',
-			options: ['nl', 'en', 'de', 'pl'],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: true,
-			current_inputs: []
-		}
-	];
-	let fields: Field[] = JSON.parse(JSON.stringify(default_fields));
 
 	function create_field() {
-		fields = [
-			...fields,
+		$fields = [
+			...$fields,
 			{
-				id: fields.length,
+				id: $fields.length,
 				name: new_field_name,
 				type: new_field_type ?? 'text',
 				options: [],
@@ -130,15 +29,15 @@
 	}
 
 	function validate_and_prepare_fields() {
-		for (let i = 0; i < fields.length; i++) {
+		for (let i = 0; i < $fields.length; i++) {
 			if (
-				fields[i].options.length < 2 &&
-				(fields[i].type == 'selectOne' || fields[i].type == 'selectMany')
+				$fields[i].options.length < 2 &&
+				($fields[i].type == 'selectOne' || $fields[i].type == 'selectMany')
 			) {
 				showErrorToast($data.toastStore, 'Select fields must have at least 2 options!');
 				return false;
 			}
-			fields[i].current_inputs = [];
+			$fields[i].current_inputs = [];
 		}
 		return true;
 	}
@@ -148,56 +47,56 @@
 			showErrorToast($data.toastStore, "Please enter preset's name");
 		} else if (
 			// @ts-ignore
-			$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
+			$presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
 		) {
 			showErrorToast($data.toastStore, 'Preset with this name already exists!');
 		} else if (!validate_and_prepare_fields()) {
 			return;
 		} else {
-			$data.presets = [
-				...$data.presets,
+			$presets = [
+				...$presets,
 				{
 					name: preset_name,
 					iframes: preset_iframes,
-					fields: JSON.parse(JSON.stringify(fields)),
+					fields: JSON.parse(JSON.stringify($fields)),
 					last_edited: new Date().getTime(),
 					status: 'unsynced',
 					hue: selected_hue
 				}
 			];
-			localStorage.setItem('presets', JSON.stringify($data.presets));
+			localStorage.setItem('presets', JSON.stringify($presets));
 			showSuccessToast($data.toastStore, `Preset "${preset_name}" saved!`);
 		}
 	}
 
 	function update_preset() {
-		if (!selected_preset) {
+		if (!$selected_preset) {
 			console.error('selected_preset is null');
 		} else if (!preset_name) {
 			showErrorToast($data.toastStore, "Please enter preset's name");
 		} else if (
 			// @ts-ignore
-			$data.presets.find(
+			$presets.find(
 				(e: Preset) =>
-					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== selected_preset
+					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== $selected_preset
 			)
 		) {
 			showErrorToast($data.toastStore, 'Preset with this name already exists!');
 		} else if (!validate_and_prepare_fields()) {
 			return;
 		} else {
-			let old_preset_name = selected_preset.name;
-			selected_preset.iframes = preset_iframes;
-			selected_preset.fields = fields;
-			selected_preset.name = preset_name;
-			selected_preset.last_edited = new Date().getTime();
-			selected_preset.hue = selected_hue;
+			let old_preset_name = $selected_preset.name;
+			$selected_preset.iframes = preset_iframes;
+			$selected_preset.fields = $fields;
+			$selected_preset.name = preset_name;
+			$selected_preset.last_edited = new Date().getTime();
+			$selected_preset.hue = selected_hue;
 
-			if (selected_preset.status == 'synced') {
-				selected_preset.status = 'to_update';
+			if ($selected_preset.status == 'synced') {
+				$selected_preset.status = 'to_update';
 			}
-			$data.presets = $data.presets;
-			localStorage.setItem('presets', JSON.stringify($data.presets));
+			$presets = $presets;
+			localStorage.setItem('presets', JSON.stringify($presets));
 			if (old_preset_name == preset_name) {
 				showSuccessToast($data.toastStore, `Preset "${preset_name}" updated!`);
 			} else {
@@ -206,67 +105,14 @@
 		}
 	}
 
-	function sync_presets() {
-		axios
-			.post(
-				$data.backend_url + '/sync_presets',
-				JSON.stringify([
-					$data.presets.filter((e: Preset) => e.status == 'unsynced'),
-					$data.presets.filter((e: Preset) => e.status == 'to_update'),
-					$data.ids_of_presets_to_remove || []
-				]),
-				{
-					headers: {
-						Authorization: `Bearer ${$data.jwt}`,
-						'Content-Type': 'application/json'
-					}
-				}
-			)
-			.then((response) => {
-				console.log(response);
-				if (response.status === 200) {
-					console.log(response.data[0]);
-					let sync_report = response.data[0];
-					if (sync_report.ignored_presets.length > 0) {
-						showWarningToast(
-							$data.toastStore,
-							`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
-								'<br/>'
-							)}`
-						);
-					}
-					if (sync_report.unfound_presets.length > 0) {
-						showWarningToast(
-							$data.toastStore,
-							`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
-								'<br/>'
-							)}`
-						);
-					}
-					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
-						showSuccessToast($data.toastStore, 'Presets synced!');
-					}
-					$data.presets = response.data[1];
-					localStorage.setItem('presets', JSON.stringify($data.presets));
-					$data.ids_of_presets_to_remove = [];
-					localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
-					fields = JSON.parse(JSON.stringify(default_fields));
-					selected_preset = null;
-				}
-			})
-			.catch((error) => {
-				showErrorToast($data.toastStore, 'Presets sync failed!');
-			});
-	}
-
 	function add_missing_bindings(field: Field) {
-		if (!field.bindings || !fields) {
+		if (!field.bindings || !$fields) {
 			return;
 		}
 		let binding_field = null;
-		for (let i = 0; i < fields?.length; i++) {
-			if (field.bound_to == fields[i].id) {
-				binding_field = fields[i];
+		for (let i = 0; i < $fields?.length; i++) {
+			if (field.bound_to == $fields[i].id) {
+				binding_field = $fields[i];
 				break;
 			}
 		}
@@ -301,44 +147,44 @@
 			}
 			field.bindings.push([to_check[i], '']);
 		}
-		fields = fields;
+		$fields = $fields;
 	}
 </script>
-
+{JSON.stringify($presets)}
 <h2 class="h2 mt-12">Create a card preset</h2>
 <div class="card p-2 ml-6 mr-6">
-	{#each $data.presets as preset}
+	{#each $presets as preset}
 		<button
 			style={`color: hsl(${preset.hue} ${
-				selected_preset?.name == preset.name
+				$selected_preset?.name == preset.name
 					? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
 					: '70% 50%);'
 			}`}
 			class={`btn ${
-				selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+				$selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 			} m-0.5`}
 			on:click={() => {
 				preset_name = preset.name;
 				preset_iframes = preset.iframes;
-				fields = JSON.parse(JSON.stringify(preset.fields));
-				selected_preset = preset;
+				$fields = JSON.parse(JSON.stringify(preset.fields));
+				$selected_preset = preset;
 				selected_hue = preset.hue;
 			}}
 		>
 			{preset.name}
 		</button>
 	{/each}
-	{#if $data.presets.length}
+	{#if $presets.length}
 		<br />
 	{/if}
 	<button
-		class={`btn ${!selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
+		class={`btn ${!$selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
 		on:click={() => {
 			preset_name = 'new preset';
 			preset_iframes = [];
-			fields = JSON.parse(JSON.stringify(default_fields));
+			$fields = JSON.parse(JSON.stringify(default_fields));
 			selected_hue = '';
-			selected_preset = null;
+			$selected_preset = null;
 		}}
 	>
 		<b><i>new preset</i></b>
@@ -347,98 +193,98 @@
 <div class="card p-4">
 	<button
 		class={`btn-icon ${
-			selected_preset && $data.presets.indexOf(selected_preset) > 0
+			$selected_preset && $presets.indexOf($selected_preset) > 0
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if (selected_preset && $data.presets.indexOf(selected_preset) > 0) {
+			if ($selected_preset && $presets.indexOf($selected_preset) > 0) {
 				// @ts-ignore
-				$data.presets = $data.presets.filter((p) => p !== selected_preset);
-				$data.presets.unshift(selected_preset);
-				localStorage.setItem('presets', JSON.stringify($data.presets));
+				$presets = $presets.filter((p) => p !== $selected_preset);
+				$presets.unshift($selected_preset);
+				localStorage.setItem('presets', JSON.stringify($presets));
 			}
 		}}
 		><i class="fa-solid fa-angles-left" />
 	</button>
 	<button
 		class={`btn-icon ${
-			selected_preset && $data.presets.indexOf(selected_preset) > 0
+			$selected_preset && $presets.indexOf($selected_preset) > 0
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if (selected_preset && $data.presets.indexOf(selected_preset) > 0) {
+			if ($selected_preset && $presets.indexOf($selected_preset) > 0) {
 				// @ts-ignore
-				let index = $data.presets.indexOf(selected_preset);
-				let temp = $data.presets[index - 1];
-				$data.presets[index - 1] = selected_preset;
-				$data.presets[index] = temp;
-				localStorage.setItem('presets', JSON.stringify($data.presets));
+				let index = $presets.indexOf($selected_preset);
+				let temp = $presets[index - 1];
+				$presets[index - 1] = $selected_preset;
+				$presets[index] = temp;
+				localStorage.setItem('presets', JSON.stringify($presets));
 			}
 		}}
 		><i class="fa-solid fa-chevron-left" />
 	</button>
 	<button
 		type="button"
-		class={`btn-icon ${selected_preset ? 'variant-filled-primary' : 'variant-ghost-primary'} m-0.5`}
+		class={`btn-icon ${$selected_preset ? 'variant-filled-primary' : 'variant-ghost-primary'} m-0.5`}
 		style="font-weight: bold;"
 		on:click={() => {
-			if (selected_preset?.status !== 'unsynced' && selected_preset?._id) {
-				$data.ids_of_presets_to_remove.push(selected_preset?._id);
+			if ($selected_preset?.status !== 'unsynced' && $selected_preset?._id) {
+				$data.ids_of_presets_to_remove.push($selected_preset?._id);
 				localStorage.setItem(
 					'ids_of_presets_to_remove',
 					JSON.stringify($data.ids_of_presets_to_remove)
 				);
 			}
 			// @ts-ignore
-			$data.presets = $data.presets.filter((p) => p !== selected_preset);
-			selected_preset = null;
-			localStorage.setItem('presets', JSON.stringify($data.presets));
+			$presets = $presets.filter((p) => p !== $selected_preset);
+			$selected_preset = null;
+			localStorage.setItem('presets', JSON.stringify($presets));
 		}}
 	>
 		<i class="fa-solid fa-remove" />
 	</button>
 	<button
 		class={`btn-icon ${
-			selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1
+			$selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if (selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1) {
+			if ($selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1) {
 				// @ts-ignore
-				let index = $data.presets.indexOf(selected_preset);
-				let temp = $data.presets[index + 1];
-				$data.presets[index + 1] = selected_preset;
-				$data.presets[index] = temp;
-				localStorage.setItem('presets', JSON.stringify($data.presets));
+				let index = $presets.indexOf($selected_preset);
+				let temp = $presets[index + 1];
+				$presets[index + 1] = $selected_preset;
+				$presets[index] = temp;
+				localStorage.setItem('presets', JSON.stringify($presets));
 			}
 		}}
 		><i class="fa-solid fa-chevron-right" />
 	</button>
 	<button
 		class={`btn-icon ${
-			selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1
+			$selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if (selected_preset && $data.presets.indexOf(selected_preset) < $data.presets.length - 1) {
+			if ($selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1) {
 				// @ts-ignore
-				$data.presets = $data.presets.filter((p) => p !== selected_preset);
-				$data.presets.push(selected_preset);
-				localStorage.setItem('presets', JSON.stringify($data.presets));
+				$presets = $presets.filter((p) => p !== $selected_preset);
+				$presets.push($selected_preset);
+				localStorage.setItem('presets', JSON.stringify($presets));
 			}
 		}}
 		><i class="fa-solid fa-angles-right" />
 	</button>
 </div>
-<button class="btn variant-filled-success" on:click={sync_presets}>sync presets</button>
+<button class="btn variant-filled-success" on:click={()=>{sync_presets($data, $presets)}}>sync presets</button>
 <div>
 	<div class="mb-4">
-		{#if selected_preset}
-			based on: {selected_preset.name}
+		{#if $selected_preset}
+			based on: {$selected_preset.name}
 		{:else}
 			creating preset from scratch
 		{/if}
@@ -552,7 +398,7 @@
 			/>
 		{/each}
 	</div>
-	{#each fields as field, i_field}
+	{#each $fields as field, i_field}
 		<div
 			class="card p-4 grid-cols-[12.2rem,2.574rem,2.574rem,4.3rem,2.574rem] md:grid-cols-[8.8rem,22.88rem,2.574rem,2.574rem,2.574rem,4.3rem,2.574rem]"
 			style="display: grid; gap: 0.5148rem; margin-top: 0.572rem;"
@@ -588,21 +434,21 @@
 					class="btn btn-sm {i_field == 0 ? 'variant-ghost-secondary' : 'variant-filled-secondary'}"
 					disabled={i_field == 0}
 					on:click={() => {
-						let temp = fields[i_field - 1];
-						fields[i_field - 1] = field;
-						fields[i_field] = temp;
+						let temp = $fields[i_field - 1];
+						$fields[i_field - 1] = field;
+						$fields[i_field] = temp;
 					}}><i class="fa-solid fa-arrow-up" /></button
 				>
 				<button
 					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 0.286rem;"
-					class="btn btn-sm {i_field == fields.length - 1
+					class="btn btn-sm {i_field == $fields.length - 1
 						? 'variant-ghost-secondary'
 						: 'variant-filled-secondary'}"
-					disabled={i_field == fields.length - 1}
+					disabled={i_field == $fields.length - 1}
 					on:click={() => {
-						let temp = fields[i_field + 1];
-						fields[i_field + 1] = field;
-						fields[i_field] = temp;
+						let temp = $fields[i_field + 1];
+						$fields[i_field + 1] = field;
+						$fields[i_field] = temp;
 					}}><i class="fa-solid fa-arrow-down" /></button
 				>
 			</div>
@@ -610,7 +456,7 @@
 				style="font-weight: bold;"
 				class="btn btn-sm variant-filled-primary order-4"
 				on:click={() => {
-					fields = fields.filter((e) => e.id != field.id);
+					$fields = $fields.filter((e) => e.id != field.id);
 				}}
 			>
 				<i class="fa-solid fa-remove" /></button
@@ -656,12 +502,12 @@
 							['en', 'English']
 						];
 						field.binding_type = BindingType.EQUALS;
-						if ((fields?.length ?? 0) >= 3 && field.id != 3) {
+						if (($fields?.length ?? 0) >= 3 && field.id != 3) {
 							field.bound_to = 3;
 						} else {
-							for (let i = 0; i < fields.length; i++) {
-								if (fields[i].id != field.id) {
-									field.bound_to = fields[i].id;
+							for (let i = 0; i < $fields.length; i++) {
+								if ($fields[i].id != field.id) {
+									field.bound_to = $fields[i].id;
 									break;
 								}
 							}
@@ -817,7 +663,7 @@
 					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
 						bound to:
 						<div class="card p-2 pr-2">
-							{#each fields.filter((e) => e != field) as field_to_bind}
+							{#each $fields.filter((e) => e != field) as field_to_bind}
 								<button
 									class={`btn ${
 										field_to_bind.id == field?.bound_to ? 'variant-filled' : 'variant-ghost'
@@ -914,11 +760,11 @@
 			}}>add field</button
 		>
 	</div>
-	{#if selected_preset}
+	{#if $selected_preset}
 		<button
 			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-warning"
-			on:click={update_preset}>update {selected_preset.name}</button
+			on:click={update_preset}>update {$selected_preset.name}</button
 		>
 		<button
 			style="margin-top: 0.858rem;"

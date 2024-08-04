@@ -3,7 +3,7 @@
 	import DownloadComponent from '$lib/DownloadComponent.svelte';
 	import NoteComponent from '$lib/NoteComponent.svelte';
 	import GuideComponent from '$lib/GuideComponent.svelte';
-	import DevelopersPlayground from '$lib/DevelopersPlayground.svelte';
+	// import DevelopersPlayground from '$lib/DevelopersPlayground.svelte';
 	import AccountComponent from '$lib/AccountComponent.svelte';
 	import SettingsComponent from '$lib/SettingsComponent.svelte';
 
@@ -61,11 +61,11 @@ class={`text-center flex flex-col items-center ${
 	>
 		<WiktionaryComponent />
 	</div>
-	<div
+	<!-- <div
 		class={`space-y-2 text-center flex flex-col items-center ${
 			$data.current_page == 'developed' ? 'block' : 'hidden'
 		}`}
 	>
 		<DevelopersPlayground />
-	</div>
+	</div> -->
 </div>
