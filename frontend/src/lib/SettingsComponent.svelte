@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
-	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck, sync_unique_questions } from '../store';
+	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck } from '../store';
 	import axios from 'axios';
 
 	const EXAMPLES_TO_SHOW = 10;
@@ -164,7 +164,7 @@
 	{/each}
 	<div class="flex flex-row w-full justify-center gap-2">
 		<button class="btn variant-filled-primary" on:click={deleteAllUniquenessEntries}>delete all</button>
-		<button class="btn-icon variant-filled-success" on:click={()=>{sync_unique_questions($data)}}>
+		<button class="btn-icon variant-filled-success" on:click={data.sync_unique_questions}>
 			<i class="fa-solid fa-rotate" />
 		</button>
 	</div>

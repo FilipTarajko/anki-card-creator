@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, showErrorToast, showSuccessToast, default_fields, sync_presets, fields, selected_preset, presets } from '../store';
+	import { data, showErrorToast, showSuccessToast, default_fields } from '../store';
 	import { BindingType, type Field, type Preset } from '../types';
+	import { get } from 'svelte/store';
 
 	let is_iframe_list_visible = false;
 	let preset_name = 'new preset';
@@ -11,10 +12,10 @@
 	let new_field_type: 'text' | 'selectOne' | 'selectMany' | null = null;
 
 	function create_field() {
-		$fields = [
-			...$fields,
+		$data.fields = [
+			...$data.fields,
 			{
-				id: $fields.length,
+				id: $data.fields.length,
 				name: new_field_name,
 				type: new_field_type ?? 'text',
 				options: [],
@@ -29,74 +30,75 @@
 	}
 
 	function validate_and_prepare_fields() {
-		for (let i = 0; i < $fields.length; i++) {
+		for (let i = 0; i < $data.fields.length; i++) {
 			if (
-				$fields[i].options.length < 2 &&
-				($fields[i].type == 'selectOne' || $fields[i].type == 'selectMany')
+				$data.fields[i].options.length < 2 &&
+				($data.fields[i].type == 'selectOne' || $data.fields[i].type == 'selectMany')
 			) {
 				showErrorToast($data.toastStore, 'Select fields must have at least 2 options!');
 				return false;
 			}
-			$fields[i].current_inputs = [];
+			$data.fields[i].current_inputs = [];
 		}
 		return true;
 	}
+	$data.presets = $data.presets;
 
 	function save_preset_as_new() {
 		if (!preset_name) {
 			showErrorToast($data.toastStore, "Please enter preset's name");
 		} else if (
 			// @ts-ignore
-			$presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
+			$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
 		) {
 			showErrorToast($data.toastStore, 'Preset with this name already exists!');
 		} else if (!validate_and_prepare_fields()) {
 			return;
 		} else {
-			$presets = [
-				...$presets,
+			$data.presets.push(
 				{
 					name: preset_name,
 					iframes: preset_iframes,
-					fields: JSON.parse(JSON.stringify($fields)),
+					fields: JSON.parse(JSON.stringify($data.fields)),
 					last_edited: new Date().getTime(),
 					status: 'unsynced',
 					hue: selected_hue
 				}
-			];
-			localStorage.setItem('presets', JSON.stringify($presets));
+			);
+			localStorage.setItem('presets', JSON.stringify($data.presets));
 			showSuccessToast($data.toastStore, `Preset "${preset_name}" saved!`);
 		}
 	}
 
 	function update_preset() {
-		if (!$selected_preset) {
+		console.log($data.presets)
+		if (!$data.selected_preset) {
 			console.error('selected_preset is null');
 		} else if (!preset_name) {
 			showErrorToast($data.toastStore, "Please enter preset's name");
 		} else if (
 			// @ts-ignore
-			$presets.find(
+			$data.presets.find(
 				(e: Preset) =>
-					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== $selected_preset
+					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== $data.selected_preset
 			)
 		) {
 			showErrorToast($data.toastStore, 'Preset with this name already exists!');
 		} else if (!validate_and_prepare_fields()) {
 			return;
 		} else {
-			let old_preset_name = $selected_preset.name;
-			$selected_preset.iframes = preset_iframes;
-			$selected_preset.fields = $fields;
-			$selected_preset.name = preset_name;
-			$selected_preset.last_edited = new Date().getTime();
-			$selected_preset.hue = selected_hue;
-
-			if ($selected_preset.status == 'synced') {
-				$selected_preset.status = 'to_update';
-			}
-			$presets = $presets;
-			localStorage.setItem('presets', JSON.stringify($presets));
+			// @ts-ignore
+			let old_preset_name = get(data).selected_preset?.name;
+			
+			// @ts-ignore
+			data.update((c)=>{return {...c, selected_preset: {...(c.selected_preset), iframes: preset_iframes, fields: $data.fields, name: preset_name, last_edited: new Date().getTime(), hue: selected_hue, status: 'to_update'}}})
+			data.update((c)=>{
+				let newPresets = structuredClone(c.presets);
+				newPresets = newPresets.filter(e=>e.name != old_preset_name);
+				newPresets.push(c.selected_preset);
+				localStorage.setItem('presets', JSON.stringify(newPresets));
+				return {...c, presets: newPresets}
+			});
 			if (old_preset_name == preset_name) {
 				showSuccessToast($data.toastStore, `Preset "${preset_name}" updated!`);
 			} else {
@@ -106,13 +108,13 @@
 	}
 
 	function add_missing_bindings(field: Field) {
-		if (!field.bindings || !$fields) {
+		if (!field.bindings || !$data.fields) {
 			return;
 		}
 		let binding_field = null;
-		for (let i = 0; i < $fields?.length; i++) {
-			if (field.bound_to == $fields[i].id) {
-				binding_field = $fields[i];
+		for (let i = 0; i < $data.fields?.length; i++) {
+			if (field.bound_to == $data.fields[i].id) {
+				binding_field = $data.fields[i];
 				break;
 			}
 		}
@@ -147,44 +149,46 @@
 			}
 			field.bindings.push([to_check[i], '']);
 		}
-		$fields = $fields;
+		$data.fields = $data.fields;
 	}
 </script>
-{JSON.stringify($presets)}
+
 <h2 class="h2 mt-12">Create a card preset</h2>
 <div class="card p-2 ml-6 mr-6">
-	{#each $presets as preset}
+	{#each $data.presets as preset}
 		<button
 			style={`color: hsl(${preset.hue} ${
-				$selected_preset?.name == preset.name
+			// @ts-ignore
+				$data.selected_preset?.name == preset.name
 					? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
 					: '70% 50%);'
 			}`}
 			class={`btn ${
-				$selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
+			// @ts-ignore
+				$data.selected_preset?.name == preset.name ? 'variant-filled' : 'variant-ghost'
 			} m-0.5`}
 			on:click={() => {
 				preset_name = preset.name;
 				preset_iframes = preset.iframes;
-				$fields = JSON.parse(JSON.stringify(preset.fields));
-				$selected_preset = preset;
+				$data.fields = JSON.parse(JSON.stringify(preset.fields));
+				$data.selected_preset = preset;
 				selected_hue = preset.hue;
 			}}
 		>
 			{preset.name}
 		</button>
 	{/each}
-	{#if $presets.length}
+	{#if $data.presets.length}
 		<br />
 	{/if}
 	<button
-		class={`btn ${!$selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
+		class={`btn ${!$data.selected_preset ? 'variant-filled' : 'variant-ghost'} m-0.5`}
 		on:click={() => {
 			preset_name = 'new preset';
 			preset_iframes = [];
-			$fields = JSON.parse(JSON.stringify(default_fields));
+			$data.fields = JSON.parse(JSON.stringify(default_fields));
 			selected_hue = '';
-			$selected_preset = null;
+			$data.selected_preset = null;
 		}}
 	>
 		<b><i>new preset</i></b>
@@ -193,98 +197,100 @@
 <div class="card p-4">
 	<button
 		class={`btn-icon ${
-			$selected_preset && $presets.indexOf($selected_preset) > 0
+			$data.selected_preset && $data.presets.indexOf($data.selected_preset) > 0
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if ($selected_preset && $presets.indexOf($selected_preset) > 0) {
+			if ($data.selected_preset && $data.presets.indexOf($data.selected_preset) > 0) {
 				// @ts-ignore
-				$presets = $presets.filter((p) => p !== $selected_preset);
-				$presets.unshift($selected_preset);
-				localStorage.setItem('presets', JSON.stringify($presets));
+				$data.presets = $data.presets.filter((p) => p !== $data.selected_preset);
+				$data.presets.unshift($data.selected_preset);
+				localStorage.setItem('presets', JSON.stringify($data.presets));
 			}
 		}}
 		><i class="fa-solid fa-angles-left" />
 	</button>
 	<button
 		class={`btn-icon ${
-			$selected_preset && $presets.indexOf($selected_preset) > 0
+			$data.selected_preset && $data.presets.indexOf($data.selected_preset) > 0
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if ($selected_preset && $presets.indexOf($selected_preset) > 0) {
+			if ($data.selected_preset && $data.presets.indexOf($data.selected_preset) > 0) {
 				// @ts-ignore
-				let index = $presets.indexOf($selected_preset);
-				let temp = $presets[index - 1];
-				$presets[index - 1] = $selected_preset;
-				$presets[index] = temp;
-				localStorage.setItem('presets', JSON.stringify($presets));
+				let index = $data.presets.indexOf($data.selected_preset);
+				let temp = $data.presets[index - 1];
+				$data.presets[index - 1] = $data.selected_preset;
+				$data.presets[index] = temp;
+				localStorage.setItem('presets', JSON.stringify($data.presets));
 			}
 		}}
 		><i class="fa-solid fa-chevron-left" />
 	</button>
 	<button
 		type="button"
-		class={`btn-icon ${$selected_preset ? 'variant-filled-primary' : 'variant-ghost-primary'} m-0.5`}
+		class={`btn-icon ${$data.selected_preset ? 'variant-filled-primary' : 'variant-ghost-primary'} m-0.5`}
 		style="font-weight: bold;"
 		on:click={() => {
-			if ($selected_preset?.status !== 'unsynced' && $selected_preset?._id) {
-				$data.ids_of_presets_to_remove.push($selected_preset?._id);
+			// @ts-ignore
+			if ($data.selected_preset?.status !== 'unsynced' && $data.selected_preset?._id) {
+			// @ts-ignore
+				$data.ids_of_presets_to_remove.push($data.selected_preset?._id);
 				localStorage.setItem(
 					'ids_of_presets_to_remove',
 					JSON.stringify($data.ids_of_presets_to_remove)
 				);
 			}
 			// @ts-ignore
-			$presets = $presets.filter((p) => p !== $selected_preset);
-			$selected_preset = null;
-			localStorage.setItem('presets', JSON.stringify($presets));
+			$data.presets = $data.presets.filter((p) => p !== $data.selected_preset);
+			$data.selected_preset = null;
+			localStorage.setItem('presets', JSON.stringify($data.presets));
 		}}
 	>
 		<i class="fa-solid fa-remove" />
 	</button>
 	<button
 		class={`btn-icon ${
-			$selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1
+			$data.selected_preset && $data.presets.indexOf($data.selected_preset) < $data.presets.length - 1
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if ($selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1) {
+			if ($data.selected_preset && $data.presets.indexOf($data.selected_preset) < $data.presets.length - 1) {
 				// @ts-ignore
-				let index = $presets.indexOf($selected_preset);
-				let temp = $presets[index + 1];
-				$presets[index + 1] = $selected_preset;
-				$presets[index] = temp;
-				localStorage.setItem('presets', JSON.stringify($presets));
+				let index = $data.presets.indexOf($data.selected_preset);
+				let temp = $data.presets[index + 1];
+				$data.presets[index + 1] = $data.selected_preset;
+				$data.presets[index] = temp;
+				localStorage.setItem('presets', JSON.stringify($data.presets));
 			}
 		}}
 		><i class="fa-solid fa-chevron-right" />
 	</button>
 	<button
 		class={`btn-icon ${
-			$selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1
+			$data.selected_preset && $data.presets.indexOf($data.selected_preset) < $data.presets.length - 1
 				? 'variant-filled'
 				: 'variant-ghost'
 		} m-0.5`}
 		on:click={() => {
-			if ($selected_preset && $presets.indexOf($selected_preset) < $presets.length - 1) {
+			if ($data.selected_preset && $data.presets.indexOf($data.selected_preset) < $data.presets.length - 1) {
 				// @ts-ignore
-				$presets = $presets.filter((p) => p !== $selected_preset);
-				$presets.push($selected_preset);
-				localStorage.setItem('presets', JSON.stringify($presets));
+				$data.presets = $data.presets.filter((p) => p !== $data.selected_preset);
+				$data.presets.push($data.selected_preset);
+				localStorage.setItem('presets', JSON.stringify($data.presets));
 			}
 		}}
 		><i class="fa-solid fa-angles-right" />
 	</button>
 </div>
-<button class="btn variant-filled-success" on:click={()=>{sync_presets($data, $presets)}}>sync presets</button>
+<button class="btn variant-filled-success" on:click={data.sync_presets}>sync presets</button>
 <div>
 	<div class="mb-4">
-		{#if $selected_preset}
-			based on: {$selected_preset.name}
+		{#if $data.selected_preset}
+			based on: {$data.selected_preset?.name}
 		{:else}
 			creating preset from scratch
 		{/if}
@@ -398,7 +404,7 @@
 			/>
 		{/each}
 	</div>
-	{#each $fields as field, i_field}
+	{#each $data.fields as field, i_field}
 		<div
 			class="card p-4 grid-cols-[12.2rem,2.574rem,2.574rem,4.3rem,2.574rem] md:grid-cols-[8.8rem,22.88rem,2.574rem,2.574rem,2.574rem,4.3rem,2.574rem]"
 			style="display: grid; gap: 0.5148rem; margin-top: 0.572rem;"
@@ -434,21 +440,21 @@
 					class="btn btn-sm {i_field == 0 ? 'variant-ghost-secondary' : 'variant-filled-secondary'}"
 					disabled={i_field == 0}
 					on:click={() => {
-						let temp = $fields[i_field - 1];
-						$fields[i_field - 1] = field;
-						$fields[i_field] = temp;
+						let temp = $data.fields[i_field - 1];
+						$data.fields[i_field - 1] = field;
+						$data.fields[i_field] = temp;
 					}}><i class="fa-solid fa-arrow-up" /></button
 				>
 				<button
 					style="border-top-left-radius: 0; border-bottom-left-radius: 0; margin-top: 0.286rem;"
-					class="btn btn-sm {i_field == $fields.length - 1
+					class="btn btn-sm {i_field == $data.fields.length - 1
 						? 'variant-ghost-secondary'
 						: 'variant-filled-secondary'}"
-					disabled={i_field == $fields.length - 1}
+					disabled={i_field == $data.fields.length - 1}
 					on:click={() => {
-						let temp = $fields[i_field + 1];
-						$fields[i_field + 1] = field;
-						$fields[i_field] = temp;
+						let temp = $data.fields[i_field + 1];
+						$data.fields[i_field + 1] = field;
+						$data.fields[i_field] = temp;
 					}}><i class="fa-solid fa-arrow-down" /></button
 				>
 			</div>
@@ -456,7 +462,7 @@
 				style="font-weight: bold;"
 				class="btn btn-sm variant-filled-primary order-4"
 				on:click={() => {
-					$fields = $fields.filter((e) => e.id != field.id);
+					$data.fields = $data.fields.filter((e) => e.id != field.id);
 				}}
 			>
 				<i class="fa-solid fa-remove" /></button
@@ -502,12 +508,12 @@
 							['en', 'English']
 						];
 						field.binding_type = BindingType.EQUALS;
-						if (($fields?.length ?? 0) >= 3 && field.id != 3) {
+						if (($data.fields?.length ?? 0) >= 3 && field.id != 3) {
 							field.bound_to = 3;
 						} else {
-							for (let i = 0; i < $fields.length; i++) {
-								if ($fields[i].id != field.id) {
-									field.bound_to = $fields[i].id;
+							for (let i = 0; i < $data.fields.length; i++) {
+								if ($data.fields[i].id != field.id) {
+									field.bound_to = $data.fields[i].id;
 									break;
 								}
 							}
@@ -663,7 +669,7 @@
 					<div class="order-7 col-start-1 md:col-start-2 col-end-5 md:col-end-2">
 						bound to:
 						<div class="card p-2 pr-2">
-							{#each $fields.filter((e) => e != field) as field_to_bind}
+							{#each $data.fields.filter((e) => e != field) as field_to_bind}
 								<button
 									class={`btn ${
 										field_to_bind.id == field?.bound_to ? 'variant-filled' : 'variant-ghost'
@@ -760,11 +766,11 @@
 			}}>add field</button
 		>
 	</div>
-	{#if $selected_preset}
+	{#if $data.selected_preset}
 		<button
 			style="margin-top: 0.858rem;"
 			class="btn btn-large variant-filled-warning"
-			on:click={update_preset}>update {$selected_preset.name}</button
+			on:click={update_preset}>update {$data.selected_preset.name}</button
 		>
 		<button
 			style="margin-top: 0.858rem;"

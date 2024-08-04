@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast, sync_prompts, getFirstPrompt, presets } from '../store';
+	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast, getFirstPrompt } from '../store';
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
 
@@ -18,7 +18,7 @@
 	}
 
 	// @ts-ignore
-	$: did_current_preset_change = $data.current_preset_for_notes && !$presets.some((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
+	$: did_current_preset_change = $data.current_preset_for_notes && !$data.presets.some((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
 
 	$: {
 		if ($data.current_preset_for_notes) {
@@ -339,16 +339,16 @@
 				selectNoteAddingMode(Object.values(NoteAddingMode)[index]);
 			}
 			if (key == "p" || key == "P") {
-				let preset = $presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
+				let preset = $data.presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
 				// let index = $presets.indexOf($data.current_preset_for_notes);
-				let index = $presets.indexOf(preset);
-				const length = $presets.length;
+				let index = $data.presets.indexOf(preset);
+				const length = $data.presets.length;
 				if (event.shiftKey) {
 					index = ((index - 1) + length) % length;
 				} else {
 					index = (index + 1) % length;
 				}
-				selectPreset($presets[index]);
+				selectPreset($data.presets[index]);
 			}
 			if (key == "i" || key == "I") {
 				let iframe = $data.current_preset_for_notes.iframes.find((i: [string, string])=>i[1] == iframe_source_template)
@@ -410,7 +410,7 @@
 		localStorage.setItem('prompts_deleted', $data.prompts_synced);
 		$data.current_prompt = '';
 		localStorage.setItem('current_prompt', $data.current_prompt);
-		sync_prompts($data);
+		data.sync_prompts();
 	}
 
 	function delete_local_prompts() {
@@ -524,13 +524,13 @@
 		<div class="flex flex-row w-full justify-center gap-2">
 			<button class="btn variant-filled-primary" on:click={delete_all_prompts}>delete all</button>
 			<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
-			<button class="btn-icon variant-filled-success" on:click={()=>{sync_prompts($data)}}>
+			<button class="btn-icon variant-filled-success" on:click={data.sync_prompts}>
 				<i class="fa-solid fa-rotate" />
 			</button>
 		</div>
 
 	{:else}
-		{#if $presets.length}
+		{#if $data.presets.length}
 			<!-- TODO -->
 			<!-- <RadioGroup class="card">
 				{#each $presets as preset}
@@ -544,7 +544,7 @@
 			</RadioGroup> -->
 			{#if ($data.noteAddingMode === NoteAddingMode.FROM_SCRATCH || $data.noteAddingMode === NoteAddingMode.FROM_PROMPT)}
 			<div class="card p-2 ml-6 mr-6">
-				{#each $presets as preset}
+				{#each $data.presets as preset}
 					<button
 						style={`color: hsl(${preset.hue} ${
 							$data.current_preset_for_notes?.name == preset.name
@@ -729,7 +729,7 @@
 					<div style="max-width: 30rem; line-break: anywhere;">
 						current result: <br><span>{current_output}</span>
 					</div>
-					<button class="btn-icon variant-filled-success" on:click={()=>{sync_prompts($data)}}>
+					<button class="btn-icon variant-filled-success" on:click={()=>{data.sync_prompts}}>
 						<i class="fa-solid fa-rotate" />
 					</button>
 				</div>

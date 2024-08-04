@@ -1,4 +1,4 @@
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { NoteAddingMode, type Field, type Preset } from './types';
@@ -103,44 +103,202 @@ export let default_fields = [
 		}
 	];
 
-export const data = writable({
-	backend_url: PUBLIC_BACKEND_URL,
-	notes_synced: (browser && window.localStorage.getItem('notes_synced')) || '',
-	notes_unsynced: (browser && window.localStorage.getItem('notes_unsynced')) || '',
-	ids_of_presets_to_remove:
-		(browser && JSON.parse(window.localStorage.getItem('ids_of_presets_to_remove') ?? '[]')) || [],
-	prefix_for_exports: `#separator:Semicolon\n#deck column:1\n#notetype column:2\n#tags column:3\n`,
-	current_page: (browser && window.localStorage.getItem('current_page')) || 'about',
-	jwt: (browser && window.localStorage.getItem('jwt')) || '',
-	username: (browser && window.localStorage.getItem('username')) || '',
-	email: (browser && window.localStorage.getItem('email')) || '',
-	id: (browser && window.localStorage.getItem('id')) || '',
-	display_csv_headers:
-		(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false,
-	duplicate_checking_values_synced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_synced') ?? '[]')) ?? [],
-	duplicate_checking_values_unsynced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_unsynced') ?? '[]')) ?? [],
-	note_export_columns_for_duplicate_checking: (browser && JSON.parse(window.localStorage.getItem('note_export_columns_for_duplicate_checking') ?? 'false')) || [0, 1],
-	preset_fields_for_duplicate_checking_offset: 3,
-	duplicate_checking_removed_needles: [/^(de)\s/, /^(het)\s/, /^.$/, /^de\/het\s/, /^the\s/],
-	current_preset_for_notes: (browser && JSON.parse(window.localStorage.getItem('current_preset_for_notes') ?? 'false')),
-	currently_all_forced_visible: (browser && JSON.parse(window.localStorage.getItem('currently_all_forced_visible') ?? 'false')),
-	isSidebarShownOnNarrow: (browser && JSON.parse(window.localStorage.getItem('isSidebarShownOnNarrow') ?? 'true' )),
-	toastStore: null,
-	noteAddingMode: (browser && window.localStorage.getItem('noteAddingMode')) ?? NoteAddingMode.FROM_SCRATCH,
-	currentlyWrittenPrompt: (browser && window.localStorage.getItem('currentlyWrittenPrompt')) ?? '',
-	currentlyWrittenPromptList: (browser && window.localStorage.getItem('currentlyWrittenPromptList')) ?? '',
-	currentPromptListSeparator: (browser && window.localStorage.getItem('currentPromptListSeparator')) ?? '',
-	prompts_unsynced: (browser && JSON.parse(window.localStorage.getItem('prompts_unsynced') ?? '[]')) ?? [],
-	prompts_synced: (browser && JSON.parse(window.localStorage.getItem('prompts_synced') ?? '[]')) ?? [],
-	prompts_deleted: (browser && JSON.parse(window.localStorage.getItem('prompts_deleted') ?? '[]')) ?? [],
-	current_prompt: (browser && window.localStorage.getItem("current_prompt")) ?? '',
-	shouldKeepPrompt: (browser && JSON.parse(window.localStorage.getItem('shouldKeepPrompt') ?? 'true')),
-	promptedFieldIndex: 3,
-});
+function createData(){
+	const data = writable({
+		backend_url: PUBLIC_BACKEND_URL,
+		notes_synced: (browser && window.localStorage.getItem('notes_synced')) || '',
+		notes_unsynced: (browser && window.localStorage.getItem('notes_unsynced')) || '',
+		presets: (browser && JSON.parse(window.localStorage.getItem('presets') ?? '[]')) || [],
+		ids_of_presets_to_remove:
+			(browser && JSON.parse(window.localStorage.getItem('ids_of_presets_to_remove') ?? '[]')) || [],
+		prefix_for_exports: `#separator:Semicolon\n#deck column:1\n#notetype column:2\n#tags column:3\n`,
+		current_page: (browser && window.localStorage.getItem('current_page')) || 'about',
+		jwt: (browser && window.localStorage.getItem('jwt')) || '',
+		username: (browser && window.localStorage.getItem('username')) || '',
+		email: (browser && window.localStorage.getItem('email')) || '',
+		id: (browser && window.localStorage.getItem('id')) || '',
+		display_csv_headers:
+			(browser && JSON.parse(window.localStorage.getItem('display_csv_headers') ?? 'false')) || false,
+		duplicate_checking_values_synced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_synced') ?? '[]')) ?? [],
+		duplicate_checking_values_unsynced: (browser && JSON.parse(window.localStorage.getItem('duplicate_checking_values_unsynced') ?? '[]')) ?? [],
+		note_export_columns_for_duplicate_checking: (browser && JSON.parse(window.localStorage.getItem('note_export_columns_for_duplicate_checking') ?? 'false')) || [0, 1],
+		preset_fields_for_duplicate_checking_offset: 3,
+		duplicate_checking_removed_needles: [/^(de)\s/, /^(het)\s/, /^.$/, /^de\/het\s/, /^the\s/],
+		current_preset_for_notes: (browser && JSON.parse(window.localStorage.getItem('current_preset_for_notes') ?? 'false')),
+		currently_all_forced_visible: (browser && JSON.parse(window.localStorage.getItem('currently_all_forced_visible') ?? 'false')),
+		isSidebarShownOnNarrow: (browser && JSON.parse(window.localStorage.getItem('isSidebarShownOnNarrow') ?? 'true' )),
+		toastStore: null,
+		noteAddingMode: (browser && window.localStorage.getItem('noteAddingMode')) ?? NoteAddingMode.FROM_SCRATCH,
+		currentlyWrittenPrompt: (browser && window.localStorage.getItem('currentlyWrittenPrompt')) ?? '',
+		currentlyWrittenPromptList: (browser && window.localStorage.getItem('currentlyWrittenPromptList')) ?? '',
+		currentPromptListSeparator: (browser && window.localStorage.getItem('currentPromptListSeparator')) ?? '',
+		prompts_unsynced: (browser && JSON.parse(window.localStorage.getItem('prompts_unsynced') ?? '[]')) ?? [],
+		prompts_synced: (browser && JSON.parse(window.localStorage.getItem('prompts_synced') ?? '[]')) ?? [],
+		prompts_deleted: (browser && JSON.parse(window.localStorage.getItem('prompts_deleted') ?? '[]')) ?? [],
+		current_prompt: (browser && window.localStorage.getItem("current_prompt")) ?? '',
+		shouldKeepPrompt: (browser && JSON.parse(window.localStorage.getItem('shouldKeepPrompt') ?? 'true')),
+		promptedFieldIndex: 3,
+		fields: JSON.parse(JSON.stringify(default_fields)),
+		selected_preset: null,
+	});
+	const { subscribe, set, update } = data;
 
-export const selected_preset: Writable<Preset | null> = writable(null);
-export const fields: Writable<Field[]> = writable(JSON.parse(JSON.stringify(default_fields)));
-export const presets = writable((browser && JSON.parse(window.localStorage.getItem('presets') ?? '[]')) || []);
+	function sync_all() {
+		sync_presets();
+		sync_unique_questions();
+		sync_prompts();
+		sync_notes();
+	}
+
+	function sync_notes() {
+		const currentData = get(data);
+		axios
+			.post(currentData.backend_url + '/sync_notes', JSON.stringify(currentData.notes_unsynced), {
+				headers: {
+					Authorization: `Bearer ${currentData.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				update((n)=>{return {...n, notes_synced: response.data, notes_unsynced: ''}})
+				localStorage.setItem('notes_unsynced', '');
+				localStorage.setItem('notes_synced', response.data);
+				showSuccessToast(currentData.toastStore, 'Notes synced!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast(currentData.toastStore, 'Notes sync failed!');
+			});
+	}
+
+	function sync_prompts() {
+		let currentData = get(data);
+		const requestPayload = JSON.stringify([
+			currentData.prompts_unsynced,
+			currentData.prompts_deleted,
+		]);
+		axios
+			.post(currentData.backend_url + '/sync_prompts', requestPayload, {
+				headers: {
+					Authorization: `Bearer ${currentData.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				update((c)=>{return {...c, prompts_synced: response.data, prompts_unsynced: [], prompts_deleted: []}});
+				localStorage.setItem('prompts_synced', JSON.stringify(response.data));
+				localStorage.setItem('prompts_unsynced', '[]');
+				localStorage.setItem('prompts_deleted', '[]');
+
+				currentData = get(data);
+				update((c)=>{return {...c, current_prompt: getFirstPrompt(currentData)}});
+				localStorage.setItem('current_prompt', JSON.stringify(currentData.current_prompt));
+				if (currentData.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
+					console.log("setting an input to current_prompt")
+					update((c)=>{
+						let new_current_prompt = structuredClone(c.current_preset_for_notes);
+						new_current_prompt.fields[currentData.promptedFieldIndex].current_inputs[0] = currentData.current_prompt;
+						return {...c, current_prompt: new_current_prompt};
+					});
+					currentData
+				}
+				showSuccessToast(currentData.toastStore, "Synced prompts");
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast(currentData.toastStore, "Prompts sync failed!");
+			});
+	}
+
+	function sync_unique_questions() {
+		let currentData = get(data);
+		axios
+			.post(currentData.backend_url + '/sync_unique_questions', JSON.stringify(currentData.duplicate_checking_values_unsynced ?? []), {
+				headers: {
+					Authorization: `Bearer ${currentData.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				update((c)=>{return {...c, duplicate_checking_values_synced: response.data, duplicate_checking_values_unsynced: []}})
+				localStorage.setItem('duplicate_checking_values_synced', JSON.stringify(response.data));
+				localStorage.setItem('duplicate_checking_values_unsynced', '[]');
+				showSuccessToast(currentData.toastStore, "Synced unique question list");
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast(currentData.toastStore, "Unique question list sync failed!");
+			});
+	}
+
+
+
+	function sync_presets() {
+		let currentData = get(data);
+		axios
+			.post(
+				currentData.backend_url + '/sync_presets',
+				JSON.stringify([
+					currentData.presets.filter((e: Preset) => e.status == 'unsynced'),
+					currentData.presets.filter((e: Preset) => e.status == 'to_update'),
+					currentData.ids_of_presets_to_remove || []
+				]),
+				{
+					headers: {
+						Authorization: `Bearer ${currentData.jwt}`,
+						'Content-Type': 'application/json'
+					}
+				}
+			)
+			.then((response) => {
+				console.log(response);
+				if (response.status === 200) {
+					console.log(response.data[0]);
+					let sync_report = response.data[0];
+					if (sync_report.ignored_presets.length > 0) {
+						showWarningToast(
+							currentData.toastStore,
+							`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
+								'<br/>'
+							)}`
+						);
+					}
+					if (sync_report.unfound_presets.length > 0) {
+						showWarningToast(
+							currentData.toastStore,
+							`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
+								'<br/>'
+							)}`
+						);
+					}
+					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
+						showSuccessToast(currentData.toastStore, 'Presets synced!');
+					}
+					update((c)=>{return {...c, presets: response.data[1], ids_of_presets_to_remove: [], fields: JSON.parse(JSON.stringify(default_fields)), selected_preset: null}})
+					localStorage.setItem('presets', JSON.stringify(response.data[1]));
+					localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast(currentData.toastStore, 'Presets sync failed!');
+			});
+	}
+
+	return {
+		set,
+		data,
+		update,
+		subscribe,
+		sync_notes,
+		sync_prompts,
+		sync_unique_questions,
+		sync_presets,
+		sync_all,
+	}
+}
+
+export const data = createData();
 
 export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
 	text = text.toLowerCase();
@@ -185,144 +343,6 @@ export function showErrorToast(toastStore: any, message: string) {
 
 export function showWarningToast(toastStore: any, message: string) {
 	showToast(toastStore, message, 'variant-filled-warning');
-}
-
-export function sync_notes(data: any) {
-	axios
-		.post(data.backend_url + '/sync_notes', JSON.stringify(data.notes_unsynced), {
-			headers: {
-				Authorization: `Bearer ${data.jwt}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		.then((response) => {
-			data.notes_synced = response.data;
-			localStorage.setItem('notes_synced', data.notes_synced);
-			data.notes_unsynced = '';
-			localStorage.setItem('notes_unsynced', '');
-			showSuccessToast(data.toastStore, 'Notes synced!');
-		})
-		.catch((error) => {
-			console.error(error);
-			showErrorToast(data.toastStore, 'Notes sync failed!');
-		});
-}
-
-export function sync_prompts(data: any) {
-	const requestPayload = JSON.stringify([
-		data.prompts_unsynced,
-		data.prompts_deleted,
-	]);
-	axios
-		.post(data.backend_url + '/sync_prompts', requestPayload, {
-			headers: {
-				Authorization: `Bearer ${data.jwt}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		.then((response) => {
-			data.prompts_synced = response.data;
-			localStorage.setItem('prompts_synced', JSON.stringify(data.prompts_synced));
-			data.prompts_unsynced = [];
-			localStorage.setItem('prompts_unsynced', '[]');
-			data.prompts_deleted = [];
-			localStorage.setItem('prompts_deleted', '[]');
-			data.current_prompt = getFirstPrompt(data);
-			localStorage.setItem('current_prompt', JSON.stringify(data.current_prompt));
-			if (data.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
-				console.log("setting an input to current_prompt")
-				data.current_preset_for_notes.fields[data.promptedFieldIndex].current_inputs[0] = data.current_prompt;
-			}
-			showSuccessToast(data.toastStore, "Synced prompts");
-		})
-		.catch((error) => {
-			console.error(error);
-			showErrorToast(data.toastStore, "Prompts sync failed!");
-		});
-}
-
-export function sync_presets(data: any, presets: any) {
-	axios
-		.post(
-			data.backend_url + '/sync_presets',
-			JSON.stringify([
-				presets.filter((e: Preset) => e.status == 'unsynced'),
-				presets.filter((e: Preset) => e.status == 'to_update'),
-				data.ids_of_presets_to_remove || []
-			]),
-			{
-				headers: {
-					Authorization: `Bearer ${data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		.then((response) => {
-			console.log(response);
-			if (response.status === 200) {
-				console.log(response.data[0]);
-				let sync_report = response.data[0];
-				if (sync_report.ignored_presets.length > 0) {
-					showWarningToast(
-						data.toastStore,
-						`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
-							'<br/>'
-						)}`
-					);
-				}
-				if (sync_report.unfound_presets.length > 0) {
-					showWarningToast(
-						data.toastStore,
-						`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
-							'<br/>'
-						)}`
-					);
-				}
-				if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
-					showSuccessToast(data.toastStore, 'Presets synced!');
-				}
-				presets = response.data[1];
-				localStorage.setItem('presets', JSON.stringify(presets));
-				data.ids_of_presets_to_remove = [];
-				localStorage.setItem('ids_of_presets_to_remove', JSON.stringify([]));
-				data.fields = JSON.parse(JSON.stringify(default_fields));
-				data.selected_preset = null;
-			}
-		})
-		.catch((error) => {
-			console.error(error);
-			showErrorToast(data.toastStore, 'Presets sync failed!');
-		});
-}
-
-export function sync_unique_questions(data: any) {
-	console.log(JSON.parse(JSON.stringify(data.duplicate_checking_values_unsynced)))
-	console.log("will sync")
-	axios
-		.post(data.backend_url + '/sync_unique_questions', JSON.stringify(data.duplicate_checking_values_unsynced ?? []), {
-			headers: {
-				Authorization: `Bearer ${data.jwt}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		.then((response) => {
-			data.duplicate_checking_values_synced = response.data;
-			localStorage.setItem('duplicate_checking_values_synced', JSON.stringify(data.duplicate_checking_values_synced));
-			data.duplicate_checking_values_unsynced = [];
-			localStorage.setItem('duplicate_checking_values_unsynced', '[]');
-			showSuccessToast(data.toastStore, "Synced unique question list");
-		})
-		.catch((error) => {
-			console.error(error);
-			showErrorToast(data.toastStore, "Unique question list sync failed!");
-		});
-}
-
-export function sync_all(data: any, presets: any) {
-	sync_presets(data, presets);
-	sync_unique_questions(data);
-	sync_prompts(data);
-	sync_notes(data);
 }
 
 export function getFirstPrompt(data: any){

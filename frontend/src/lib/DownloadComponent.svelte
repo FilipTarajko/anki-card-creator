@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SlideToggle } from '@skeletonlabs/skeleton';
-	import { data, showErrorToast, showSuccessToast, sync_notes } from '../store';
+	import { data, showErrorToast, showSuccessToast } from '../store';
 	import axios from 'axios';
 
 	function download(filename: string, text: string) {
@@ -111,7 +111,7 @@
 		<button class="btn-icon variant-filled-success" on:click={upload_notes}>
 			<i class="fa-solid fa-cloud-arrow-up" /></button
 		>
-		<button class="btn-icon variant-filled-success" on:click={()=>{sync_notes($data)}}>
+		<button class="btn-icon variant-filled-success" on:click={data.sync_notes}>
 			<i class="fa-solid fa-rotate" /></button
 		>
 	</div>

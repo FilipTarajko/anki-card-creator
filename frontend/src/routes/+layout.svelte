@@ -22,7 +22,7 @@
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
-	import { data, presets, sync_all } from '../store';
+	import { data } from '../store';
 
 	// For toasts, modals etc.
 	import { initializeStores } from '@skeletonlabs/skeleton';
@@ -212,7 +212,7 @@
 			</AppRailTile> -->
 			<button
 				class="w-20 text-green-300 flex flex-col left-0 pt-7 pb-3 h-20 mt-8 items-center justify-between cursor-pointer hover:bg-primary-500/10"
-				on:click={()=>{sync_all($data, $presets)}}
+				on:click={data.sync_all}
 			>
 				<i class="fa-solid fa-rotate fa-xl" />
 				<span>sync all</span>

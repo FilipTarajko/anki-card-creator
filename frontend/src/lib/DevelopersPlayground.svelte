@@ -5,7 +5,7 @@
 	let mongo_status = 'loading...';
 	let user_count = 'loading...';
 
-	import { data, presets, sync_notes, sync_presets } from '../store';
+	import { data } from '../store';
 
 	function check_connection_to_backend() {
 		backend_status = 'loading...';
@@ -162,7 +162,7 @@
 	</div>
 	<div>
 		<button class="btn variant-filled-warning" on:click={upload_notes}>upload notes</button>
-		<button class="btn variant-filled-warning" on:click={()=>{sync_notes($data)}}>sync notes</button>
+		<!-- <button class="btn variant-filled-warning" on:click={()=>{sync_notes($data)}}>sync notes</button> -->
 		<button
 			class="btn-icon variant-filled-primary"
 			on:click={() => {
@@ -176,9 +176,9 @@
 		</button>
 		<button class="btn variant-filled-primary" on:click={delete_notes}>delete notes</button>
 	</div>
-	{#if $presets.length}
+	{#if $data.presets.length}
 		<div class="card p-4 variant-ghost">
-			{#each $presets as preset}
+			{#each $data.presets as preset}
 				<div>
 					{preset.name}
 					{preset.last_edited}
@@ -201,12 +201,12 @@
 		</div>
 	{/if}
 	<div>
-		<button class="btn variant-filled-success" on:click={()=>{sync_presets($data, $presets)}}>sync presets</button>
+		<button class="btn variant-filled-success" on:click={data.sync_presets}>sync presets</button>
 		<button
 			class="btn-icon variant-filled-primary"
 			on:click={() => {
-				$presets = [];
-				localStorage.setItem('presets', $presets);
+				$data.presets = [];
+				localStorage.setItem('presets', $data.presets);
 			}}
 		>
 			<i class="fa-solid fa-remove" />
