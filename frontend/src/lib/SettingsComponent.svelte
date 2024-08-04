@@ -113,6 +113,23 @@
 				showErrorToast($data.toastStore, "Unique question list sync failed!");
 			});
 	}
+
+	$: note_export_uniqueness_selectable_columns = firstFields[0];
+	$: note_export_uniqueness_selected_columns = (note_export_uniqueness_selectable_columns ?? []).map((elem, i) => {
+		if ($data.note_export_columns_for_duplicate_checking.includes(i)) {
+			return true;
+		}
+		return false;
+	});
+
+	function toggleNoteExportColumnForDuplicateChecking(i: number) {
+		if (!$data.note_export_columns_for_duplicate_checking.includes(i)) {
+			$data.note_export_columns_for_duplicate_checking.push(i)
+		} else {
+			$data.note_export_columns_for_duplicate_checking = $data.note_export_columns_for_duplicate_checking.filter((elem: number)=>elem!=i)
+		}
+		localStorage.setItem('note_export_columns_for_duplicate_checking', JSON.stringify($data.note_export_columns_for_duplicate_checking));
+	}
 </script>
 
 <h2 class="h2 mt-12">Settings</h2>
@@ -129,6 +146,21 @@
 		<button class="btn variant-filled-success" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true)}}>append</button>
 	</div>
 	<table>
+		{#if note_export_uniqueness_selectable_columns}
+			<tr>
+				{#each firstFields[0] as _, i}
+					<td style={"padding: 0 0.6rem; " + ($data.note_export_columns_for_duplicate_checking.includes(i) ? 'background: rgba(127, 255, 127, 0.2);' : '')}>
+						<input
+							type="checkbox"
+							name="slide"
+							value={i}
+							on:change={()=>{toggleNoteExportColumnForDuplicateChecking(i)}}
+							bind:checked={note_export_uniqueness_selected_columns[i]}
+						/>
+					</td>
+				{/each}
+			</tr>
+		{/if}
 		{#each firstFields as row}
 			<tr>
 				{#each row as field, i}
