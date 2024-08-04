@@ -514,8 +514,9 @@
 											on:keydown={(e)=>handleNoteFieldInputKeydown(e, i)}
 											type="text"
 											style={field.current_inputs[0] && 
-												($data.duplicate_checking_values_synced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)) ||
-												$data.duplicate_checking_values_unsynced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles)))
+												($data.preset_fields_for_duplicate_checking.includes(i)
+												&& ($data.duplicate_checking_values_synced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles))
+												|| $data.duplicate_checking_values_unsynced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles))))
 												? "color: rgb(200, 0, 0);" : ""}
 											bind:value={field.current_inputs[0]}
 											on:input={rememberCurrentPreset}
