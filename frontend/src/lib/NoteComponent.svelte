@@ -481,12 +481,13 @@
 		<form on:submit|preventDefault={addPromptsFromList}>
 			<label class="flex items-center justify-between w-full">
 				<div>new prompts</div>
-				<textarea
+				<input
 					id="field1"
+					type="text"
 					style="color: black;"
 					bind:value={$data.currentlyWrittenPromptList}
 					on:input={rememberCurrentlyWrittenPromptList}
-				></textarea>
+				>
 			</label>
 			<label>prompt separator
 				<input
