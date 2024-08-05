@@ -104,7 +104,41 @@ export let default_fields = [
 	];
 
 function createData(){
-	const data = writable({
+	const data: Writable<{
+		backend_url: string
+		notes_synced: string
+		notes_unsynced: string
+		presets: Preset[]
+		ids_of_presets_to_remove: number[]
+		prefix_for_exports: string
+		current_page: string
+		jwt: string
+		username: string
+		email: string
+		id: string
+		display_csv_headers: boolean
+		duplicate_checking_values_synced: string[]
+		duplicate_checking_values_unsynced: string[]
+		note_export_columns_for_duplicate_checking: number[]
+		preset_fields_for_duplicate_checking_offset: number
+		duplicate_checking_removed_needles: (string|RegExp)[]
+		current_preset_for_notes: Preset
+		currently_all_forced_visible: boolean
+		isSidebarShownOnNarrow: boolean
+		toastStore: any
+		noteAddingMode: NoteAddingMode | string | boolean // TODO
+		currentlyWrittenPrompt: string
+		currentlyWrittenPromptList: string
+		currentPromptListSeparator: string
+		prompts_unsynced: string[]
+		prompts_synced: string[]
+		prompts_deleted: string[]
+		current_prompt: string
+		shouldKeepPrompt: boolean
+		promptedFieldIndex: number
+		fields: Field[]
+		selected_preset: Preset | null
+	}> = writable({
 		backend_url: PUBLIC_BACKEND_URL,
 		notes_synced: (browser && window.localStorage.getItem('notes_synced')) || '',
 		notes_unsynced: (browser && window.localStorage.getItem('notes_unsynced')) || '',
@@ -129,13 +163,13 @@ function createData(){
 		isSidebarShownOnNarrow: (browser && JSON.parse(window.localStorage.getItem('isSidebarShownOnNarrow') ?? 'true' )),
 		toastStore: null,
 		noteAddingMode: (browser && window.localStorage.getItem('noteAddingMode')) ?? NoteAddingMode.FROM_SCRATCH,
-		currentlyWrittenPrompt: (browser && window.localStorage.getItem('currentlyWrittenPrompt')) ?? '',
-		currentlyWrittenPromptList: (browser && window.localStorage.getItem('currentlyWrittenPromptList')) ?? '',
-		currentPromptListSeparator: (browser && window.localStorage.getItem('currentPromptListSeparator')) ?? '',
+		currentlyWrittenPrompt: (browser && window.localStorage.getItem('currentlyWrittenPrompt')) || '',
+		currentlyWrittenPromptList: (browser && window.localStorage.getItem('currentlyWrittenPromptList')) || '',
+		currentPromptListSeparator: (browser && window.localStorage.getItem('currentPromptListSeparator')) || '',
 		prompts_unsynced: (browser && JSON.parse(window.localStorage.getItem('prompts_unsynced') ?? '[]')) ?? [],
 		prompts_synced: (browser && JSON.parse(window.localStorage.getItem('prompts_synced') ?? '[]')) ?? [],
 		prompts_deleted: (browser && JSON.parse(window.localStorage.getItem('prompts_deleted') ?? '[]')) ?? [],
-		current_prompt: (browser && window.localStorage.getItem("current_prompt")) ?? '',
+		current_prompt: (browser && window.localStorage.getItem("current_prompt")) || '',
 		shouldKeepPrompt: (browser && JSON.parse(window.localStorage.getItem('shouldKeepPrompt') ?? 'true')),
 		promptedFieldIndex: 3,
 		fields: JSON.parse(JSON.stringify(default_fields)),
@@ -195,7 +229,8 @@ function createData(){
 				localStorage.setItem('current_prompt', JSON.stringify(currentData.current_prompt));
 				if (currentData.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
 					console.log("setting an input to current_prompt")
-					update((c)=>{
+						// @ts-ignore
+						update((c)=>{
 						let new_current_prompt = structuredClone(c.current_preset_for_notes);
 						new_current_prompt.fields[currentData.promptedFieldIndex].current_inputs[0] = currentData.current_prompt;
 						return {...c, current_prompt: new_current_prompt};

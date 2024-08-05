@@ -122,6 +122,7 @@
 	}
 
 	import LoginRegisterComponent from './LoginRegisterComponent.svelte';
+	import { get } from 'svelte/store';
 
 	check_connection_to_backend();
 	check_connection_to_backend_and_mongo();
@@ -205,8 +206,8 @@
 		<button
 			class="btn-icon variant-filled-primary"
 			on:click={() => {
-				$data.presets = [];
-				localStorage.setItem('presets', $data.presets);
+				data.update((c)=>{return {...c, presets: []}});
+				localStorage.setItem('presets', JSON.stringify(get(data).presets));
 			}}
 		>
 			<i class="fa-solid fa-remove" />

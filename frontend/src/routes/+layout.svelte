@@ -34,8 +34,12 @@
 	$data.toastStore = toastStore;
 
 	function toggleSidebarOnNarrow() {
-		$data.isSidebarShownOnNarrow = !$data.isSidebarShownOnNarrow;
-		localStorage.setItem('isSidebarShownOnNarrow', $data.isSidebarShownOnNarrow);
+		data.update((c)=>{
+			const currentIsSidebarShownOnNarrow = c.isSidebarShownOnNarrow;
+			// @ts-ignore
+			localStorage.setItem('isSidebarShownOnNarrow', currentIsSidebarShownOnNarrow);
+			return {...c, isSidebarShownOnNarrow: !currentIsSidebarShownOnNarrow};
+		})
 	}
 
 	let innerWidth = 0;

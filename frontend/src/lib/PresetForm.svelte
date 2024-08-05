@@ -95,6 +95,7 @@
 			data.update((c)=>{
 				let newPresets = structuredClone(c.presets);
 				newPresets = newPresets.filter(e=>e.name != old_preset_name);
+				// @ts-ignore
 				newPresets.push(c.selected_preset);
 				localStorage.setItem('presets', JSON.stringify(newPresets));
 				return {...c, presets: newPresets}
@@ -169,7 +170,7 @@
 			} m-0.5`}
 			on:click={() => {
 				preset_name = preset.name;
-				preset_iframes = preset.iframes;
+				preset_iframes = preset.iframes ?? [];
 				$data.fields = JSON.parse(JSON.stringify(preset.fields));
 				$data.selected_preset = preset;
 				selected_hue = preset.hue;
@@ -234,19 +235,24 @@
 		class={`btn-icon ${$data.selected_preset ? 'variant-filled-primary' : 'variant-ghost-primary'} m-0.5`}
 		style="font-weight: bold;"
 		on:click={() => {
+			const currentData = get(data);
 			// @ts-ignore
-			if ($data.selected_preset?.status !== 'unsynced' && $data.selected_preset?._id) {
+			if (currentData.selected_preset?.status !== 'unsynced' && currentData.selected_preset?._id) {
 			// @ts-ignore
-				$data.ids_of_presets_to_remove.push($data.selected_preset?._id);
+				currentData.ids_of_presets_to_remove.push($data.selected_preset?._id);
+				data.update((c)=>{return {...c, ids_of_presets_to_remove: currentData.ids_of_presets_to_remove}})
 				localStorage.setItem(
 					'ids_of_presets_to_remove',
-					JSON.stringify($data.ids_of_presets_to_remove)
+					JSON.stringify(currentData.ids_of_presets_to_remove)
 				);
 			}
 			// @ts-ignore
-			$data.presets = $data.presets.filter((p) => p !== $data.selected_preset);
-			$data.selected_preset = null;
-			localStorage.setItem('presets', JSON.stringify($data.presets));
+			data.update((c)=>{
+				const newPresets = currentData.presets.filter((p) => p !== $data.selected_preset)
+				console.log(newPresets)
+				return {...c, presets: newPresets, selected_preset: null}
+			});
+			localStorage.setItem('presets', JSON.stringify(get(data).presets));
 		}}
 	>
 		<i class="fa-solid fa-remove" />
