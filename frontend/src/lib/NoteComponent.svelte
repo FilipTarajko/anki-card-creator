@@ -3,6 +3,7 @@
 	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast, getFirstPrompt } from '../store';
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
+	import { get } from 'svelte/store';
 
 	let current_output: string = '';
 
@@ -172,7 +173,7 @@
 	}
 
 	function rememberShouldKeepPrompt() {
-		localStorage.setItem('shouldKeepPrompt', $data.shouldKeepPrompt);
+		localStorage.setItem('shouldKeepPrompt', JSON.stringify($data.shouldKeepPrompt));
 	}
 
 	function addNote() {
@@ -264,7 +265,7 @@
 
 	function toggleAllFieldsVisible() {
 		$data.currently_all_forced_visible = !$data.currently_all_forced_visible;
-		localStorage.setItem('currently_all_forced_visible', $data.currently_all_forced_visible);
+		localStorage.setItem('currently_all_forced_visible', JSON.stringify($data.currently_all_forced_visible));
 	}
 
 	function getAdjustedNewFocusElem(newFocusElem: any) {
@@ -282,7 +283,7 @@
 		let {target, key} = event;
 		let fieldIndex = target?.id.replace('field','');
 
-		if (key == "Enter" && ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT || $data.noteAddingMode === NoteAddingMode.FROM_SCRATCH)) {
+		if (key == "Enter" && !event?.target?.closest('form') && ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT || $data.noteAddingMode === NoteAddingMode.FROM_SCRATCH)) {
 			addNote();
 		}
 
@@ -310,7 +311,11 @@
 					}
 				}
 			} else {
-				for (let i=fieldIndex-(-1); i<$data.current_preset_for_notes.fields.length; i++) {
+				let length = get(data).current_preset_for_notes.fields?.length;
+				if (get(data).noteAddingMode === NoteAddingMode.NEW_PROMPT) {
+					length = 3;
+				}
+				for (let i=fieldIndex-(-1); i<length; i++) {
 					const potentialMatch = document.getElementById(`field${i}`)
 					if (potentialMatch && (!event.shiftKey || potentialMatch.getAttribute('type') == "text" || potentialMatch.tagName == "TEXTAREA")) {
 						newFocusElem = potentialMatch;
@@ -341,6 +346,7 @@
 			if (key == "p" || key == "P") {
 				let preset = $data.presets.find((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
 				// let index = $presets.indexOf($data.current_preset_for_notes);
+				// @ts-ignore
 				let index = $data.presets.indexOf(preset);
 				const length = $data.presets.length;
 				if (event.shiftKey) {
@@ -351,14 +357,18 @@
 				selectPreset($data.presets[index]);
 			}
 			if (key == "i" || key == "I") {
+				// @ts-ignore
 				let iframe = $data.current_preset_for_notes.iframes.find((i: [string, string])=>i[1] == iframe_source_template)
+				// @ts-ignore
 				let index = $data.current_preset_for_notes.iframes.indexOf(iframe);
+				// @ts-ignore
 				const length = $data.current_preset_for_notes.iframes.length;
 				if (event.shiftKey) {
 					index = ((index - 1) + length) % length;
 				} else {
 					index = (index + 1) % length;
 				}
+				// @ts-ignore
 				iframe_source_template = $data.current_preset_for_notes.iframes[index][1];
 			}
 			// field freeze/reset/visibility TODO
@@ -395,9 +405,7 @@
 		localStorage.setItem('noteAddingMode', mode);
 		if (mode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
 			$data.current_prompt = getFirstPrompt($data);
-			console.log(`current_prompt = ${$data.current_prompt}`)
 			localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
-			console.log("setting an input to current_prompt")
 			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.current_prompt;
 			rememberCurrentPreset();
 		}
@@ -407,7 +415,7 @@
 		$data.prompts_unsynced = [];
 		localStorage.setItem('prompts_unsynced', '[]');
 		$data.prompts_deleted = $data.prompts_synced;
-		localStorage.setItem('prompts_deleted', $data.prompts_synced);
+		localStorage.setItem('prompts_deleted', JSON.stringify($data.prompts_synced));
 		$data.current_prompt = '';
 		localStorage.setItem('current_prompt', $data.current_prompt);
 		data.sync_prompts();
@@ -454,7 +462,7 @@
 		<form on:submit|preventDefault={()=>addOnePrompt()}>
 			<label>new prompt
 				<input
-					id="field1"
+					id="field0"
 					type="text"
 					bind:value={$data.currentlyWrittenPrompt}
 					on:input={rememberCurrentlyWrittenPrompt}
@@ -474,7 +482,7 @@
 			<label class="flex items-center justify-between w-full">
 				<div>new prompts</div>
 				<textarea
-					id="field2"
+					id="field1"
 					style="color: black;"
 					bind:value={$data.currentlyWrittenPromptList}
 					on:input={rememberCurrentlyWrittenPromptList}
@@ -482,7 +490,7 @@
 			</label>
 			<label>prompt separator
 				<input
-					id="field3"
+					id="field2"
 					type="text"
 					placeholder="space (default)"
 					bind:value={$data.currentPromptListSeparator}
@@ -490,11 +498,11 @@
 				>
 			</label>
 			<button
-				type="button"
+				type="submit"
 				style="margin-top: 0.858rem;"
 				class="btn btn-large variant-filled-success"
 			>
-				add prompt
+				add prompts
 			</button>
 		</form>
 
@@ -603,7 +611,7 @@
 						</abbr>
 						</button>
 					</div>
-					<form bind:clientWidth={cardFormWidth}>
+					<form bind:clientWidth={cardFormWidth} on:submit|preventDefault={addNote}>
 						{#if $data.noteAddingMode === NoteAddingMode.FROM_PROMPT}
 							<span style={($data.prompts_synced.length || $data.prompts_unsynced.length) ? 'color: rgb(100, 200, 200)' : 'color: rgb(255, 100, 100);'}>{ $data.current_prompt || 'no current prompt' }</span>
 						{/if}
@@ -721,7 +729,7 @@
 							</button>
 						{/if}
 						<button
-							type="button"
+							type="submit"
 							style="margin-top: 0.858rem;"
 							class="btn btn-large variant-filled-success">add card</button
 						>
