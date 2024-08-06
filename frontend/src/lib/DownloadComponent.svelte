@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { SlideToggle } from '@skeletonlabs/skeleton';
-	import { data, showErrorToast, showSuccessToast } from '../store';
+	import { data } from '../store';
 	import axios from 'axios';
 
 	function download(filename: string, text: string) {
@@ -11,7 +11,7 @@
 		document.body.appendChild(element);
 		element.click();
 		document.body.removeChild(element);
-		showSuccessToast($data.toastStore, 'Notes downloaded!');
+		data.showSuccessToast('Notes downloaded!');
 	}
 
 	function upload_notes() {
@@ -28,11 +28,11 @@
 				$data.notes_unsynced = '';
 				localStorage.setItem('notes_unsynced', '');
 				console.log(response);
-				showSuccessToast($data.toastStore, 'Notes uploaded!');
+				data.showSuccessToast('Notes uploaded!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast($data.toastStore, 'Notes upload failed!');
+				data.showErrorToast('Notes upload failed!');
 			});
 	}
 
@@ -49,11 +49,11 @@
 				localStorage.setItem('notes_synced', '');
 				$data.notes_unsynced = '';
 				localStorage.setItem('notes_unsynced', '');
-				showSuccessToast($data.toastStore, 'Local and cloud notes deleted!');
+				data.showSuccessToast('Local and cloud notes deleted!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast($data.toastStore, 'Notes deletion failed!');
+				data.showErrorToast('Notes deletion failed!');
 			});
 	}
 </script>
@@ -122,7 +122,7 @@
 			localStorage.setItem('notes_synced', $data.notes_synced);
 			$data.notes_unsynced = '';
 			localStorage.setItem('notes_unsynced', $data.notes_unsynced);
-			showSuccessToast($data.toastStore, 'Local notes deleted!');
+			data.showSuccessToast('Local notes deleted!');
 		}}
 	>
 		<!-- <i class="fa-solid fa-remove" /> -->

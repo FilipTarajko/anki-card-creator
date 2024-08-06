@@ -197,11 +197,11 @@ function createData(){
 				update((n)=>{return {...n, notes_synced: response.data, notes_unsynced: ''}})
 				localStorage.setItem('notes_unsynced', '');
 				localStorage.setItem('notes_synced', response.data);
-				showSuccessToast(currentData.toastStore, 'Notes synced!');
+				showSuccessToast('Notes synced!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast(currentData.toastStore, 'Notes sync failed!');
+				showErrorToast('Notes sync failed!');
 			});
 	}
 
@@ -225,7 +225,7 @@ function createData(){
 				localStorage.setItem('prompts_deleted', '[]');
 
 				currentData = get(data);
-				update((c)=>{return {...c, current_prompt: getFirstPrompt(currentData)}});
+				update((c)=>{return {...c, current_prompt: getFirstPrompt()}});
 				localStorage.setItem('current_prompt', JSON.stringify(currentData.current_prompt));
 				if (currentData.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
 					console.log("setting an input to current_prompt")
@@ -237,11 +237,11 @@ function createData(){
 					});
 					currentData
 				}
-				showSuccessToast(currentData.toastStore, "Synced prompts");
+				showSuccessToast("Synced prompts");
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast(currentData.toastStore, "Prompts sync failed!");
+				showErrorToast("Prompts sync failed!");
 			});
 	}
 
@@ -258,11 +258,11 @@ function createData(){
 				update((c)=>{return {...c, duplicate_checking_values_synced: response.data, duplicate_checking_values_unsynced: []}})
 				localStorage.setItem('duplicate_checking_values_synced', JSON.stringify(response.data));
 				localStorage.setItem('duplicate_checking_values_unsynced', '[]');
-				showSuccessToast(currentData.toastStore, "Synced unique question list");
+				showSuccessToast("Synced unique question list");
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast(currentData.toastStore, "Unique question list sync failed!");
+				showErrorToast("Unique question list sync failed!");
 			});
 	}
 
@@ -292,7 +292,6 @@ function createData(){
 					let sync_report = response.data[0];
 					if (sync_report.ignored_presets.length > 0) {
 						showWarningToast(
-							currentData.toastStore,
 							`Some presets were later changed on different device!<br/>${sync_report.ignored_presets.join(
 								'<br/>'
 							)}`
@@ -300,14 +299,13 @@ function createData(){
 					}
 					if (sync_report.unfound_presets.length > 0) {
 						showWarningToast(
-							currentData.toastStore,
 							`You had changes to already-deleted presets!<br/>${sync_report.unfound_presets.join(
 								'<br/>'
 							)}`
 						);
 					}
 					if (sync_report.ignored_presets.length == 0 && sync_report.unfound_presets.length == 0) {
-						showSuccessToast(currentData.toastStore, 'Presets synced!');
+						showSuccessToast('Presets synced!');
 					}
 					update((c)=>{return {...c, presets: response.data[1], ids_of_presets_to_remove: [], fields: JSON.parse(JSON.stringify(default_fields)), selected_preset: null}})
 					localStorage.setItem('presets', JSON.stringify(response.data[1]));
@@ -316,8 +314,65 @@ function createData(){
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast(currentData.toastStore, 'Presets sync failed!');
+				showErrorToast('Presets sync failed!');
 			});
+	}
+
+	function showToast(message: string, background: string) {
+		get(data).toastStore.trigger({
+			message,
+			background,
+			timeout: 5000,
+			autohide: true,
+			hideDismiss: false,
+		})
+	}
+
+	function showSuccessToast(message: string) {
+		showToast(message, 'variant-filled-success');
+	}
+
+	function showErrorToast(message: string) {
+		showToast(message, 'variant-filled-primary');
+	}
+
+	function showWarningToast(message: string) {
+		showToast(message, 'variant-filled-warning');
+	}
+
+	function transformTextForDuplicateCheck(text: string) {
+		text = text.toLowerCase();
+		get(data).duplicate_checking_removed_needles.forEach(needle=>{
+			if (needle instanceof RegExp && !needle.global) {
+				text = text.replace(needle, "")
+			} else {
+				text = text.replaceAll(needle, "");
+			}
+		})
+		return text;
+	}
+
+	function appendToDuplicateCheckingValuesUnsynced(values: string[]) {
+		for (let i=0; i<values.length; i++) {
+			const val = transformTextForDuplicateCheck(values[i]);
+			if (!val || get(data).duplicate_checking_values_unsynced.includes(val)) {
+				continue;
+			}
+			data.update((c)=>{
+				const new_duplicate_checking_values_unsynced = c.duplicate_checking_values_unsynced;
+				new_duplicate_checking_values_unsynced.push(val);
+				return {...c, duplicate_checking_values_unsynced: new_duplicate_checking_values_unsynced};
+			})
+		}
+		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(get(data).duplicate_checking_values_unsynced));
+	}
+
+	function getFirstPrompt(){
+		const currentData = get(data);
+		if (currentData.current_prompt && (currentData.prompts_synced.includes(currentData.current_prompt) || currentData.prompts_unsynced.includes(currentData.current_prompt))) {
+			return currentData.current_prompt;
+		}
+		return currentData.prompts_synced[0] ?? currentData.prompts_unsynced[0] ?? '';
 	}
 
 	return {
@@ -330,59 +385,13 @@ function createData(){
 		sync_unique_questions,
 		sync_presets,
 		sync_all,
+		showSuccessToast,
+		showErrorToast,
+		showWarningToast,
+		transformTextForDuplicateCheck,
+		appendToDuplicateCheckingValuesUnsynced,
+		getFirstPrompt,
 	}
 }
 
 export const data = createData();
-
-export function transformTextForDuplicateCheck(text: string, duplicate_checking_removed_needles: (string|RegExp)[]) {
-	text = text.toLowerCase();
-	duplicate_checking_removed_needles.forEach(needle=>{
-		if (needle instanceof RegExp && !needle.global) {
-			text = text.replace(needle, "")
-		} else {
-			text = text.replaceAll(needle, "");
-		}
-	})
-	return text;
-}
-
-export function appendToDuplicateCheckingValuesUnsynced(data: {duplicate_checking_values_unsynced: string[], duplicate_checking_removed_needles: (string|RegExp)[]}, values: string[]) {
-	for (let i=0; i<values.length; i++) {
-		const val = transformTextForDuplicateCheck(values[i], data.duplicate_checking_removed_needles);
-		if (!val || data.duplicate_checking_values_unsynced.includes(val)) {
-			continue;
-		}
-		data.duplicate_checking_values_unsynced.push(val);
-	}
-	localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(data.duplicate_checking_values_unsynced));
-}
-
-export function showToast(toastStore: any, message: string, background: string) {
-	toastStore.trigger({
-		message,
-		background,
-		timeout: 5000,
-		autohide: true,
-		hideDismiss: false,
-	})
-}
-
-export function showSuccessToast(toastStore: any, message: string) {
-	showToast(toastStore, message, 'variant-filled-success');
-}
-
-export function showErrorToast(toastStore: any, message: string) {
-	showToast(toastStore, message, 'variant-filled-primary');
-}
-
-export function showWarningToast(toastStore: any, message: string) {
-	showToast(toastStore, message, 'variant-filled-warning');
-}
-
-export function getFirstPrompt(data: any){
-		if (data.current_prompt && (data.prompts_synced.includes(data.current_prompt) || data.prompts_unsynced.includes(data.current_prompt))) {
-			return data.current_prompt;
-		}
-		return data.prompts_synced[0] ?? data.prompts_unsynced[0] ?? '';
-	}

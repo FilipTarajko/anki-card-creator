@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
-	import { data, showSuccessToast, showErrorToast, transformTextForDuplicateCheck } from '../store';
+	import { data } from '../store';
 	import axios from 'axios';
 
 	const EXAMPLES_TO_SHOW = 10;
@@ -11,19 +11,19 @@
 	function tryUpdateUniquenessEntriesFromFile(shouldSave: boolean, shouldAppend: boolean = true) {
 		console.time("tryReadFile")
 		if (!fileForUniqueness?.length) {
-			showErrorToast($data.toastStore, "No file selected!");
+			data.showErrorToast("No file selected!");
 			return;
 		}
 		const file = fileForUniqueness[0]
 		const reader = new FileReader()
 		reader.onload = (e) => {
-			const data = e?.target?.result
-			if (data as string && typeof data == "string") {
-				const result = tryCreateNewUniquenessStateFromFile(data, shouldAppend);
+			const fileData = e?.target?.result
+			if (fileData as string && typeof fileData == "string") {
+				const result = tryCreateNewUniquenessStateFromFile(fileData, shouldAppend);
 				if (shouldSave) {
 					$data.duplicate_checking_values_unsynced = result;
 					localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify(result));
-					showSuccessToast($data.toastStore, shouldAppend ? "Appended to unique question list" : "Overwritten unique questions list");
+					data.showSuccessToast(shouldAppend ? "Appended to unique question list" : "Overwritten unique questions list");
 				}
 			}
 		}
@@ -53,7 +53,7 @@
 		for (let i = 0; i < rowsParsed.length; i++) {
 			const row = rowsParsed[i];
 			for (let j = 0; j < row.length; j++) {
-				let element = transformTextForDuplicateCheck(row[j], $data.duplicate_checking_removed_needles);
+				let element = data.transformTextForDuplicateCheck(row[j]);
 
 				if (element && $data.note_export_columns_for_duplicate_checking.includes(j)) {
 					result.add(element)
@@ -77,18 +77,18 @@
 				localStorage.setItem("duplicate_checking_values_synced", JSON.stringify([]));
 				$data.duplicate_checking_values_unsynced = [];
 				localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
-				showSuccessToast($data.toastStore, 'Unique question list deleted!');
+				data.showSuccessToast('Unique question list deleted!');
 			})
 			.catch((error) => {
 				console.error(error);
-				showErrorToast($data.toastStore, 'Deleting unique question list failed!');
+				data.showErrorToast('Deleting unique question list failed!');
 			});
 	}
 
 	function deleteLocalUniquenessEntries() {
 		$data.duplicate_checking_values_unsynced = [];
 		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
-		showSuccessToast($data.toastStore, "Deleted unsynced unique questions list");
+		data.showSuccessToast("Deleted unsynced unique questions list");
 	}
 
 	$: note_export_uniqueness_selectable_columns = firstFields[0];

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { data, showErrorToast, showSuccessToast } from '../store';
+	import { data } from '../store';
 	import jwt_decode from 'jwt-decode';
 	import axios from 'axios';
 
@@ -17,18 +17,18 @@
 
 	function try_to_register() {
 		if (registration_form_data.password !== password_repeat) {
-			showErrorToast($data.toastStore, 'Passwords do not match!');
+			data.showErrorToast('Passwords do not match!');
 			return;
 		}
 		axios
 			.post($data.backend_url + '/register_user', registration_form_data)
 			.then((response) => {
 				if (response.data === 'Registered') {
-					showSuccessToast($data.toastStore, 'Registered successfully! You can now log in.');
+					data.showSuccessToast('Registered successfully! You can now log in.');
 				}
 			})
 			.catch((error) => {
-				showErrorToast($data.toastStore, `Registration failed: ${error?.response?.data || 'no connection'}`);
+				data.showErrorToast(`Registration failed: ${error?.response?.data || 'no connection'}`);
 			});
 	}
 
@@ -46,10 +46,10 @@
 				localStorage.setItem('email', $data.email);
 				localStorage.setItem('id', $data.id);
 
-				showSuccessToast($data.toastStore, 'Logged in successfully!');
+				data.showSuccessToast('Logged in successfully!');
 			})
 			.catch((error) => {
-				showErrorToast($data.toastStore, `Log-in failed: ${error?.response?.data || 'no connection'}`);
+				data.showErrorToast(`Log-in failed: ${error?.response?.data || 'no connection'}`);
 			});
 	}
 
@@ -63,7 +63,7 @@
 		localStorage.removeItem('email');
 		localStorage.removeItem('id');
 
-		showSuccessToast($data.toastStore, 'Logged out successfully!');
+		data.showSuccessToast('Logged out successfully!');
 	}
 </script>
 

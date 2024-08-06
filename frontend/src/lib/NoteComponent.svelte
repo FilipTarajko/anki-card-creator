@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, transformTextForDuplicateCheck, appendToDuplicateCheckingValuesUnsynced, showSuccessToast, showErrorToast, getFirstPrompt } from '../store';
+	import { data } from '../store';
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
 	import { get } from 'svelte/store';
@@ -140,13 +140,13 @@
 
 	function addPrompt(prompt: string) {
 		if (!prompt) {
-			showErrorToast($data.toastStore, 'Cannot add empty prompt!');
+			data.showErrorToast('Cannot add empty prompt!');
 			return;
 		} else if ($data.prompts_unsynced.includes(prompt)) {
-			showErrorToast($data.toastStore, 'Prompt already exists!');
+			data.showErrorToast('Prompt already exists!');
 			return;
 		}
-		showSuccessToast($data.toastStore, 'Prompt added!');
+		data.showSuccessToast('Prompt added!');
 		$data.prompts_unsynced.push(prompt);
 		rememberPromptsUnsynced();
 	}
@@ -177,7 +177,7 @@
 	}
 
 	function addNote() {
-		showSuccessToast($data.toastStore, 'Note added!');
+		data.showSuccessToast('Note added!');
 		$data.notes_unsynced +=
 			current_output +
 			`
@@ -188,7 +188,7 @@
 				values_to_append.push(current_output.split(';')[i]);
 			}
 		}
-		appendToDuplicateCheckingValuesUnsynced($data, values_to_append);
+		data.appendToDuplicateCheckingValuesUnsynced(values_to_append);
 		if ($data.current_preset_for_notes?.fields?.length) {
 			for (let i = 0; i < $data.current_preset_for_notes?.fields?.length || 0; i++) {
 				if (!$data.current_preset_for_notes?.fields[i].currently_frozen) {
@@ -404,7 +404,7 @@
 		$data.noteAddingMode = mode;
 		localStorage.setItem('noteAddingMode', mode);
 		if (mode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
-			$data.current_prompt = getFirstPrompt($data);
+			$data.current_prompt = data.getFirstPrompt();
 			localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
 			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.current_prompt;
 			rememberCurrentPreset();
@@ -628,8 +628,8 @@
 											type="text"
 											style={field.current_inputs[0] && 
 												(preset_fields_for_duplicate_checking.includes(i)
-												&& ($data.duplicate_checking_values_synced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles))
-												|| $data.duplicate_checking_values_unsynced.includes(transformTextForDuplicateCheck(field.current_inputs[0], $data.duplicate_checking_removed_needles))))
+												&& ($data.duplicate_checking_values_synced.includes(data.transformTextForDuplicateCheck(field.current_inputs[0]))
+												|| $data.duplicate_checking_values_unsynced.includes(data.transformTextForDuplicateCheck(field.current_inputs[0]))))
 												? "color: rgb(200, 0, 0);" : ""}
 											bind:value={field.current_inputs[0]}
 											on:input={rememberCurrentPreset}

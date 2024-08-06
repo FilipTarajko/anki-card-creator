@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, showErrorToast, showSuccessToast, default_fields } from '../store';
+	import { data, default_fields } from '../store';
 	import { BindingType, type Field, type Preset } from '../types';
 	import { get } from 'svelte/store';
 
@@ -35,7 +35,7 @@
 				$data.fields[i].options.length < 2 &&
 				($data.fields[i].type == 'selectOne' || $data.fields[i].type == 'selectMany')
 			) {
-				showErrorToast($data.toastStore, 'Select fields must have at least 2 options!');
+				data.showErrorToast('Select fields must have at least 2 options!');
 				return false;
 			}
 			$data.fields[i].current_inputs = [];
@@ -46,12 +46,12 @@
 
 	function save_preset_as_new() {
 		if (!preset_name) {
-			showErrorToast($data.toastStore, "Please enter preset's name");
+			data.showErrorToast("Please enter preset's name");
 		} else if (
 			// @ts-ignore
 			$data.presets.find((e) => e.name.toLowerCase().trim() === preset_name.toLowerCase().trim())
 		) {
-			showErrorToast($data.toastStore, 'Preset with this name already exists!');
+			data.showErrorToast('Preset with this name already exists!');
 		} else if (!validate_and_prepare_fields()) {
 			return;
 		} else {
@@ -66,7 +66,7 @@
 				}
 			);
 			localStorage.setItem('presets', JSON.stringify($data.presets));
-			showSuccessToast($data.toastStore, `Preset "${preset_name}" saved!`);
+			data.showSuccessToast(`Preset "${preset_name}" saved!`);
 		}
 	}
 
@@ -75,7 +75,7 @@
 		if (!$data.selected_preset) {
 			console.error('selected_preset is null');
 		} else if (!preset_name) {
-			showErrorToast($data.toastStore, "Please enter preset's name");
+			data.showErrorToast("Please enter preset's name");
 		} else if (
 			// @ts-ignore
 			$data.presets.find(
@@ -83,7 +83,7 @@
 					e.name.toLowerCase().trim() === preset_name.toLowerCase().trim() && e !== $data.selected_preset
 			)
 		) {
-			showErrorToast($data.toastStore, 'Preset with this name already exists!');
+			data.showErrorToast('Preset with this name already exists!');
 		} else if (!validate_and_prepare_fields()) {
 			return;
 		} else {
@@ -101,9 +101,9 @@
 				return {...c, presets: newPresets}
 			});
 			if (old_preset_name == preset_name) {
-				showSuccessToast($data.toastStore, `Preset "${preset_name}" updated!`);
+				data.showSuccessToast(`Preset "${preset_name}" updated!`);
 			} else {
-				showSuccessToast($data.toastStore, `Preset "${old_preset_name}" updated as "${preset_name}"!`);
+				data.showSuccessToast(`Preset "${old_preset_name}" updated as "${preset_name}"!`);
 			}
 		}
 	}
@@ -597,7 +597,7 @@
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
 										if (field.options.includes(field.current_inputs[0])) {
-											showErrorToast($data.toastStore, 'Value already exists!');
+											data.showErrorToast('Value already exists!');
 											return;
 										}
 										field.options.push(field.current_inputs[0] || '');
@@ -647,11 +647,11 @@
 									class="btn btn-sm variant-filled-success"
 									on:click={() => {
 										if (!field.current_inputs[0]?.length) {
-											showErrorToast($data.toastStore, "Value of 'select many' must not be empty!");
+											data.showErrorToast("Value of 'select many' must not be empty!");
 											return;
 										}
 										if (field.options.includes(field.current_inputs[0])) {
-											showErrorToast($data.toastStore, 'Value already exists!');
+											data.showErrorToast('Value already exists!');
 											return;
 										}
 										field.options.push(field.current_inputs[0] || '');
