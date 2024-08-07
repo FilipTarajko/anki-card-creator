@@ -46,6 +46,7 @@ async fn main() {
         .route("/sync_unique_questions", post(handlers::sync::sync_unique_questions))
         .route("/delete_unique_questions", post(handlers::sync::delete_unique_questions))
         .route("/sync_prompts", post(handlers::sync::sync_prompts))
+        .route("/delete_prompts", post(handlers::sync::delete_prompts))
         .layer(cors_layer)
         .with_state(database_client);
 

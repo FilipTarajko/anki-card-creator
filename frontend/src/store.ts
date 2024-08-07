@@ -245,6 +245,28 @@ function createData(){
 			});
 	}
 
+	function delete_prompts() {
+		const currentData = get(data);
+		axios
+			.post(currentData.backend_url + '/delete_prompts', '', {
+				headers: {
+					Authorization: `Bearer ${currentData.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				data.update((c) => {return {...c, prompts_unsynced: [], prompts_synced: [], prompts_deleted: []}});
+				localStorage.setItem("prompts_unsynced", JSON.stringify([]));
+				localStorage.setItem("prompts_synced", JSON.stringify([]));
+				localStorage.setItem("prompts_deleted", JSON.stringify([]));
+				showSuccessToast('All prompts deleted!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Deleting all prompts failed!');
+			});
+	}
+
 	function sync_unique_questions() {
 		let currentData = get(data);
 		axios
@@ -391,6 +413,7 @@ function createData(){
 		transformTextForDuplicateCheck,
 		appendToDuplicateCheckingValuesUnsynced,
 		getFirstPrompt,
+		delete_prompts,
 	}
 }
 

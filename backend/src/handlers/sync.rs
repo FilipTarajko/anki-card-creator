@@ -223,6 +223,28 @@ pub async fn delete_unique_questions(
     "Unique questions deleted!".to_string()
 }
 
+pub async fn delete_prompts(
+    State(client): State<Client>,
+    TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>
+) -> String {
+    let authenticated_user = get_user_by_jwt(State(client.clone()), TypedHeader(auth_header))
+        .await
+        .unwrap();
+    let user_collection: Collection<User> = client
+        .database(std::env::var("DATABASE_NAME").unwrap().as_str())
+        .collection("Users");
+    user_collection
+        .update_one(
+            doc! {"_id": authenticated_user.id.unwrap()},
+            doc! {"$set": {"prompts": Vec::<String>::new()}},
+            None,
+        )
+        .await
+        .unwrap();
+
+    "All prompts deleted!".to_string()
+}
+
 pub async fn delete_notes(
     State(client): State<Client>,
     TypedHeader(auth_header): TypedHeader<Authorization<Bearer>>,

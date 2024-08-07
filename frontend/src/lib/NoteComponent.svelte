@@ -430,16 +430,6 @@
 		}
 	}
 
-	function delete_all_prompts() {
-		$data.prompts_unsynced = [];
-		localStorage.setItem('prompts_unsynced', '[]');
-		$data.prompts_deleted = $data.prompts_synced;
-		localStorage.setItem('prompts_deleted', JSON.stringify($data.prompts_synced));
-		$data.current_prompt = '';
-		localStorage.setItem('current_prompt', $data.current_prompt);
-		data.sync_prompts();
-	}
-
 	function delete_local_prompts() {
 		$data.prompts_unsynced = [];
 		localStorage.setItem('prompts_unsynced', '[]');
@@ -550,7 +540,7 @@
 			{/if}
 		</div>
 		<div class="flex flex-row w-full justify-center gap-2">
-			<button class="btn variant-filled-primary" on:click={delete_all_prompts}>delete all</button>
+			<button class="btn variant-filled-primary" on:click={data.delete_prompts}>delete all</button>
 			<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
 			<button class="btn-icon variant-filled-success" on:click={data.sync_prompts}>
 				<i class="fa-solid fa-rotate" />
