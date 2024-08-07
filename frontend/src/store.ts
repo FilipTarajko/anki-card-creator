@@ -169,7 +169,7 @@ function createData(){
 		prompts_unsynced: (browser && JSON.parse(window.localStorage.getItem('prompts_unsynced') ?? '[]')) ?? [],
 		prompts_synced: (browser && JSON.parse(window.localStorage.getItem('prompts_synced') ?? '[]')) ?? [],
 		prompts_deleted: (browser && JSON.parse(window.localStorage.getItem('prompts_deleted') ?? '[]')) ?? [],
-		current_prompt: (browser && JSON.parse(window.localStorage.getItem("current_prompt") ?? '')) || '',
+		current_prompt: (browser && JSON.parse(window.localStorage.getItem("current_prompt") ?? '""')) ?? '',
 		shouldKeepPrompt: (browser && JSON.parse(window.localStorage.getItem('shouldKeepPrompt') ?? 'true')),
 		promptedFieldIndex: 3,
 		fields: JSON.parse(JSON.stringify(default_fields)),
