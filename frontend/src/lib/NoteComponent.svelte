@@ -132,29 +132,48 @@
 		localStorage.setItem('currentPromptListSeparator', $data.currentPromptListSeparator || '')
 	}
 
-	function addOnePrompt() {
-		addPrompt($data.currentlyWrittenPrompt || '');
-		$data.currentlyWrittenPrompt = '';
-		rememberCurrentlyWrittenPrompt();
+	enum AddPromptResult {
+		empty = 'Cannot add empty prompt!',
+		exists = 'Prompt already exists!',
+		success = 'Prompt added!',
 	}
 
-	function addPrompt(prompt: string) {
-		if (!prompt) {
-			data.showErrorToast('Cannot add empty prompt!');
-			return;
-		} else if ($data.prompts_unsynced.includes(prompt)) {
-			data.showErrorToast('Prompt already exists!');
-			return;
+	function addOnePrompt() {
+		const result = addPrompt($data.currentlyWrittenPrompt || '');
+		$data.currentlyWrittenPrompt = '';
+		rememberCurrentlyWrittenPrompt();
+		if (result === AddPromptResult.success) {
+			data.showSuccessToast(result);
+		} else {
+			data.showErrorToast(result);
 		}
-		data.showSuccessToast('Prompt added!');
+	}
+
+	function addPrompt(prompt: string): AddPromptResult {
+		if (!prompt) {
+			return AddPromptResult.empty;
+		} else if ($data.prompts_unsynced.includes(prompt)) {
+			return AddPromptResult.exists;
+		}
 		$data.prompts_unsynced.push(prompt);
 		rememberPromptsUnsynced();
+		return AddPromptResult.success;
 	}
 
 	function addPromptsFromList() {
+		const resultsCounter: Map<AddPromptResult, number> = new Map();
 		const promptList = ($data.currentlyWrittenPromptList || '').split($data.currentPromptListSeparator || ' ');
 		for (let i=0; i<promptList.length; i++) {
-			addPrompt(promptList[i]);
+			const result = addPrompt(promptList[i]);
+			resultsCounter.set(result, (resultsCounter.get(result) ?? 0) +1);
+		}
+		const keys = Array.from(resultsCounter.keys())
+		for (let i=0; i<keys.length; i++) {
+			if (keys[i] === AddPromptResult.success) {
+				data.showSuccessToast(`${resultsCounter.get(keys[i])} x ${keys[i]}`)
+			} else {
+				data.showErrorToast(`${resultsCounter.get(keys[i])} x ${keys[i]}`)
+			}
 		}
 		$data.currentlyWrittenPromptList = '';
 		localStorage.setItem('currentlyWrittenPromptList', '');
