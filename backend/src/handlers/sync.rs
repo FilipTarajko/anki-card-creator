@@ -372,5 +372,13 @@ pub async fn sync_presets(
         ignored_presets,
         unfound_presets,
     };
-    Json((sync_report, presets_to_save))
+    if number_of_new_presets > 0 {
+        let maybe_user_reloaded = user_collection.find_one(doc! { "_id": user.id.unwrap() }, None)
+        .await
+        .unwrap();
+        if let Some(user_reloaded) = maybe_user_reloaded {
+            return Json((sync_report, user_reloaded.presets));
+        }
+    }
+    return Json((sync_report, presets_to_save));
 }
