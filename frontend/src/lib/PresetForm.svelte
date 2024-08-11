@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListBox, ListBoxItem, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { data, default_fields } from '../store';
+	import { data } from '../store';
 	import { BindingType, type Field, type Preset } from '../types';
 	import { get } from 'svelte/store';
 
@@ -187,7 +187,7 @@
 		on:click={() => {
 			preset_name = 'new preset';
 			preset_iframes = [];
-			$data.fields = JSON.parse(JSON.stringify(default_fields));
+			$data.fields = JSON.parse(JSON.stringify(data.default_fields));
 			selected_hue = '';
 			$data.selected_preset = null;
 		}}

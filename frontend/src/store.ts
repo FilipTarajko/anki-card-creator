@@ -4,105 +4,7 @@ import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { NoteAddingMode, type Field, type Preset } from './types';
 import axios from 'axios';
 import jwt_decode from 'jwt-decode';
-
-export let default_fields = [
-		{
-			id: 0,
-			name: 'deck',
-			type: 'bound',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: true,
-			current_inputs: [],
-			bound_to: 5,
-			bindings: [
-				['nl', 'Dutch'],
-				['en', 'English']
-			],
-			binding_type: 'equals'
-		},
-		{
-			id: 1,
-			name: 'notetype',
-			type: 'selectOne',
-			options: ['2X26', '3X26'],
-			default: ['2X26'],
-			visible_by_default: false,
-			frozen_by_default: true,
-			current_inputs: []
-		},
-		{
-			id: 2,
-			name: 'tags',
-			type: 'selectMany',
-			options: ['AnkiCC', 'test', 'test::AnkiCC', 'test::foo::baz::baz'],
-			default: ['AnkiCC', 'test'],
-			visible_by_default: false,
-			frozen_by_default: true,
-			current_inputs: []
-		},
-		{
-			id: 3,
-			name: 'front',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 4,
-			name: 'back',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 5,
-			name: 'rev',
-			type: 'selectOne',
-			options: ['', 'y'],
-			default: [''],
-			visible_by_default: true,
-			frozen_by_default: true,
-			current_inputs: []
-		},
-		{
-			id: 6,
-			name: 'info',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 7,
-			name: 'source',
-			type: 'text',
-			options: [],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: false,
-			current_inputs: []
-		},
-		{
-			id: 8,
-			name: 'theme',
-			type: 'selectOne',
-			options: ['nl', 'en', 'de', 'pl'],
-			default: [],
-			visible_by_default: true,
-			frozen_by_default: true,
-			current_inputs: []
-		}
-	];
+import {default as default_fields} from './default_fields.json';
 
 function createData(){
 	const data: Writable<{
@@ -586,6 +488,7 @@ function createData(){
 		log_out,
 		deleteAllUniquenessEntries,
 		deleteLocalUniquenessEntries,
+		default_fields,
 	}
 }
 
