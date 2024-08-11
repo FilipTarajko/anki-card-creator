@@ -662,16 +662,18 @@
 											on:input={rememberCurrentPreset}
 										/>
 									{:else if field.type === 'selectOne'}
-										<RadioGroup>
+										<ListBox>
+											<div id={`field${i}`} class="children-flex-grow bg-surface-200-700-token border-token border-surface-400-500-token card" style="display: flex; flex-direction: row; flex-wrap: wrap;">
 											{#each field.options as option}
-												<RadioItem id={`field${i}`} bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
-													>{option || '(empty)'}</RadioItem
+												<ListBoxItem id={`field${i}`} bind:group={field.current_inputs[0]} on:change={rememberCurrentPreset} name="type" value={option}
+													>{option || '(empty)'}</ListBoxItem
 												>
 											{/each}
-										</RadioGroup>
+											</div>
+										</ListBox>
 									{:else if field.type === 'selectMany'}
 										<ListBox multiple id={`field${i}`}>
-											<div id={`field${i}`} class="card" style="display: flex; flex-direction: row;">
+											<div id={`field${i}`} class="card" style="display: flex; flex-direction: row; flex-wrap: wrap;">
 												{#each field.options as option}
 													<ListBoxItem id={`field${i}`} bind:group={field.current_inputs} on:change={rememberCurrentPreset} name="type" value={option}
 														>{option || '(empty)'}</ListBoxItem
@@ -801,6 +803,10 @@
 </div>
 
 <style lang="postcss">
+	.children-flex-grow * {
+		flex-grow: 1 !important;
+	}
+
 	input {
 		color: black;
 	}
