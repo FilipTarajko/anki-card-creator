@@ -177,7 +177,29 @@ function createData(){
 	});
 	const { subscribe, set, update } = data;
 
+	function handleNoJWT() {
+		if (!get(data).jwt) {
+			showErrorToast('Please log in before syncing!',
+				{
+					label: 'Go to login page',
+					response: ()=>{data.update((c)=>{
+						localStorage.setItem('current_page', 'account');
+						return {
+							...c,
+							current_page: 'account'
+						}
+					})}
+				}
+			);
+			return true;
+		}
+		return false;
+	}
+
 	function sync_all() {
+		if (handleNoJWT()) {
+			return;
+		}
 		sync_presets();
 		sync_unique_questions();
 		sync_prompts();
@@ -185,6 +207,9 @@ function createData(){
 	}
 
 	function sync_notes() {
+		if (handleNoJWT()) {
+			return;
+		}
 		const currentData = get(data);
 		axios
 			.post(currentData.backend_url + '/sync_notes', JSON.stringify(currentData.notes_unsynced), {
@@ -206,6 +231,9 @@ function createData(){
 	}
 
 	function sync_prompts() {
+		if (handleNoJWT()) {
+			return;
+		}
 		let currentData = get(data);
 		const requestPayload = JSON.stringify([
 			currentData.prompts_unsynced,
@@ -246,6 +274,9 @@ function createData(){
 	}
 
 	function delete_prompts() {
+		if (handleNoJWT()) {
+			return;
+		}
 		const currentData = get(data);
 		axios
 			.post(currentData.backend_url + '/delete_prompts', '', {
@@ -268,6 +299,9 @@ function createData(){
 	}
 
 	function sync_unique_questions() {
+		if (handleNoJWT()) {
+			return;
+		}
 		let currentData = get(data);
 		axios
 			.post(currentData.backend_url + '/sync_unique_questions', JSON.stringify(currentData.duplicate_checking_values_unsynced ?? []), {
@@ -291,6 +325,9 @@ function createData(){
 
 
 	function sync_presets() {
+		if (handleNoJWT()) {
+			return;
+		}
 		let currentData = get(data);
 		axios
 			.post(
@@ -340,13 +377,63 @@ function createData(){
 			});
 	}
 
-	function showToast(message: string, background: string) {
+	function upload_notes() {
+		if (handleNoJWT()) {
+			return;
+		}
+		let currentData = get(data);
+		axios
+			.post(currentData.backend_url + '/upload_notes', JSON.stringify(currentData.notes_unsynced), {
+				headers: {
+					Authorization: `Bearer ${currentData.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				data.update((c)=>{return {...c, notes_synced: currentData.notes_synced+currentData.notes_unsynced, notes_unsynced: ''}})
+				localStorage.setItem('notes_synced', currentData.notes_synced+currentData.notes_unsynced);
+				localStorage.setItem('notes_unsynced', '');
+				console.log(response);
+				showSuccessToast('Notes uploaded!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Notes upload failed!');
+			});
+	}
+
+	function delete_notes() {
+		if (handleNoJWT()) {
+			return;
+		}
+		let currentData = get(data);
+		axios
+			.post(currentData.backend_url + '/delete_notes', '', {
+				headers: {
+					Authorization: `Bearer ${currentData.jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				data.update((c)=>{return {...c, notes_synced: '', notes_unsynced: ''}})
+				localStorage.setItem('notes_synced', '');
+				localStorage.setItem('notes_unsynced', '');
+				showSuccessToast('Local and cloud notes deleted!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Notes deletion failed!');
+			});
+	}
+
+	function showToast(message: string, background: string, action?: {label: string, response: Function}) {
 		get(data).toastStore.trigger({
 			message,
 			background,
 			timeout: 5000,
 			autohide: true,
 			hideDismiss: false,
+			action: action,
 		})
 	}
 
@@ -354,8 +441,8 @@ function createData(){
 		showToast(message, 'variant-filled-success');
 	}
 
-	function showErrorToast(message: string) {
-		showToast(message, 'variant-filled-primary');
+	function showErrorToast(message: string, action?: {label: string, response: Function}) {
+		showToast(message, 'variant-filled-primary', action);
 	}
 
 	function showWarningToast(message: string) {
@@ -414,6 +501,8 @@ function createData(){
 		appendToDuplicateCheckingValuesUnsynced,
 		getFirstPrompt,
 		delete_prompts,
+		upload_notes,
+		delete_notes,
 	}
 }
 

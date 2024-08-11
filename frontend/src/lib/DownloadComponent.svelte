@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
-	import axios from 'axios';
 
 	function download(filename: string, text: string) {
 		const element = document.createElement('a');
@@ -12,49 +11,6 @@
 		element.click();
 		document.body.removeChild(element);
 		data.showSuccessToast('Notes downloaded!');
-	}
-
-	function upload_notes() {
-		axios
-			.post($data.backend_url + '/upload_notes', JSON.stringify($data.notes_unsynced), {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.notes_synced = $data.notes_synced + $data.notes_unsynced;
-				localStorage.setItem('notes_synced', $data.notes_synced);
-				$data.notes_unsynced = '';
-				localStorage.setItem('notes_unsynced', '');
-				console.log(response);
-				data.showSuccessToast('Notes uploaded!');
-			})
-			.catch((error) => {
-				console.error(error);
-				data.showErrorToast('Notes upload failed!');
-			});
-	}
-
-	function delete_notes() {
-		axios
-			.post($data.backend_url + '/delete_notes', '', {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.notes_synced = '';
-				localStorage.setItem('notes_synced', '');
-				$data.notes_unsynced = '';
-				localStorage.setItem('notes_unsynced', '');
-				data.showSuccessToast('Local and cloud notes deleted!');
-			})
-			.catch((error) => {
-				console.error(error);
-				data.showErrorToast('Notes deletion failed!');
-			});
 	}
 </script>
 
@@ -108,7 +64,7 @@
 		>
 			<i class="fa-solid fa-download" />
 		</button>
-		<button class="btn-icon variant-filled-success" on:click={upload_notes}>
+		<button class="btn-icon variant-filled-success" on:click={data.upload_notes}>
 			<i class="fa-solid fa-cloud-arrow-up" /></button
 		>
 		<button class="btn-icon variant-filled-success" on:click={data.sync_notes}>
@@ -128,7 +84,7 @@
 		<!-- <i class="fa-solid fa-remove" /> -->
 		delete local notes
 	</button>
-	<button class="btn variant-filled-primary" on:click={delete_notes}
+	<button class="btn variant-filled-primary" on:click={data.delete_notes}
 		>delete local and cloud notes</button
 	>
 </div>
