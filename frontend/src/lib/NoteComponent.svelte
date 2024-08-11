@@ -102,18 +102,27 @@
 	let iframe_source_template = '';
 
 	function selectPreset(preset: Preset) {
-		$data.current_preset_for_notes = JSON.parse(JSON.stringify(preset));
-		if ($data.current_preset_for_notes) {
-			for (let i = 0; i < $data.current_preset_for_notes.fields.length; i++) {
-				$data.current_preset_for_notes.fields[i].current_inputs = JSON.parse(
-					JSON.stringify($data.current_preset_for_notes?.fields[i].default)
+		const newCurrentPresetState = JSON.parse(JSON.stringify(preset));
+		if (newCurrentPresetState) {
+			for (let i = 0; i < newCurrentPresetState.fields.length; i++) {
+				newCurrentPresetState.fields[i].current_inputs = JSON.parse(
+					JSON.stringify(newCurrentPresetState?.fields[i].default)
 				);
-				$data.current_preset_for_notes.fields[i].currently_frozen = $data.current_preset_for_notes.fields[i].frozen_by_default;
-				$data.current_preset_for_notes.fields[i].currently_visible = $data.current_preset_for_notes.fields[i].visible_by_default;
+				newCurrentPresetState.fields[i].currently_frozen = newCurrentPresetState.fields[i].frozen_by_default;
+				newCurrentPresetState.fields[i].currently_visible = newCurrentPresetState.fields[i].visible_by_default;
 			}
 		}
-		localStorage.setItem('current_preset_for_notes', JSON.stringify($data.current_preset_for_notes));
-		iframe_source_template = $data.current_preset_for_notes?.iframes?.length && $data.current_preset_for_notes.iframes[0][1] || '';
+		data.update((c)=>{
+			return {
+				...c,
+				current_preset_for_notes: newCurrentPresetState
+			}
+		});
+		localStorage.setItem('current_preset_for_notes', newCurrentPresetState);
+		iframe_source_template = newCurrentPresetState?.iframes?.length && newCurrentPresetState.iframes[0][1] || '';
+		if (get(data).noteAddingMode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
+			assignPromptToPromptedField();
+		}
 	}
 
 	function rememberCurrentPreset() {
@@ -419,14 +428,23 @@
 		}
 	}
 
+	function assignPromptToPromptedField(){
+		const new_preset_for_notes_state = get(data).current_preset_for_notes;
+		new_preset_for_notes_state.fields[get(data).promptedFieldIndex].current_inputs[0] = data.getFirstPrompt();
+		data.update((c)=>{return{
+			...c,
+			current_prompt: data.getFirstPrompt(),
+			current_preset_for_notes: new_preset_for_notes_state
+		}})
+		localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
+		rememberCurrentPreset();
+	}
+
 	function selectNoteAddingMode(mode: NoteAddingMode) {
-		$data.noteAddingMode = mode;
+		data.update((c)=>{return{...c, noteAddingMode: mode}});
 		localStorage.setItem('noteAddingMode', mode);
 		if (mode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes) {
-			$data.current_prompt = data.getFirstPrompt();
-			localStorage.setItem('current_prompt', JSON.stringify($data.current_prompt));
-			$data.current_preset_for_notes.fields[$data.promptedFieldIndex].current_inputs[0] = $data.current_prompt;
-			rememberCurrentPreset();
+			assignPromptToPromptedField();
 		}
 	}
 
