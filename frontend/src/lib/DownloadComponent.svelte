@@ -74,10 +74,9 @@
 	<button
 		class="btn variant-filled-primary"
 		on:click={() => {
-			$data.notes_synced = '';
-			localStorage.setItem('notes_synced', $data.notes_synced);
-			$data.notes_unsynced = '';
-			localStorage.setItem('notes_unsynced', $data.notes_unsynced);
+			data.update((c)=>{return{...c, notes_synced: '', notes_unsynced: ''}})
+			localStorage.setItem('notes_synced', '');
+			localStorage.setItem('notes_unsynced', '');
 			data.showSuccessToast('Local notes deleted!');
 		}}
 	>

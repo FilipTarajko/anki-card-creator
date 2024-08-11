@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { NoteAddingMode, type Field, type Preset } from './types';
 import axios from 'axios';
+import jwt_decode from 'jwt-decode';
 
 export let default_fields = [
 		{
@@ -377,6 +378,57 @@ function createData(){
 			});
 	}
 
+	function try_to_register(registration_form_data: {email: string, username: string, password: string}, password_repeat: string) {
+		if (registration_form_data.password !== password_repeat) {
+			showErrorToast('Passwords do not match!');
+			return;
+		}
+		axios
+			.post(get(data).backend_url + '/register_user', registration_form_data)
+			.then((response) => {
+				if (response.data === 'Registered') {
+					showSuccessToast('Registered successfully! You can now log in.');
+				}
+			})
+			.catch((error) => {
+				showErrorToast(`Registration failed: ${error?.response?.data || 'no connection'}`);
+			});
+	}
+
+	function try_to_login(login_form_data: {username_or_email: string, password: string}) {
+		axios
+			.post(get(data).backend_url + '/login', login_form_data)
+			.then((response) => {
+				data.update((c)=>{return{
+					...c,
+					jwt: response.data,
+					username: decoded?.sub || '',
+					email: decoded?.email || '',
+					id: decoded?.id || '',
+				}})
+				let decoded: any = jwt_decode(response.data);
+				localStorage.setItem('jwt', response.data);
+				localStorage.setItem('username', decoded?.sub || '');
+				localStorage.setItem('email', decoded?.email || '');
+				localStorage.setItem('id', decoded?.id || '');
+
+				showSuccessToast('Logged in successfully!');
+			})
+			.catch((error) => {
+				showErrorToast(`Log-in failed: ${error?.response?.data || 'no connection'}`);
+			});
+	}
+
+	function log_out() {
+		data.update((c)=>{return {...c, jwt: '', username: '', email: '', id: ''}})
+		localStorage.removeItem('jwt');
+		localStorage.removeItem('username');
+		localStorage.removeItem('email');
+		localStorage.removeItem('id');
+
+		showSuccessToast('Logged out successfully!');
+	}
+
 	function upload_notes() {
 		if (handleNoJWT()) {
 			return;
@@ -424,6 +476,32 @@ function createData(){
 				console.error(error);
 				showErrorToast('Notes deletion failed!');
 			});
+	}
+
+	function deleteAllUniquenessEntries() {
+		axios
+			.post(get(data).backend_url + '/delete_unique_questions', '', {
+				headers: {
+					Authorization: `Bearer ${get(data).jwt}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			.then((response) => {
+				data.update((c)=>{return{...c, duplicate_checking_values_synced: [], duplicate_checking_values_unsynced: []}})
+				localStorage.setItem("duplicate_checking_values_synced", JSON.stringify([]));
+				localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
+				showSuccessToast('Unique question list deleted!');
+			})
+			.catch((error) => {
+				console.error(error);
+				showErrorToast('Deleting unique question list failed!');
+			});
+	}
+
+	function deleteLocalUniquenessEntries() {
+		data.update((c)=>{return{...c, duplicate_checking_values_unsynced: []}})
+		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
+		showSuccessToast("Deleted unsynced unique questions list");
 	}
 
 	function showToast(message: string, background: string, action?: {label: string, response: Function}) {
@@ -503,6 +581,11 @@ function createData(){
 		delete_prompts,
 		upload_notes,
 		delete_notes,
+		try_to_register,
+		try_to_login,
+		log_out,
+		deleteAllUniquenessEntries,
+		deleteLocalUniquenessEntries,
 	}
 }
 

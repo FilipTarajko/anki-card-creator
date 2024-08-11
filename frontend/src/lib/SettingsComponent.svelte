@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
 	import { data } from '../store';
-	import axios from 'axios';
 
 	const EXAMPLES_TO_SHOW = 10;
 
@@ -64,33 +63,6 @@
 		return Array.from(result);
 	}
 
-	function deleteAllUniquenessEntries() {
-		axios
-			.post($data.backend_url + '/delete_unique_questions', '', {
-				headers: {
-					Authorization: `Bearer ${$data.jwt}`,
-					'Content-Type': 'application/json'
-				}
-			})
-			.then((response) => {
-				$data.duplicate_checking_values_synced = [];
-				localStorage.setItem("duplicate_checking_values_synced", JSON.stringify([]));
-				$data.duplicate_checking_values_unsynced = [];
-				localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
-				data.showSuccessToast('Unique question list deleted!');
-			})
-			.catch((error) => {
-				console.error(error);
-				data.showErrorToast('Deleting unique question list failed!');
-			});
-	}
-
-	function deleteLocalUniquenessEntries() {
-		$data.duplicate_checking_values_unsynced = [];
-		localStorage.setItem("duplicate_checking_values_unsynced", JSON.stringify([]));
-		data.showSuccessToast("Deleted unsynced unique questions list");
-	}
-
 	$: note_export_uniqueness_selectable_columns = firstFields[0];
 	$: note_export_uniqueness_selected_columns = (note_export_uniqueness_selectable_columns ?? []).map((elem, i) => {
 		if ($data.note_export_columns_for_duplicate_checking.includes(i)) {
@@ -118,7 +90,7 @@
 	File for uniqueness checks:
 	<input bind:files={fileForUniqueness} on:change={()=>{tryUpdateUniquenessEntriesFromFile(false)}} type="file">
 	<div class="flex flex-row w-full justify-center gap-2">
-		<button class="btn variant-filled-primary" on:click={deleteLocalUniquenessEntries}>delete unsynced</button>
+		<button class="btn variant-filled-primary" on:click={data.deleteLocalUniquenessEntries}>delete unsynced</button>
 		<button class="btn variant-filled-warning" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true, false)}}>overwrite</button>
 		<button class="btn variant-filled-success" on:click={()=>{tryUpdateUniquenessEntriesFromFile(true)}}>append</button>
 	</div>
@@ -163,7 +135,7 @@
 		</div>
 	{/each}
 	<div class="flex flex-row w-full justify-center gap-2">
-		<button class="btn variant-filled-primary" on:click={deleteAllUniquenessEntries}>delete all</button>
+		<button class="btn variant-filled-primary" on:click={data.deleteAllUniquenessEntries}>delete all</button>
 		<button class="btn-icon variant-filled-success" on:click={data.sync_unique_questions}>
 			<i class="fa-solid fa-rotate" />
 		</button>
