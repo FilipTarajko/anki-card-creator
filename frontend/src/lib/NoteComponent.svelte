@@ -312,7 +312,11 @@
 		let fieldIndex = target?.id.replace('field','');
 
 		if (key == "Enter" && !event?.target?.closest('form') && ($data.noteAddingMode === NoteAddingMode.FROM_PROMPT || $data.noteAddingMode === NoteAddingMode.FROM_SCRATCH)) {
-			addNote();
+			if ($data.current_page == 'add cards') {
+				addNote();
+			} else {
+				data.showWarningToast('Notes can only be added from "add cards" page!');
+			}
 		}
 
 		// also handle single- and multi-selects
