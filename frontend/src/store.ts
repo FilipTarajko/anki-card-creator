@@ -301,6 +301,7 @@ function createData(){
 		axios
 			.post(get(data).backend_url + '/login', login_form_data)
 			.then((response) => {
+				let decoded: any = jwt_decode(response.data);
 				data.update((c)=>{return{
 					...c,
 					jwt: response.data,
@@ -308,7 +309,6 @@ function createData(){
 					email: decoded?.email || '',
 					id: decoded?.id || '',
 				}})
-				let decoded: any = jwt_decode(response.data);
 				localStorage.setItem('jwt', response.data);
 				localStorage.setItem('username', decoded?.sub || '');
 				localStorage.setItem('email', decoded?.email || '');
