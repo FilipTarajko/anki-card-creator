@@ -160,11 +160,12 @@ function createData(){
 				localStorage.setItem('current_prompt', JSON.stringify(currentData.current_prompt));
 				if (currentData.noteAddingMode === NoteAddingMode.FROM_PROMPT) {
 					console.log("setting an input to current_prompt")
-						// @ts-ignore
-						update((c)=>{
-						let new_current_prompt = structuredClone(c.current_preset_for_notes);
-						new_current_prompt.fields[currentData.promptedFieldIndex].current_inputs[0] = currentData.current_prompt;
-						return {...c, current_prompt: new_current_prompt};
+					// @ts-ignore
+					update((c)=>{
+						let new_current_prompt = structuredClone(c.current_prompt);
+						let new_current_preset_for_notes = structuredClone(c.current_preset_for_notes);
+						new_current_preset_for_notes.fields[currentData.promptedFieldIndex].current_inputs[0] = currentData.current_prompt;
+						return {...c, current_prompt: new_current_prompt, current_preset_for_notes: new_current_preset_for_notes};
 					});
 					currentData
 				}
