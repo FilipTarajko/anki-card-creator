@@ -205,7 +205,6 @@
 	}
 
 	function addNote() {
-		data.showSuccessToast('Note added!');
 		$data.notes_unsynced +=
 			current_output +
 			`
@@ -232,8 +231,10 @@
 			if (!$data.shouldKeepPrompt) {
 				deleteCurrentPrompt()
 			}
-			selectNoteAddingMode(NoteAddingMode.FROM_PROMPT);
+			assignPromptToPromptedField();
 		}
+
+		data.showSuccessToast('Note added!');
 	}
 
 	function deleteCurrentPrompt() {
@@ -277,7 +278,11 @@
 	let is_iframe_moved_to_top = false;
 
 	function resetFieldValueToDefault(i: number) {
-		$data.current_preset_for_notes.fields[i].current_inputs = JSON.parse(JSON.stringify($data.current_preset_for_notes.fields[i].default));
+		if (get(data).noteAddingMode === NoteAddingMode.FROM_PROMPT && $data.current_preset_for_notes && i == get(data).promptedFieldIndex) {
+			assignPromptToPromptedField();
+		} else {
+			$data.current_preset_for_notes.fields[i].current_inputs = JSON.parse(JSON.stringify($data.current_preset_for_notes.fields[i].default));
+		}
 		rememberCurrentPreset();
 	}
 
