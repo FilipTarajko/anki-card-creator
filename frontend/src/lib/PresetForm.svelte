@@ -89,9 +89,11 @@
 		} else {
 			// @ts-ignore
 			let old_preset_name = get(data).selected_preset?.name;
-			
+			let old_preset_status = get(data).selected_preset?.status;
+			let new_preset_status = old_preset_status === 'unsynced' ? 'unsynced' : 'to_update';
+
 			// @ts-ignore
-			data.update((c)=>{return {...c, selected_preset: {...(c.selected_preset), iframes: preset_iframes, fields: $data.fields, name: preset_name, last_edited: new Date().getTime(), hue: selected_hue, status: 'to_update'}}})
+			data.update((c)=>{return {...c, selected_preset: {...(c.selected_preset), iframes: preset_iframes, fields: $data.fields, name: preset_name, last_edited: new Date().getTime(), hue: selected_hue, status: new_preset_status}}})
 			data.update((c)=>{
 				let newPresets = structuredClone(c.presets);
 				newPresets = newPresets.filter(e=>e.name != old_preset_name);
