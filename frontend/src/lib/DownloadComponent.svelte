@@ -12,6 +12,34 @@
 		document.body.removeChild(element);
 		data.showSuccessToast('Notes downloaded!');
 	}
+
+	function locallyDeleteLastNote() {
+		if ($data.notes_unsynced && $data.notes_unsynced.includes('\n')) {
+			const notes_being_processed = $data.notes_unsynced.split('\n');
+			notes_being_processed.pop();
+			const removed_note = notes_being_processed.pop();
+			notes_being_processed.push('');
+			const new_notes_unsynced = notes_being_processed.join('\n');
+			data.update((c) => {
+				return {...c, notes_unsynced: new_notes_unsynced}
+			})
+			localStorage.setItem('notes_unsynced', new_notes_unsynced);
+			data.showSuccessToast(`Last (unsynced) note deleted!<br>${removed_note}`);
+		} else if ($data.notes_synced && $data.notes_synced.includes('\n')) {
+			const notes_being_processed = $data.notes_synced.split('\n');
+			notes_being_processed.pop();
+			const removed_note = notes_being_processed.pop();
+			notes_being_processed.push('');
+			const new_notes_synced = notes_being_processed.join('\n');
+			data.update((c) => {
+				return {...c, notes_synced: new_notes_synced}
+			})
+			localStorage.setItem('notes_synced', new_notes_synced);
+			data.showSuccessToast(`Last (synced) note deleted!<br>${removed_note}`);
+		} else {
+			data.showErrorToast('No notes to delete!');
+		}
+	}
 </script>
 
 <h2 class="h2 mt-12">Data to download</h2>
@@ -71,6 +99,12 @@
 			<i class="fa-solid fa-rotate" /></button
 		>
 	</div>
+	<button
+			class="btn variant-filled-warning"
+			on:click={locallyDeleteLastNote}
+	>
+		(locally) delete last note
+	</button>
 	<button
 		class="btn variant-filled-primary"
 		on:click={() => {
