@@ -13,6 +13,7 @@
         <div class="w-1/12">
             {#if !is_on_side}
                 <button
+                    title={`move ${is_moved_to_top ? "down" : "up"}`}
                     style="width: 2.574rem;"
                     class="btn btn-larges variant-filled"
                     type="button"
@@ -20,19 +21,20 @@
                         is_moved_to_top = !is_moved_to_top;
                     }}
                 >
-                    <abbr title={`move ${is_moved_to_top ? "down" : "up"}`}>
+                    <div>
                         {#if is_moved_to_top}
                             <i class="fa-solid fa-chevron-down" />
                         {:else}
                             <i class="fa-solid fa-chevron-up" />
                         {/if}
-                    </abbr>
+                    </div>
                 </button>
             {/if}
         </div>
         <div class="card p-2 w-10/12">
             {#each selected_preset?.iframes ?? [] as iframe, index}
                 <button
+                    title={`alt+(shift)+i to cycle between iframes`}
                     style={`color: hsl(${current_presets_hue_as_number + index*45} ${
                         iframe_source_template == iframe[1]
                             ? '100% 20%); background-color: hsl(' + (current_presets_hue_as_number + index*45) + ' 100% 87%);'

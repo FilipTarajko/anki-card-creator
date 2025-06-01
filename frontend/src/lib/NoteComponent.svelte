@@ -479,6 +479,7 @@
 		<div class="card p-2 ml-6 mr-6">
 			{#each Object.values(NoteAddingMode) as noteAddingMode, i}
 				<button
+					title={`alt+(shift)+m to cycle between modes`}
 					style={`color: hsl(${120+i*40} ${
 						$data.noteAddingMode == noteAddingMode
 							? '100% 20%); background-color: hsl(' + 120+i*40 + ' 100% 87%);'
@@ -563,7 +564,7 @@
 			{#if $data.prompts_deleted.length }
 				prompts for sync deleting: "{ $data.prompts_deleted.join('", "') }"
 			{:else}
-				no promps for sync deleting
+				no prompts for sync deleting
 			{/if}
 		</div>
 		<div class="flex flex-row w-full justify-center gap-2">
@@ -591,6 +592,7 @@
 			<div class="card p-2 ml-6 mr-6">
 				{#each $data.presets as preset}
 					<button
+						title={`alt+(shift)+p to cycle between presets`}
 						style={`color: hsl(${preset.hue} ${
 							$data.current_preset_for_notes?.name == preset.name
 								? '100% 20%); background-color: hsl(' + preset.hue + ' 100% 87%);'
@@ -638,14 +640,13 @@
 							class={`btn-icon variant-filled${$data.currently_all_forced_visible ? '-warning' : ''}`}
 							style="font-weight: bold;"
 							on:click={toggleAllFieldsVisible}
+							title={`temporarily force all field visible - (alt+a)`}
 						>
-						<abbr title={`temporarily force all field visible - (alt+a)`}>
 							{#if $data.currently_all_forced_visible}
 								<i class="fa-solid fa-eye" />
 							{:else}
 								<i class="fa-solid fa-eye-slash" />
 							{/if}
-						</abbr>
 						</button>
 					</div>
 					<form bind:clientWidth={cardFormWidth} on:submit|preventDefault={addNote}>
@@ -662,7 +663,7 @@
 										<input
 											id={`field${i}`}
 											type="text"
-											style={field.current_inputs[0] && 
+											style={field.current_inputs[0] &&
 												(preset_fields_for_duplicate_checking.includes(i)
 												&& ($data.duplicate_checking_values_synced.includes(data.transformTextForDuplicateCheck(field.current_inputs[0]))
 												|| $data.duplicate_checking_values_unsynced.includes(data.transformTextForDuplicateCheck(field.current_inputs[0]))))
@@ -701,11 +702,10 @@
 										style="width: 2.574rem;"
 										class="btn btn-large variant-filled"
 										type="button"
+										title={`reset to "${field.default}" (alt+r while typing)`}
 										on:click={() => resetFieldValueToDefault(i)}
 									>
-										<abbr title={`reset to "${field.default}" (alt+r while typing)`}
-											><i class="fa-solid fa-rotate-left" /></abbr
-										>
+											<i class="fa-solid fa-rotate-left" />
 									</button>
 									<!-- svelte-ignore a11y-positive-tabindex -->
 									<button
@@ -714,14 +714,15 @@
 										class="btn btn-large {!field.currently_frozen ? 'variant-filled' : 'variant-ghost'}"
 										type="button"
 										on:click={() => {changeFieldCurrentlyFrozen(i)}}
+										title={`toggle resetting to "${field.default}" on submit - (alt+f or alt+l while typing)`}
 									>
-										<abbr title={`toggle resetting to "${field.default}" on submit - (alt+f or alt+l while typing)`}>
+										<div>
 											{#if field.currently_frozen}
 												<i class="fa-solid fa-lock" />
 											{:else}
 												<i class="fa-solid fa-lock-open" />
 											{/if}
-										</abbr>
+										</div>
 									</button>
 									{#if $data.currently_all_forced_visible}
 										<!-- svelte-ignore a11y-positive-tabindex -->
@@ -733,14 +734,13 @@
 												: `variant-ghost${field.visible_by_default ? '-warning' : ''}`}"
 												type="button"
 											on:click={() => changeFieldCurrentlyVisible(i)}
+											title={`toggle visibility - (alt+v while typing)`}
 										>
-											<abbr title={`toggle visibility - (alt+v while typing)`}>
-												{#if field.currently_visible}
-													<i class="fa-solid fa-eye" />
-												{:else}
-													<i class="fa-solid fa-eye-slash" />
-												{/if}
-											</abbr>
+											{#if field.currently_visible}
+												<i class="fa-solid fa-eye" />
+											{:else}
+												<i class="fa-solid fa-eye-slash" />
+											{/if}
 										</button>
 									{/if}
 								{/if}
