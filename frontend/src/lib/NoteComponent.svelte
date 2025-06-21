@@ -4,19 +4,9 @@
 	import { BindingType, NoteAddingMode, type Field, type Preset } from '../types';
 	import IframesComponent from './IframesComponent.svelte';
 	import { get } from 'svelte/store';
+	import {sanitize} from "$lib/helpers";
 
-	let current_output: string = '';
-
-	function sanitize(text: String) {
-		if (!text) {
-			return '';
-		}
-		text = text.replaceAll('"', '""');
-		if (text.includes(';')) {
-			text = '"' + text + '"';
-		}
-		return text;
-	}
+	let current_output = '';
 
 	// @ts-ignore
 	$: did_current_preset_change = $data.current_preset_for_notes && !$data.presets.some((preset: Preset) => preset.last_edited === $data.current_preset_for_notes?.last_edited);
