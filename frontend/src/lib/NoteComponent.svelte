@@ -560,7 +560,7 @@
 		<div class="flex flex-row w-full justify-center gap-2">
 			<button class="btn variant-filled-primary" on:click={data.delete_prompts}>delete all</button>
 			<button class="btn variant-filled-primary" on:click={delete_local_prompts}>delete unsynced</button>
-			<button class="btn-icon variant-filled-success" on:click={data.sync_prompts}>
+			<button class="btn-icon variant-filled-success" on:click={data.sync_prompts} title="sync prompts">
 				<i class="fa-solid fa-rotate" />
 			</button>
 		</div>
@@ -766,9 +766,6 @@
 					<div style="max-width: 30rem; line-break: anywhere;">
 						current result: <br><span>{current_output}</span>
 					</div>
-					<button class="btn-icon variant-filled-success" on:click={()=>{data.sync_prompts}}>
-						<i class="fa-solid fa-rotate" />
-					</button>
 				</div>
 			{/if}
 		{:else}
