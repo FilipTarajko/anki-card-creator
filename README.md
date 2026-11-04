@@ -20,7 +20,7 @@ MongoDB: MongoDB Atlas
 
 [<img align="left" width="26" height="26" alt="Svelte" src="readmeIcons\devicons_svelte.svg" style="padding: 0 20px 16px 0"/>](https://svelte.dev "Svelte")
 [<img align="left" width="26" height="26" alt="Skeleton" src="readmeIcons\Skeleton.png" style="padding: 0 20px 16px 0"/>](https://www.skeleton.dev "Skeleton")
-[<img align="left" width="26" height="26" alt="Typescript" src="readmeIcons\devicons_typescipt.svg" style="padding: 0 20px 16px 0"/>](https://www.typescriptlang.org "Typescript")
+[<img align="left" width="26" height="26" alt="Typescript" src="readmeIcons\devicons_typescript.svg" style="padding: 0 20px 16px 0"/>](https://www.typescriptlang.org "Typescript")
 [<img align="left" width="26" height="26" alt="Javascript" src="readmeIcons\devicons_javascript.svg" style="padding: 0 20px 16px 0"/>](https://en.wikipedia.org/wiki/JavaScript "Javascript")
 [<img align="left" width="26" height="26" alt="TailwindCSS" src="readmeIcons\devicons_tailwindcss.svg" style="padding: 0 20px 16px 0"/>](https://tailwindcss.com "TailwindCSS")
 [<img align="left" width="26" height="26" alt="Rust" src="readmeIcons\vscode-icons_file-type-rust.svg" style="padding: 0 20px 16px 0"/>](https://www.rust-lang.org "Rust")
